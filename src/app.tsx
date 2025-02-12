@@ -8,7 +8,7 @@ import { menuLayout } from "./routes/menu";
 import { theme } from "./theme/theme";
 import { MenuLayout } from "./types/TMenu.type";
 
-const App = () => {
+export default () => {
   const createRoutes = (menu: MenuLayout) => {
     return menu.map((item) => (
       <Route
@@ -22,19 +22,27 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <Routes>
           {/* Rota de login separada do BaseLayout */}
           <Route path="/login" element={<Login />} />
 
           {/* Rotas que utilizam o BaseLayout */}
+          <Route
+            path="/*"
+            element={
+              <BaseLayout>
+                <Routes>{createRoutes(menuLayout)}</Routes>
+              </BaseLayout>
+            }
+          />
         </Routes>
-        <BaseLayout>
-          <Routes>{createRoutes(menuLayout)}</Routes>
-        </BaseLayout>
       </BrowserRouter>
     </ThemeProvider>
   );
 };
-
-export default App;
