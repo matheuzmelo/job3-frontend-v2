@@ -1,6 +1,6 @@
 import { CssBaseline, ThemeProvider } from "@mui/material"
 import { Suspense } from "react"
-import { BrowserRouter, HashRouter, Route, Routes } from "react-router-dom"
+import { HashRouter, Route, Routes } from "react-router-dom"
 import BaseLayout from "./components/layout/BaseLayout"
 import Loading from "./components/pages/Loading"
 import Login from "./components/pages/Login"
