@@ -28,8 +28,11 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React, { useEffect, useState } from "react";
 import { useNfeContext } from "../../../context/nfe.context";
+import { EmpresasService } from "../../../services/api/Empresas/Empresas.service";
 import { NotasFicaisService } from "../../../services/api/NotasFiscais/nfe.service";
+import { PessoasService } from "../../../services/api/Pessoas/pessoas.service";
 import ToastMessage from "../../organisms/ToastMessage";
+import { ProdutosService } from "../../../services/api/Produtos/produtos.service";
 
 interface ProdutoSelecionado {
   produto_id: number;
@@ -42,36 +45,24 @@ interface Cliente {
   nome: string;
 }
 
-// Dados mockados ajustados
-const empresas = [
-  { id: 1, nome: "Empresa A" },
-  { id: 2, nome: "Empresa B" },
-  { id: 3, nome: "Empresa C" },
-];
+interface Produto {
+  id: number;
+  nome: string;
+  preco: number;
+}
 
-const clientesPorEmpresa: Record<number, Cliente[]> = {
-  1: [
-    { id: 1, nome: "Cliente A1" },
-    { id: 2, nome: "Cliente A2" },
-  ],
-  2: [
-    { id: 3, nome: "Cliente B1" },
-    { id: 4, nome: "Cliente B2" },
-  ],
-  3: [
-    { id: 5, nome: "Cliente C1" },
-    { id: 6, nome: "Cliente C2" },
-  ],
-};
-
-const produtosComPrecos = [
-  { id: 1, nome: "Produto 1", preco: 100.0 },
-  { id: 2, nome: "Produto 2", preco: 200.0 },
-  { id: 3, nome: "Produto 3", preco: 150.0 },
-];
+interface Nfe {
+  numero: string;
+  pessoa_id: number;
+  produtos: {
+    descricao: string;
+    quantidade: number;
+    valor_unitario: number;
+  }[];
+}
 
 export const Form: React.FC = () => {
-  const { nfeAtual } = useNfeContext();
+  const { nfeAtual }: any = useNfeContext();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     numero: "",
@@ -83,7 +74,9 @@ export const Form: React.FC = () => {
   const [produtosDaProposta, setProdutosDaProposta] = useState<
     ProdutoSelecionado[]
   >([]);
-  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [pessoas, setPessoas] = useState<Cliente[]>([]);
+  const [empresas, setEmpresas] = useState<any[]>([]);
+  const [produtosComPrecos, setProdutosComPrecos] = useState<Produto[]>([]);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [openToast, setOpenToast] = useState(false);
   const [toastStatus, setToastStatus] = useState<"success" | "alert" | "warn">(
@@ -91,17 +84,70 @@ export const Form: React.FC = () => {
   );
   const [message, setMessage] = useState("");
 
+  // Carrega empresas, pessoas e produtos ao iniciar o componente
   useEffect(() => {
-    const produtosSalvos = localStorage.getItem("produtosDaProposta");
-    if (produtosSalvos) {
-      setProdutosDaProposta(JSON.parse(produtosSalvos));
-    }
+    const carregarDados = async () => {
+      try {
+        const empresasResponse = await EmpresasService.getAll();
+        setEmpresas(empresasResponse.data);
+
+        const produtosResponse = await ProdutosService.getAll();
+        setProdutosComPrecos(produtosResponse.data);
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+        handleOpenToast("warn", "Erro ao carregar empresas ou produtos.");
+      }
+    };
+
+    carregarDados();
   }, []);
 
+  // Carrega pessoas da empresa selecionada
+  useEffect(() => {
+    const carregarPessoas = async () => {
+      if (empresaId) {
+        try {
+          const pessoasResponse = await PessoasService.getAll();
+          const pessoasFiltradas = pessoasResponse.data.filter(
+            (pessoa: any) => pessoa.empresa_id === Number(empresaId)
+          );
+          setPessoas(pessoasFiltradas);
+        } catch (error) {
+          console.error("Erro ao carregar pessoas:", error);
+          handleOpenToast("warn", "Erro ao carregar clientes.");
+        }
+      }
+    };
+
+    carregarPessoas();
+  }, [empresaId]);
+
+  // Preenche o formulário com os dados da nota fiscal atual
+  useEffect(() => {
+    if (nfeAtual) {
+      setFormData({
+        numero: nfeAtual.numero,
+        pessoa_id: nfeAtual?.id.toString(),
+      });
+
+      // Define a empresa com base na nota fiscal
+      setEmpresaId(nfeAtual.empresa_id.toString());
+
+      // Preenche os produtos da nota fiscal
+      if (nfeAtual.produtos) {
+        const produtosFormatados = nfeAtual.produtos.map((produto: any) => ({
+          produto_id: produtosComPrecos.find((p) => p.nome === produto.descricao)?.id || 0,
+          quantidade: Number(produto.quantidade),
+          valor_unitario: Number(produto.valor_unitario),
+        }));
+        setProdutosDaProposta(produtosFormatados);
+      }
+    }
+  }, [nfeAtual, produtosComPrecos]);
+
   const handleEmpresaChange = (event: SelectChangeEvent): void => {
-    const selectedEmpresaId = Number(event.target.value);
-    setEmpresaId(selectedEmpresaId.toString());
-    setClientes(clientesPorEmpresa[selectedEmpresaId] || []);
+    const selectedEmpresaId = event.target.value;
+    setEmpresaId(selectedEmpresaId);
     setFormData((prev) => ({ ...prev, pessoa_id: "" }));
   };
 
@@ -181,7 +227,7 @@ export const Form: React.FC = () => {
     setFormData({ numero: "", pessoa_id: "" });
     setProdutosDaProposta([]);
     setEmpresaId("");
-    setClientes([]);
+    setPessoas([]);
     localStorage.removeItem("produtosDaProposta");
   };
 
@@ -232,7 +278,7 @@ export const Form: React.FC = () => {
               <MenuItem value="">Selecione a empresa</MenuItem>
               {empresas.map((empresa) => (
                 <MenuItem key={empresa.id} value={empresa.id}>
-                  {empresa.nome}
+                  {empresa.nome_fantasia}
                 </MenuItem>
               ))}
             </Select>
@@ -249,7 +295,7 @@ export const Form: React.FC = () => {
             disabled={!empresaId}
           >
             <MenuItem value="">Selecione o cliente</MenuItem>
-            {clientes.map((cliente) => (
+            {pessoas.map((cliente) => (
               <MenuItem key={cliente.id} value={cliente.id}>
                 {cliente.nome}
               </MenuItem>
@@ -267,7 +313,7 @@ export const Form: React.FC = () => {
               <MenuItem value="">Selecione um produto</MenuItem>
               {produtosComPrecos.map((produto) => (
                 <MenuItem key={produto.id} value={produto.id}>
-                  {produto.nome} - R$ {produto.preco.toFixed(2)}
+                  {produto.nome} - R$ {produto.preco}
                 </MenuItem>
               ))}
             </Select>

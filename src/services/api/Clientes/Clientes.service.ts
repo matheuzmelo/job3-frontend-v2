@@ -46,7 +46,7 @@ const deleteById = async () => {
 
 }
 
-export const ProdutosService = {
+export const ClientesService = {
   create,
   getAll,
   getById,

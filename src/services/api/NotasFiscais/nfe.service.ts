@@ -22,11 +22,38 @@ const create = async (data: any) => {
 };
 
 const getAll = async () => {
+  const token = localStorage.getItem('token');
 
+  const options = {
+    method: 'GET',
+    url: '/notas-fiscais',
+    headers: {authorization: `Bearer ${token}`}
+  };
+  
+  try {
+    const { data } = await Api.request(options);
+    console.log(data)
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-const getById = async () => {
+const getById = async (id: number) => {
+  const token = localStorage.getItem('token');
 
+  const options = {
+    method: 'GET',
+    url: `/notas-fiscais/${id}`,
+    headers: {authorization: `Bearer ${token}`}
+  };
+  
+  try {
+    const { data } = await Api.request(options);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 const updateById = async () => {
