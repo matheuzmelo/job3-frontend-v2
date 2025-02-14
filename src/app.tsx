@@ -29,10 +29,8 @@ export default () => {
         }}
       >
         <Routes>
-          {/* Rota de login separada do BaseLayout */}
           <Route path="/login" element={<Login />} />
 
-          {/* Rotas que utilizam o BaseLayout */}
           <Route
             path="/*"
             element={
