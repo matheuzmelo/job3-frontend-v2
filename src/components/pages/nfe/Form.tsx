@@ -31,8 +31,8 @@ import { useNfeContext } from "../../../context/nfe.context";
 import { EmpresasService } from "../../../services/api/Empresas/Empresas.service";
 import { NotasFicaisService } from "../../../services/api/NotasFiscais/nfe.service";
 import { PessoasService } from "../../../services/api/Pessoas/pessoas.service";
-import ToastMessage from "../../organisms/ToastMessage";
 import { ProdutosService } from "../../../services/api/Produtos/produtos.service";
+import ToastMessage from "../../organisms/ToastMessage";
 
 interface ProdutoSelecionado {
   produto_id: number;
@@ -42,7 +42,8 @@ interface ProdutoSelecionado {
 
 interface Cliente {
   id: number;
-  nome: string;
+  primeiro_nome: string;
+  segundo_nome: string;
 }
 
 interface Produto {
@@ -52,13 +53,14 @@ interface Produto {
 }
 
 interface Nfe {
-  numero: string;
-  pessoa_id: number;
-  produtos: {
-    descricao: string;
-    quantidade: number;
-    valor_unitario: number;
-  }[];
+  numero: number;
+  chave_acesso: string | null;
+  observacoes: string | null;
+  total_notal_fiscal: string;
+  pessoa: {
+    primeiro_nome: string;
+    segundo_nome: string;
+  };
 }
 
 export const Form: React.FC = () => {
@@ -66,22 +68,20 @@ export const Form: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     numero: "",
-    pessoa_id: "",
+    primeiro_nome: "",
+    segundo_nome: "",
+    total_notal_fiscal: "",
   });
   const [empresaId, setEmpresaId] = useState("");
   const [produtoId, setProdutoId] = useState("");
   const [quantidade, setQuantidade] = useState(1);
-  const [produtosDaProposta, setProdutosDaProposta] = useState<
-    ProdutoSelecionado[]
-  >([]);
+  const [produtosDaProposta, setProdutosDaProposta] = useState<ProdutoSelecionado[]>([]);
   const [pessoas, setPessoas] = useState<Cliente[]>([]);
   const [empresas, setEmpresas] = useState<any[]>([]);
   const [produtosComPrecos, setProdutosComPrecos] = useState<Produto[]>([]);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [openToast, setOpenToast] = useState(false);
-  const [toastStatus, setToastStatus] = useState<"success" | "alert" | "warn">(
-    "success"
-  );
+  const [toastStatus, setToastStatus] = useState<"success" | "alert" | "warn">("success");
   const [message, setMessage] = useState("");
 
   // Carrega empresas, pessoas e produtos ao iniciar o componente
@@ -126,14 +126,13 @@ export const Form: React.FC = () => {
   useEffect(() => {
     if (nfeAtual) {
       setFormData({
-        numero: nfeAtual.numero,
-        pessoa_id: nfeAtual?.id.toString(),
+        numero: nfeAtual.numero.toString(),
+        primeiro_nome: nfeAtual.pessoa.primeiro_nome,
+        segundo_nome: nfeAtual.pessoa.segundo_nome,
+        total_notal_fiscal: nfeAtual.total_notal_fiscal,
       });
 
-      // Define a empresa com base na nota fiscal
-      setEmpresaId(nfeAtual.empresa_id.toString());
-
-      // Preenche os produtos da nota fiscal
+      // Preenche os produtos da nota fiscal (se houver)
       if (nfeAtual.produtos) {
         const produtosFormatados = nfeAtual.produtos.map((produto: any) => ({
           produto_id: produtosComPrecos.find((p) => p.nome === produto.descricao)?.id || 0,
@@ -148,7 +147,7 @@ export const Form: React.FC = () => {
   const handleEmpresaChange = (event: SelectChangeEvent): void => {
     const selectedEmpresaId = event.target.value;
     setEmpresaId(selectedEmpresaId);
-    setFormData((prev) => ({ ...prev, pessoa_id: "" }));
+    setFormData((prev) => ({ ...prev, primeiro_nome: "", segundo_nome: "" }));
   };
 
   const handleAddProduct = () => {
@@ -194,7 +193,8 @@ export const Form: React.FC = () => {
   const handleSave = async () => {
     if (
       !formData.numero ||
-      !formData.pessoa_id ||
+      !formData.primeiro_nome ||
+      !formData.segundo_nome ||
       produtosDaProposta.length === 0
     ) {
       handleOpenToast("warn", "Preencha todos os campos obrigatórios!");
@@ -205,7 +205,11 @@ export const Form: React.FC = () => {
 
     const nfeData = {
       numero: Number(formData.numero),
-      pessoa_id: Number(formData.pessoa_id),
+      pessoa: {
+        primeiro_nome: formData.primeiro_nome,
+        segundo_nome: formData.segundo_nome,
+      },
+      total_notal_fiscal: formData.total_notal_fiscal,
       produtos: produtosDaProposta,
     };
 
@@ -224,7 +228,12 @@ export const Form: React.FC = () => {
   };
 
   const handleClear = () => {
-    setFormData({ numero: "", pessoa_id: "" });
+    setFormData({
+      numero: "",
+      primeiro_nome: "",
+      segundo_nome: "",
+      total_notal_fiscal: "",
+    });
     setProdutosDaProposta([]);
     setEmpresaId("");
     setPessoas([]);
@@ -268,40 +277,43 @@ export const Form: React.FC = () => {
           </Box>
 
           <Box>
-            <InputLabel>Empresa</InputLabel>
-            <Select
+            <InputLabel>Primeiro Nome do Cliente</InputLabel>
+            <TextField
+              name="primeiro_nome"
+              value={formData.primeiro_nome}
+              onChange={(e) =>
+                setFormData({ ...formData, primeiro_nome: e.target.value })
+              }
               fullWidth
-              value={empresaId}
-              onChange={handleEmpresaChange}
-              disabled={!!nfeAtual}
-            >
-              <MenuItem value="">Selecione a empresa</MenuItem>
-              {empresas.map((empresa) => (
-                <MenuItem key={empresa.id} value={empresa.id}>
-                  {empresa.nome_fantasia}
-                </MenuItem>
-              ))}
-            </Select>
+            />
+          </Box>
+
+          <Box>
+            <InputLabel>Segundo Nome do Cliente</InputLabel>
+            <TextField
+              name="segundo_nome"
+              value={formData.segundo_nome}
+              onChange={(e) =>
+                setFormData({ ...formData, segundo_nome: e.target.value })
+              }
+              fullWidth
+            />
+          </Box>
+
+          <Box>
+            <InputLabel>Total da Nota Fiscal</InputLabel>
+            <TextField
+              name="total_notal_fiscal"
+              value={formData.total_notal_fiscal}
+              onChange={(e) =>
+                setFormData({ ...formData, total_notal_fiscal: e.target.value })
+              }
+              fullWidth
+              type="number"
+            />
           </Box>
         </Box>
-        <Grid item xs={12} sm={6}>
-          <InputLabel>Cliente</InputLabel>
-          <Select
-            fullWidth
-            value={formData.pessoa_id}
-            onChange={(e) =>
-              setFormData({ ...formData, pessoa_id: e.target.value as string })
-            }
-            disabled={!empresaId}
-          >
-            <MenuItem value="">Selecione o cliente</MenuItem>
-            {pessoas.map((cliente) => (
-              <MenuItem key={cliente.id} value={cliente.id}>
-                {cliente.nome}
-              </MenuItem>
-            ))}
-          </Select>
-        </Grid>
+
         <Box mt={4}>
           <Typography variant="h6">Produtos</Typography>
           <Box display="flex" gap={2} mt={2}>
@@ -393,7 +405,8 @@ export const Form: React.FC = () => {
             disabled={
               isLoading ||
               !formData.numero ||
-              !formData.pessoa_id ||
+              !formData.primeiro_nome ||
+              !formData.segundo_nome ||
               produtosDaProposta.length === 0
             }
             sx={{

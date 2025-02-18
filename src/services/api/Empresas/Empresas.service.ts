@@ -14,7 +14,6 @@ const create = async (data: any) => {
 
   try {
     const { data } = await Api.request(options);
-    console.log(data);
   } catch (error) {
     console.error(error);
   }

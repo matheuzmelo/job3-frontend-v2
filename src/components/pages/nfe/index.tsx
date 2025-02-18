@@ -7,6 +7,7 @@ import { NfeProvider, useNfeContext } from '../../../context/nfe.context';
 import { Form } from './Form';
 import { List } from './List';
 
+// Componente para renderizar o conteúdo das abas
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
 
@@ -23,6 +24,7 @@ function CustomTabPanel(props) {
     );
 }
 
+// Função para gerar propriedades de acessibilidade das abas
 function handleNavigateTab(index: number) {
     return {
         id: `simple-tab-${index}`,
@@ -30,14 +32,16 @@ function handleNavigateTab(index: number) {
     };
 }
 
+// Componente principal das abas
 function NfeTabs() {
-    const { abaAtual, setAbaAtual }: any = useNfeContext();
+    const { abaAtual, setAbaAtual } = useNfeContext();
 
+    // Função para mudar a aba atual
     const handleChange = (_event: React.SyntheticEvent, newValue: number): void => {
         setAbaAtual(newValue);
     };
 
-
+    // Configuração das abas
     const ContentTabs = [
         {
             id: 0,
@@ -50,44 +54,44 @@ function NfeTabs() {
     ];
 
     return (
-        <>
-
-            <Box sx={{ width: '100%', minHeight: '100dvh' }}>
-                <Box
-                    sx={{
-                        borderBottom: 1,
-                        borderColor: 'divider',
-                        display: 'flex',
-                        justifyContent: 'center',
-                    }}
-                >
-                    <Tabs value={abaAtual} onChange={handleChange}>
-                        {ContentTabs.map((tab) => (
-                            <Tab
-                                sx={{
-                                    mr: 1,
-                                    minWidth: 150,
-                                    textTransform: 'capitalize',
-                                }}
-                                key={tab.id}
-                                label={tab.label}
-                                {...handleNavigateTab(tab.id)}
-                            />
-                        ))}
-                    </Tabs>
-                </Box>
-                <CustomTabPanel value={abaAtual} index={0}>
-                    <Form />
-                </CustomTabPanel>
-                <CustomTabPanel value={abaAtual} index={1}>
-                    <List />
-                </CustomTabPanel>
+        <Box sx={{ width: '100%', minHeight: '100dvh' }}>
+            {/* Barra de abas */}
+            <Box
+                sx={{
+                    borderBottom: 1,
+                    borderColor: 'divider',
+                    display: 'flex',
+                    justifyContent: 'center',
+                }}
+            >
+                <Tabs value={abaAtual} onChange={handleChange}>
+                    {ContentTabs.map((tab) => (
+                        <Tab
+                            sx={{
+                                mr: 1,
+                                minWidth: 150,
+                                textTransform: 'capitalize',
+                            }}
+                            key={tab.id}
+                            label={tab.label}
+                            {...handleNavigateTab(tab.id)}
+                        />
+                    ))}
+                </Tabs>
             </Box>
 
-        </>
+            {/* Conteúdo das abas */}
+            <CustomTabPanel value={abaAtual} index={0}>
+                <Form />
+            </CustomTabPanel>
+            <CustomTabPanel value={abaAtual} index={1}>
+                <List />
+            </CustomTabPanel>
+        </Box>
     );
 }
 
+// Componente principal que envolve o NfeTabs com o NfeProvider
 export default function Nfe() {
     return (
         <NfeProvider>

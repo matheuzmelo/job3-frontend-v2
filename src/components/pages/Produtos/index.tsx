@@ -39,7 +39,6 @@ function ProdutosTabs() {
     const { abaAtual, setAbaAtual } = useProdutoContext();
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-        console.log(event)
         setAbaAtual(newValue);
     };
 

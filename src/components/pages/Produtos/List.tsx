@@ -10,8 +10,7 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    TextField // Adicionei o componente TextField
-    ,
+    TextField,
     Typography
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
@@ -23,7 +22,7 @@ export const List: React.FC = () => {
     const { setProdutoAtual, setAbaAtual } = useProdutoContext();
     const [produtos, setProdutos] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState(''); // Estado para o termo de busca
+    const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
 
     const fetchProdutos = async () => {
@@ -34,7 +33,7 @@ export const List: React.FC = () => {
         }
 
         try {
-            const productList = await ProdutosService.getAll('');
+            const productList = await ProdutosService.getAll();
             if (productList) {
                 setProdutos(productList.data);
             }
@@ -51,7 +50,7 @@ export const List: React.FC = () => {
 
     const handleEdit = (produto: any) => {
         setProdutoAtual(produto);
-        setAbaAtual(0);
+        setAbaAtual(0); // Define a aba atual para 0 (Cadastro)
     };
 
     const filteredAndSortedProdutos = produtos
@@ -68,7 +67,6 @@ export const List: React.FC = () => {
         <Container maxWidth="xl" sx={{ mt: 4 }}>
             <Typography variant="h5">Lista de Produtos</Typography>
 
-            {/* Campo de busca */}
             <TextField
                 label="Buscar por descrição"
                 variant="outlined"

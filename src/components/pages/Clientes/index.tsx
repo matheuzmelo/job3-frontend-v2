@@ -38,7 +38,6 @@ function ClientesTabs() {
     const { abaAtual, setAbaAtual } = useClienteContext();
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-        console.log(event)
         setAbaAtual(newValue);
     };
 

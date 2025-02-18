@@ -16,22 +16,6 @@ import React, { useEffect, useState } from 'react';
 import { useNfeContext } from '../../../context/nfe.context';
 import { NotasFicaisService } from '../../../services/api/NotasFiscais/nfe.service';
 
-// Dados mockados consistentes com o formulário
-const clientesPorEmpresa = {
-    1: [
-        { id: 1, nome: 'Cliente A1' },
-        { id: 2, nome: 'Cliente A2' },
-    ],
-    2: [
-        { id: 3, nome: 'Cliente B1' },
-        { id: 4, nome: 'Cliente B2' },
-    ],
-    3: [
-        { id: 5, nome: 'Cliente C1' },
-        { id: 6, nome: 'Cliente C2' },
-    ],
-};
-
 export const List: React.FC = () => {
     const { setNfeAtual, setAbaAtual }: any = useNfeContext();
     const [notas, setNotas] = useState<any>([]);
@@ -60,25 +44,11 @@ export const List: React.FC = () => {
         carregarNotas();
     }, []);
 
-    const getNomeCliente = (pessoaId: number) => {
-        for (const clientes of Object.values(clientesPorEmpresa)) {
-            const cliente = clientes.find(c => c.id === pessoaId);
-            if (cliente) return cliente.nome;
-        }
-        return 'Cliente não encontrado';
-    };
-
-    // const calcularTotal = (produtos) => {
-    //     return produtos.reduce((total, produto) =>
-    //         total + (produto.quantidade * produto.valor_unitario), 0
-    //     ).toFixed(2);
-    // };
-
     const handleEdit = (nota) => {
         setNfeAtual({
-            ...nota
+            ...nota 
         });
-        setAbaAtual(0);
+        setAbaAtual(0); 
     };
 
     return (
@@ -110,13 +80,13 @@ export const List: React.FC = () => {
                             {notas.map((nota, index) => (
                                 <TableRow key={index}>
                                     <TableCell>{nota.numero}</TableCell>
-                                    <TableCell>{nota.pessoa.primeiro_nome } {nota.pessoa.segundo_nome}</TableCell>
+                                    <TableCell>{nota.pessoa.primeiro_nome} {nota.pessoa.segundo_nome}</TableCell>
                                     <TableCell>R$ {nota.total_notal_fiscal}</TableCell>
                                     <TableCell>
                                         <Button
                                             variant="contained"
                                             color="primary"
-                                            onClick={() => handleEdit(nota.numero)}
+                                            onClick={() => handleEdit(nota)} // Passa o objeto completo da nota fiscal
                                         >
                                             Editar
                                         </Button>

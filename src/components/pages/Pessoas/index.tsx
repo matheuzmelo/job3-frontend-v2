@@ -37,7 +37,6 @@ function PessoasTabs() {
   const { abaAtual, setAbaAtual } = usePessoaContext();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log(event)
     setAbaAtual(newValue);
   };
 
