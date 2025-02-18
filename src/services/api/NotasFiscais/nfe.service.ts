@@ -49,6 +49,7 @@ const getById = async (id: number) => {
   
   try {
     const { data } = await Api.request(options);
+    return data;
   } catch (error) {
     console.error(error);
   }
