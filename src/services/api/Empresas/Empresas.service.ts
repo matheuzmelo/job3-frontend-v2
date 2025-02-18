@@ -4,7 +4,7 @@ const create = async (data: any) => {
   const token = localStorage.getItem("token");
   const options = {
     method: "POST",
-    url: "/pessoas",
+    url: "/empresas",
     headers: {
       authorization: `Bearer ${token}`,
       "content-type": "application/json",
@@ -14,7 +14,7 @@ const create = async (data: any) => {
 
   try {
     const { data } = await Api.request(options);
-    return data;
+    console.log(data);
   } catch (error) {
     console.error(error);
   }
@@ -23,9 +23,11 @@ const create = async (data: any) => {
 const getAll = async () => {
   const token = localStorage.getItem("token");
   const options = {
-    method: 'GET',
-    url: '/pessoas',
-    headers: {authorization: `Bearer ${token}`}
+    method: "GET",
+    url: "/empresas",
+    headers: {
+      authorization: `Bearer ${token}`
+    }
   };
 
   try {
@@ -36,13 +38,29 @@ const getAll = async () => {
   }
 };
 
-const getById = async () => {};
+const getById = async (id: number) => {
+  const token = localStorage.getItem("token");
+  const options = {
+    method: "GET",
+    url: `/empresa/${id}`,
+    headers: {
+      authorization: `Bearer ${token}`
+    }
+  };
+
+  try {
+    const { data } = await Api.request(options);
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 const updateById = async () => {};
 
 const deleteById = async () => {};
 
-export const PessoasService = {
+export const EmpresasService = {
   create,
   getAll,
   getById,

@@ -31,7 +31,7 @@ function handleNavigateTab(index: number) {
 }
 
 function NfeTabs() {
-    const { abaAtual, setAbaAtual } = useNfeContext();
+    const { abaAtual, setAbaAtual }: any = useNfeContext();
 
     const handleChange = (_event: React.SyntheticEvent, newValue: number): void => {
         setAbaAtual(newValue);
@@ -43,10 +43,10 @@ function NfeTabs() {
             id: 0,
             label: 'Cadastro',
         },
-        // {
-        //     id: 1,
-        //     label: 'Notas Fiscais',
-        // },
+        {
+            id: 1,
+            label: 'Notas Fiscais',
+        },
     ];
 
     return (

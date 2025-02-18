@@ -17,13 +17,12 @@ const create = async (data: any) => {
   }
 };
 
-const getAll = async (data: any | null) => {
+const getAll = async () => {
   const token = localStorage.getItem('token');
   const options = {
     method: 'GET',
     url: '/produtos',
-    headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
-    data: data
+    headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }
   };
 
   try {
