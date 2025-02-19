@@ -9,7 +9,6 @@ import {
   Button,
   CircularProgress,
   Container,
-  Grid,
   InputLabel,
   MenuItem,
   Paper,
@@ -44,23 +43,13 @@ interface Cliente {
   id: number;
   primeiro_nome: string;
   segundo_nome: string;
+  empresa_id: number;
 }
 
 interface Produto {
   id: number;
   nome: string;
   preco: number;
-}
-
-interface Nfe {
-  numero: number;
-  chave_acesso: string | null;
-  observacoes: string | null;
-  total_notal_fiscal: string;
-  pessoa: {
-    primeiro_nome: string;
-    segundo_nome: string;
-  };
 }
 
 export const Form: React.FC = () => {
@@ -73,6 +62,7 @@ export const Form: React.FC = () => {
     total_notal_fiscal: "",
   });
   const [empresaId, setEmpresaId] = useState("");
+  const [clienteId, setClienteId] = useState("");
   const [produtoId, setProdutoId] = useState("");
   const [quantidade, setQuantidade] = useState(1);
   const [produtosDaProposta, setProdutosDaProposta] = useState<ProdutoSelecionado[]>([]);
@@ -84,7 +74,7 @@ export const Form: React.FC = () => {
   const [toastStatus, setToastStatus] = useState<"success" | "alert" | "warn">("success");
   const [message, setMessage] = useState("");
 
-  // Carrega empresas, pessoas e produtos ao iniciar o componente
+  // Carrega empresas e produtos ao iniciar o componente
   useEffect(() => {
     const carregarDados = async () => {
       try {
@@ -141,13 +131,42 @@ export const Form: React.FC = () => {
         }));
         setProdutosDaProposta(produtosFormatados);
       }
+
+      // Tenta encontrar a empresa e o cliente com base nos dados da nota fiscal
+      if (nfeAtual.pessoa) {
+        const cliente = pessoas.find(
+          (p) =>
+            p.primeiro_nome === nfeAtual.pessoa.primeiro_nome &&
+            p.segundo_nome === nfeAtual.pessoa.segundo_nome
+        );
+        if (cliente) {
+          setClienteId(cliente.id.toString());
+          setEmpresaId(cliente.empresa_id.toString());
+        }
+      }
     }
-  }, [nfeAtual, produtosComPrecos]);
+  }, [nfeAtual, produtosComPrecos, pessoas]);
 
   const handleEmpresaChange = (event: SelectChangeEvent): void => {
     const selectedEmpresaId = event.target.value;
     setEmpresaId(selectedEmpresaId);
+    setClienteId(""); // Limpa o cliente ao mudar a empresa
     setFormData((prev) => ({ ...prev, primeiro_nome: "", segundo_nome: "" }));
+  };
+
+  const handleClienteChange = (event: SelectChangeEvent): void => {
+    const selectedClienteId = event.target.value;
+    setClienteId(selectedClienteId);
+
+    // Preenche os campos de nome do cliente
+    const clienteSelecionado = pessoas.find((p) => p.id === Number(selectedClienteId));
+    if (clienteSelecionado) {
+      setFormData({
+        ...formData,
+        primeiro_nome: clienteSelecionado.primeiro_nome,
+        segundo_nome: clienteSelecionado.segundo_nome,
+      });
+    }
   };
 
   const handleAddProduct = () => {
@@ -205,10 +224,8 @@ export const Form: React.FC = () => {
 
     const nfeData = {
       numero: Number(formData.numero),
-      pessoa: {
-        primeiro_nome: formData.primeiro_nome,
-        segundo_nome: formData.segundo_nome,
-      },
+      pessoa_id: Number(clienteId),
+      empresa_id: Number(empresaId),
       total_notal_fiscal: formData.total_notal_fiscal,
       produtos: produtosDaProposta,
     };
@@ -236,6 +253,7 @@ export const Form: React.FC = () => {
     });
     setProdutosDaProposta([]);
     setEmpresaId("");
+    setClienteId("");
     setPessoas([]);
     localStorage.removeItem("produtosDaProposta");
   };
@@ -277,27 +295,37 @@ export const Form: React.FC = () => {
           </Box>
 
           <Box>
-            <InputLabel>Primeiro Nome do Cliente</InputLabel>
-            <TextField
-              name="primeiro_nome"
-              value={formData.primeiro_nome}
-              onChange={(e) =>
-                setFormData({ ...formData, primeiro_nome: e.target.value })
-              }
+            <InputLabel>Empresa</InputLabel>
+            <Select
               fullWidth
-            />
+              value={empresaId}
+              onChange={handleEmpresaChange}
+              disabled={!!nfeAtual}
+            >
+              <MenuItem value="">Selecione a empresa</MenuItem>
+              {empresas.map((empresa) => (
+                <MenuItem key={empresa.id} value={empresa.id}>
+                  {empresa.nome_fantasia}
+                </MenuItem>
+              ))}
+            </Select>
           </Box>
 
           <Box>
-            <InputLabel>Segundo Nome do Cliente</InputLabel>
-            <TextField
-              name="segundo_nome"
-              value={formData.segundo_nome}
-              onChange={(e) =>
-                setFormData({ ...formData, segundo_nome: e.target.value })
-              }
+            <InputLabel>Cliente</InputLabel>
+            <Select
               fullWidth
-            />
+              value={clienteId}
+              onChange={handleClienteChange}
+              disabled={!empresaId}
+            >
+              <MenuItem value="">Selecione o cliente</MenuItem>
+              {pessoas.map((cliente) => (
+                <MenuItem key={cliente.id} value={cliente.id}>
+                  {cliente.primeiro_nome} {cliente.segundo_nome}
+                </MenuItem>
+              ))}
+            </Select>
           </Box>
 
           <Box>
