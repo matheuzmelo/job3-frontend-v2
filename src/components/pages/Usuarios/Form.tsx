@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, CircularProgress, Container, Grid, TextField, Typography } from '@mui/material';
 import { SaveAltRounded } from '@mui/icons-material';
 import { useUserContext } from '../../../context/usuario.context';
-import { UsuariosService } from '../../../services/api/Usuarios/usuarios.service';
 
 export const UserForm: React.FC = () => {
     const { currentUser, setCurrentUser, setUsers, addUser, users } = useUserContext();
@@ -15,11 +14,6 @@ export const UserForm: React.FC = () => {
         senha: '',
         nivel: 0,
     });
-
-    const fetchUsuarios = async () => {
-        const response = await UsuariosService.getAll();
-        setUsers(response.data);
-    }
 
     useEffect(() => {
         if (currentUser) {
@@ -49,6 +43,10 @@ export const UserForm: React.FC = () => {
     };
 
     const handleSubmit = () => {
+        addUser({
+            ...formData,
+            id: users.length + 1,
+        });
         setIsLoading(false);
     };
 

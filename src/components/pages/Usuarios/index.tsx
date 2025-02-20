@@ -57,7 +57,7 @@ const UserIndex: React.FC = () => {
                 <UserForm />
             </CustomTabPanel>
             <CustomTabPanel value={abaAtual} index={1}>
-                <UserList />
+                <UserList setAbaAtual={setAbaAtual} />
             </CustomTabPanel>
         </Box>
     );

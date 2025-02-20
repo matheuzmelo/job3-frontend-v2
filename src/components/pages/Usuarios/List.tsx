@@ -17,7 +17,11 @@ import {
 } from '@mui/material';
 import { useUserContext } from '../../../context/usuario.context';
 
-export const UserList: React.FC = () => {
+interface UserListProps {
+    setAbaAtual: (value: number) => void; // Prop para mudar a aba ativa
+}
+
+export const UserList: React.FC<UserListProps> = ({ setAbaAtual }) => {
     const { users, setCurrentUser } = useUserContext();
     const [isLoading, setIsLoading] = React.useState(false);
     const [page, setPage] = React.useState(1);
@@ -25,19 +29,20 @@ export const UserList: React.FC = () => {
     const itemsPerPage = 15;
 
     const handleEdit = (user: any) => {
-        setCurrentUser(user);
+        setCurrentUser(user); // Define o usuário atual no contexto
+        setAbaAtual(0); // Muda para a aba do formulário (aba 0)
     };
 
     const handleChangePage = (event: React.ChangeEvent<unknown>, newPage: number) => {
-        console.log(event);
         setPage(newPage);
     };
 
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(event.target.value);
-        setPage(1);
+        setPage(1); // Resetar para a primeira página ao buscar
     };
 
+    // Filtrar usuários com base no termo de busca
     const filteredUsers = users.filter((user) => {
         return (
             user.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -46,6 +51,7 @@ export const UserList: React.FC = () => {
         );
     });
 
+    // Calcular os usuários que devem ser exibidos na página atual
     const startIndex = (page - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const currentUsers = filteredUsers.slice(startIndex, endIndex);

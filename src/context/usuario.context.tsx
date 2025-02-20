@@ -16,7 +16,7 @@ interface UserContextData {
     setCurrentUser: (user: User | null) => void;
     users: User[];
     setUsers: (users: User[]) => void;
-    addUser: (user: User) => void; // Função para adicionar usuário
+    addUser: (user: User) => void;
 }
 
 const UserContext = createContext<UserContextData | undefined>(undefined);
@@ -27,7 +27,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const getAllUsers = async () => {
         const users = await UsuariosService.getAll();
-        console.log(users.data)
         if (users) {
             setUsers(users.data);
         }
@@ -36,7 +35,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         getAllUsers()
     }, [])
 
-    const addUser = (user: User) => {
+    const addUser = async (user: User) => {
+        console.log(user)
+        await UsuariosService.create(user);
         setUsers([...users, user]);
     };
 
