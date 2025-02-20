@@ -22,8 +22,26 @@ export const UserForm: React.FC = () => {
     }
 
     useEffect(() => {
-      fetchUsuarios();
-    }, []);
+        if (currentUser) {
+            setFormData({
+                nome: currentUser.nome,
+                usuario: currentUser.usuario,
+                tenant_id: currentUser.tenant_id,
+                email: currentUser.email,
+                senha: currentUser.senha,
+                nivel: currentUser.nivel,
+            });
+        } else {
+            setFormData({
+                nome: '',
+                usuario: '',
+                tenant_id: '',
+                email: '',
+                senha: '',
+                nivel: 0,
+            });
+        }
+    }, [currentUser]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;

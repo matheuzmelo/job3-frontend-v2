@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { UsuariosService } from '../services/api/Usuarios/usuarios.service';
 
 interface User {
     id: number;
@@ -23,6 +24,17 @@ const UserContext = createContext<UserContextData | undefined>(undefined);
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [users, setUsers] = useState<User[]>([]);
+
+    const getAllUsers = async () => {
+        const users = await UsuariosService.getAll();
+        console.log(users.data)
+        if (users) {
+            setUsers(users.data);
+        }
+    }
+    useEffect(()=> {
+        getAllUsers()
+    }, [])
 
     const addUser = (user: User) => {
         setUsers([...users, user]);
