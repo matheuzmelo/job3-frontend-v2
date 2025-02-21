@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { UsuariosService } from '../services/api/Usuarios/usuarios.service';
+import { EmpresasService } from '../services/api/Empresas/Empresas.service';
 
 interface User {
     id: number;
@@ -17,6 +18,7 @@ interface UserContextData {
     users: User[];
     setUsers: (users: User[]) => void;
     addUser: (user: User) => void;
+    getEmpresas: () => any;
 }
 
 const UserContext = createContext<UserContextData | undefined>(undefined);
@@ -24,6 +26,7 @@ const UserContext = createContext<UserContextData | undefined>(undefined);
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [users, setUsers] = useState<User[]>([]);
+    const [_, setEmpresas] = useState<any[]>([]);
 
     const getAllUsers = async () => {
         const users = await UsuariosService.getAll();
@@ -36,13 +39,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [])
 
     const addUser = async (user: User) => {
-        console.log(user)
         await UsuariosService.create(user);
         setUsers([...users, user]);
     };
 
+    const getEmpresas = async () => {
+        const empresas = await EmpresasService.getAll();
+        if (empresas) {
+            setEmpresas(empresas.data);
+            return empresas.data;
+        }
+    }
+
     return (
-        <UserContext.Provider value={{ currentUser, setCurrentUser, users, setUsers, addUser }}>
+        <UserContext.Provider value={{ currentUser, setCurrentUser, users, setUsers, addUser, getEmpresas }}>
             {children}
         </UserContext.Provider>
     );

@@ -12,6 +12,7 @@ import { MenuLayout } from '../types/TMenu.type';
 import Pessoas from '../components/pages/Pessoas';
 import GroupIcon from '@mui/icons-material/Group';
 import Usuario from '../components/pages/Usuarios';
+import PersonIcon from '@mui/icons-material/Person';
 
 
 export const menuLayout: MenuLayout = [
@@ -61,7 +62,7 @@ export const menuLayout: MenuLayout = [
         name: "Usuários",
         route: "/usuarios",
         page: <Usuario />,
-        icon: <GroupIcon />,
-        permission: undefined
+        icon: <PersonIcon />,
+        permission: 'USUARIOS'
     },
 ]
