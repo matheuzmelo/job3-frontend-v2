@@ -76,6 +76,15 @@ export const UserForm: React.FC = () => {
   };
 
   const handleSubmit = () => {
+    setIsLoading(true);
+    setFormData({
+        nome: "",
+        usuario: "",
+        tenant_id: "",
+        email: "",
+        senha: "",
+        nivel: 0,
+      });
     addUser({
       ...formData,
       id: users.length + 1,

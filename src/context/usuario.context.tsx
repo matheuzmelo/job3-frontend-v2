@@ -26,7 +26,6 @@ const UserContext = createContext<UserContextData | undefined>(undefined);
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [users, setUsers] = useState<User[]>([]);
-    const [_, setEmpresas] = useState<any[]>([]);
 
     const getAllUsers = async () => {
         const users = await UsuariosService.getAll();
@@ -45,8 +44,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const getEmpresas = async () => {
         const empresas = await EmpresasService.getAll();
+        
         if (empresas) {
-            setEmpresas(empresas.data);
             return empresas.data;
         }
     }
