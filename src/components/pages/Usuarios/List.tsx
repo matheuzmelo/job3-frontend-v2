@@ -1,20 +1,20 @@
-import React from 'react';
 import {
     Box,
     Button,
     CircularProgress,
     Container,
+    Pagination,
+    Paper,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
-    Paper,
-    Typography,
-    Pagination,
-    TextField
+    TextField,
+    Typography
 } from '@mui/material';
+import React from 'react';
 import { useUserContext } from '../../../context/usuario.context';
 
 interface UserListProps {
@@ -23,7 +23,7 @@ interface UserListProps {
 
 export const UserList: React.FC<UserListProps> = ({ setAbaAtual }) => {
     const { users, setCurrentUser } = useUserContext();
-    const [isLoading, setIsLoading] = React.useState(false);
+    const [isLoading, _] = React.useState(false);
     const [page, setPage] = React.useState(1);
     const [searchTerm, setSearchTerm] = React.useState('');
     const itemsPerPage = 15;
@@ -34,6 +34,7 @@ export const UserList: React.FC<UserListProps> = ({ setAbaAtual }) => {
     };
 
     const handleChangePage = (event: React.ChangeEvent<unknown>, newPage: number) => {
+        console.log(event)
         setPage(newPage);
     };
 

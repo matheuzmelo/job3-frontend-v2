@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Container,
-  Grid,
-  TextField,
-  Typography,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
-} from "@mui/material";
 import { SaveAltRounded } from "@mui/icons-material";
+import {
+    Box,
+    Button,
+    CircularProgress,
+    Container,
+    FormControl,
+    Grid,
+    InputLabel,
+    MenuItem,
+    Select,
+    TextField,
+    Typography,
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
 import { useUserContext } from "../../../context/usuario.context";
 
 export const UserForm: React.FC = () => {
-  const { currentUser, setCurrentUser, setUsers, addUser, users, getEmpresas } =
+  const { currentUser, addUser, users, getEmpresas } =
     useUserContext();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({

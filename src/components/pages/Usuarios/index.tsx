@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
 import { Box, Tab, Tabs } from '@mui/material';
-import { UserProvider, useUserContext } from '../../../context/usuario.context';
+import React, { useState } from 'react';
+import { UserProvider } from '../../../context/usuario.context';
 import { UserForm } from './Form';
 import { UserList } from './List';
 
@@ -20,10 +20,11 @@ function CustomTabPanel(props: TabPanelProps) {
 }
 
 const UserIndex: React.FC = () => {
-    const { users } = useUserContext(); // Mantém a estrutura do contexto, se necessário
+    // const { users } = useUserContext(); // Mantém a estrutura do contexto, se necessário
     const [abaAtual, setAbaAtual] = useState(0);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+        console.log(event)
         setAbaAtual(newValue);
     };
 
