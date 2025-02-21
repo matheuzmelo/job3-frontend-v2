@@ -63,6 +63,6 @@ export const menuLayout: MenuLayout = [
         route: "/usuarios",
         page: <Usuario />,
         icon: <PersonIcon />,
-        permission: 'USUARIOS'
+        permission: undefined // adicionar a chave USUARIOS no enum de permissões 
     },
 ]
