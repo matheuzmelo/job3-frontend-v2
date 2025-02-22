@@ -55,7 +55,7 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(true);
       const response = await EmpresasService.getAll();
       setIsLoading(false);
-      if (response.statusCode === 200) {
+      if (response) {
         setEmpresas(response.data);
       }
     } catch (error) {
