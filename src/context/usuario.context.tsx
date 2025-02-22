@@ -19,6 +19,7 @@ interface UserContextData {
     setUsers: (users: User[]) => void;
     addUser: (user: User) => void;
     getEmpresas: () => any;
+    isLoading: boolean;
 }
 
 const UserContext = createContext<UserContextData | undefined>(undefined);
@@ -26,10 +27,14 @@ const UserContext = createContext<UserContextData | undefined>(undefined);
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [users, setUsers] = useState<User[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const getAllUsers = async () => {
+        setIsLoading(true);
         const users = await UsuariosService.getAll();
+
         if (users) {
+            setIsLoading(false);
             setUsers(users.data);
         }
     }
@@ -51,7 +56,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     return (
-        <UserContext.Provider value={{ currentUser, setCurrentUser, users, setUsers, addUser, getEmpresas }}>
+        <UserContext.Provider value={{ currentUser, setCurrentUser, users, setUsers, addUser, getEmpresas, isLoading}}>
             {children}
         </UserContext.Provider>
     );
