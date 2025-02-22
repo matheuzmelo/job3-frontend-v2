@@ -28,6 +28,7 @@ export const UserList: React.FC<UserListProps> = ({ setAbaAtual }) => {
     const itemsPerPage = 15;
 
     const handleEdit = (user: any) => {
+        console.log(user)
         setCurrentUser(user); // Define o usuário atual no contexto
         setAbaAtual(0); // Muda para a aba do formulário (aba 0)
     };

@@ -8,12 +8,13 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InputMask from "react-input-mask";
 import { useEmpresasContext } from "../../../context/empresas.context";
+import ToastMessage from "../../organisms/ToastMessage";
 
 export const Form: React.FC = () => {
-  const { isLoading, consultaCep, addEmpresa } = useEmpresasContext();
+  const { currentEmpresa, isLoading, consultaCep, addEmpresa, error, setError } = useEmpresasContext();
   const [formData, setFormData] = useState<any>({
     cnpj: "",
     razao_social: "",
@@ -29,12 +30,54 @@ export const Form: React.FC = () => {
     uf: "",
   });
 
+  // Estado para controlar o ToastMessage
+  const [toast, setToast] = useState({
+    open: false,
+    status: "success" as "success" | "error",
+    message: "",
+  });
+
+  // Fecha o ToastMessage
+  const handleCloseToast = () => {
+    setToast((prev) => ({ ...prev, open: false }));
+  };
+
+  useEffect(() => {
+    if (currentEmpresa) {
+      setFormData({
+        cnpj: currentEmpresa.cnpj,
+        razao_social: currentEmpresa.razao_social,
+        nome_fantasia: currentEmpresa.nome_fantasia,
+        email: currentEmpresa.email,
+        telefone: currentEmpresa.telefone,
+        cep: currentEmpresa.cep,
+        bairro: currentEmpresa.bairro,
+        logradouro: currentEmpresa.endereco,
+        numero: currentEmpresa.numero_endereco,
+        complemento: currentEmpresa.complemento,
+        cidade: currentEmpresa.cidade,
+        uf: currentEmpresa.uf,
+      });
+    }
+  }, [currentEmpresa]);
+
+  useEffect(() => {
+    if (error) {
+      setToast({
+        open: true,
+        status: "error",
+        message: error.message || error, // Garante que a mensagem seja uma string
+      });
+      setError(null);
+    }
+  }, [error, setError]);
+
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     if (name === "cep" && value.length === 8) {
       const cep = value.replace(/\D/g, "");
-      const data = await consultaCep(cep);
+      const data: any = await consultaCep(cep);
       setFormData((prev) => ({
         ...prev,
         uf: data.state,
@@ -48,35 +91,38 @@ export const Form: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    console.log(formData);
+    try {
+      const dataEmpresa: any = {
+        cnpj: formData.cnpj,
+        razao_social: formData.razao_social,
+        nome_fantasia: formData.nome_fantasia,
+        email: formData.email,
+        telefone: formData.telefone,
+        cep: formData.cep,
+        bairro: formData.bairro,
+        endereco: `${formData.logradouro}, ${formData.numero}, ${formData.complemento}`,
+        cidade: formData.cidade,
+        uf: formData.uf,
+      };
 
-    const dataEmpresa: any = {
-      cnpj: formData.cnpj,
-      razao_social: formData.razao_social,
-      nome_fantasia: formData.nome_fantasia,
-      email: formData.email,
-      telefone: formData.telefone,
-      cep: formData.cep,
-      bairro: formData.bairro,
-      endereco: `${formData.logradouro}, ${formData.numero}, ${formData.complemento}`,
-      cidade: formData.cidade,
-      uf: formData.uf
+      await addEmpresa(dataEmpresa);
+
+      setToast({
+        open: true,
+        status: "success",
+        message: "Empresa cadastrada com sucesso!",
+      });
+
+      // Limpa o formulário após o sucesso
+      handleClear();
+    } catch (err) {
+      // Exibe mensagem de erro
+      setToast({
+        open: true,
+        status: "error",
+        message: error?.message || "Erro ao cadastrar a empresa.", // Acessa a propriedade `message` do erro
+      });
     }
-    addEmpresa(dataEmpresa);
-    // setFormData({
-    //   cnpj: "",
-    //   razao_social: "",
-    //   nome_fantasia: "",
-    //   email: "",
-    //   telefone: "",
-    //   cep: "",
-    //   bairro: "",
-    //   logradouro: "",
-    //   numero: "",
-    //   complemento: "",
-    //   cidade: "",
-    //   uf: "",
-    // });
   };
 
   const handleClear = () => {
@@ -129,7 +175,6 @@ export const Form: React.FC = () => {
             )}
           </InputMask>
         </Grid>
-        {/* Outros Campos do Formulário */}
         <Grid item xs={12} sm={6} md={4}>
           <TextField
             label="Razão Social"
@@ -171,14 +216,14 @@ export const Form: React.FC = () => {
           />
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              label="CEP"
-              name="cep"
-              value={formData.cep}
-              onChange={handleChange}
-              fullWidth
-              required
-            />
+          <TextField
+            label="CEP"
+            name="cep"
+            value={formData.cep}
+            onChange={handleChange}
+            fullWidth
+            required
+          />
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
           <TextField
@@ -262,6 +307,12 @@ export const Form: React.FC = () => {
           Limpar
         </Button>
       </Box>
+      <ToastMessage
+        status={toast.status}
+        open={toast.open}
+        message={toast.message}
+        onClose={handleCloseToast}
+      />
     </Container>
   );
 };
