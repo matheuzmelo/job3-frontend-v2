@@ -1,23 +1,21 @@
 import { SaveAltRounded } from "@mui/icons-material";
 import {
-    Box,
-    Button,
-    CircularProgress,
-    Container,
-    FormControl,
-    Grid,
-    InputLabel,
-    MenuItem,
-    Select,
-    TextField,
-    Typography,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useUserContext } from "../../../context/usuario.context";
 
 export const UserForm: React.FC = () => {
-  const { currentUser, addUser, users, getEmpresas } =
-    useUserContext();
+  const { currentUser, addUser, getEmpresas } = useUserContext();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     nome: "",
@@ -51,10 +49,10 @@ export const UserForm: React.FC = () => {
       setFormData({
         nome: currentUser.nome,
         usuario: currentUser.usuario,
-        tenant_id: currentUser.tenant_id,
+        tenant_id: String(currentUser.tenant_id),
         email: currentUser.email,
         senha: currentUser.senha,
-        nivel: currentUser.nivel,
+        nivel: Number(currentUser.nivel),
       });
     } else {
       setFormData({
@@ -69,7 +67,7 @@ export const UserForm: React.FC = () => {
   }, [currentUser, getEmpresas]);
 
   const handleChange: any = (
-    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
+    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name as string]: value }));
@@ -77,17 +75,14 @@ export const UserForm: React.FC = () => {
 
   const handleSubmit = () => {
     setIsLoading(true);
-    setFormData({
-        nome: "",
-        usuario: "",
-        tenant_id: "",
-        email: "",
-        senha: "",
-        nivel: 0,
-      });
+    // handleClear();
     addUser({
-      ...formData,
-      id: users.length + 1,
+      nome: formData.nome,
+      usuario: formData.usuario,
+      tenant_id: String(formData.tenant_id),
+      email: formData.email,
+      senha: formData.senha,
+      nivel: Number(formData.nivel),
     });
     setIsLoading(false);
   };
@@ -108,9 +103,8 @@ export const UserForm: React.FC = () => {
       <Typography variant="h5" sx={{ mb: 2 }}>
         Cadastro de Usuário
       </Typography>
-      <Grid container spacing={2}>
-        {/* Campos do Formulário */}
-        <Grid item xs={12} sm={6} md={4}>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+        <Box sx={{ width: "100%", maxWidth: "400px" }}>
           <TextField
             label="Nome"
             name="nome"
@@ -118,8 +112,8 @@ export const UserForm: React.FC = () => {
             onChange={handleChange}
             fullWidth
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box sx={{ width: "100%", maxWidth: "400px" }}>
           <TextField
             label="Usuário"
             name="usuario"
@@ -127,8 +121,8 @@ export const UserForm: React.FC = () => {
             onChange={handleChange}
             fullWidth
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box sx={{ width: "100%", maxWidth: "400px" }}>
           <FormControl fullWidth>
             <InputLabel id="empresa-label">Empresa</InputLabel>
             <Select
@@ -143,7 +137,7 @@ export const UserForm: React.FC = () => {
                 <MenuItem value="">Erro ao carregar empresas</MenuItem>
               ) : empresas.length > 0 ? (
                 empresas.map((empresa) => (
-                  <MenuItem key={empresa.id} value={empresa.id}>
+                  <MenuItem key={empresa.id} value={empresa.cnpj}>
                     {empresa.nome_fantasia}
                   </MenuItem>
                 ))
@@ -152,8 +146,8 @@ export const UserForm: React.FC = () => {
               )}
             </Select>
           </FormControl>
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box sx={{ width: "100%", maxWidth: "400px" }}>
           <TextField
             label="Email"
             name="email"
@@ -161,8 +155,8 @@ export const UserForm: React.FC = () => {
             onChange={handleChange}
             fullWidth
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box sx={{ width: "100%", maxWidth: "400px" }}>
           <TextField
             label="Senha"
             name="senha"
@@ -170,8 +164,8 @@ export const UserForm: React.FC = () => {
             onChange={handleChange}
             fullWidth
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box sx={{ width: "100%", maxWidth: "400px" }}>
           <TextField
             label="Nível"
             name="nivel"
@@ -180,9 +174,8 @@ export const UserForm: React.FC = () => {
             type="number"
             fullWidth
           />
-        </Grid>
-      </Grid>
-      {/* Botões de Ação */}
+        </Box>
+      </Box>
       <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
         <Button
           variant="contained"
