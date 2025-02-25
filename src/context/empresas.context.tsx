@@ -2,6 +2,7 @@ import React, { createContext, useEffect } from "react";
 import { EmpresasService } from "../services/api/Empresas/Empresas.service";
 import { CepService } from "../services/api/CEP/cep.service";
 import { DadosCep } from "../types/TCep.type";
+import axios from "axios";
 
 interface Empresa {
   id: number;
@@ -27,10 +28,14 @@ interface Empresa {
 interface EmpresaContextData {
   empresas: Empresa[];
   setEmpresas: (empresas: Empresa[]) => void;
-  addEmpresa: (empresa: Empresa) => void;
+  addEmpresa: (empresa: Empresa) => Promise<void>;
   getEmpresas: () => any;
   isLoading: boolean;
-  consultaCep: (cep: string) => any;
+  consultaCep: (cep: string) => Promise<DadosCep | undefined>;
+  currentEmpresa: Empresa | null;
+  setCurrentEmpresa: (empresa: Empresa | null) => void;
+  setError: (error: any) => any;
+  error: any;
 }
 
 const EmpresasContext = createContext<EmpresaContextData | undefined>(
@@ -40,41 +45,56 @@ const EmpresasContext = createContext<EmpresaContextData | undefined>(
 export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const [currentEmpresa, setCurrentEmpresa] = React.useState<Empresa | null>(null);
   const [empresas, setEmpresas] = React.useState<Empresa[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<any>(null);
 
   const getEmpresas = async () => {
-    const empresas = await EmpresasService.getAll();
-    setIsLoading(true);
-
-    if (empresas) {
+    try {
+      setIsLoading(true);
+      const response = await EmpresasService.getAll();
       setIsLoading(false);
-      setEmpresas(empresas.data);
+      if (response) {
+        setEmpresas(response.data);
+      }
+    } catch (error) {
+      setIsLoading(false);
+      setError(error);
     }
-    return empresas;
   };
   useEffect(() => {
     getEmpresas();
   }, []);
 
   const addEmpresa = async (empresa: Empresa) => {
-    setIsLoading(true);
-    const create_empresa = await EmpresasService.create(empresa);
-    setIsLoading(false);
-    setEmpresas([...empresas, empresa]);
-    return create_empresa;
+    try {
+      setIsLoading(true);
+      const response = await EmpresasService.create(empresa);
+      console.log(response);
+      setIsLoading(false);
+      if(axios.AxiosError){
+        throw new Error("Erro ao adicionar a empresa");
+      }
+      setEmpresas([...empresas, response.data]);
+    } catch (error) {
+      setIsLoading(false);
+      setError(error);
+    }
   };
 
   const consultaCep = async (cep: string): Promise<DadosCep | undefined> => {
-    setIsLoading(true);
-    const dados = await CepService.getCepData(cep);
-    setIsLoading(false);
-    return dados;
+    try {
+      const dados = await CepService.getCepData(cep);
+      return dados;
+    } catch (error) {
+      setError(error);
+    }
   }
 
   return (
     <EmpresasContext.Provider
-      value={{ empresas, setEmpresas, addEmpresa, getEmpresas, isLoading, consultaCep }}
+      value={{ empresas, setEmpresas, addEmpresa, getEmpresas, isLoading, consultaCep, currentEmpresa, setCurrentEmpresa, setError, error }}
     >
       {children}
     </EmpresasContext.Provider>
