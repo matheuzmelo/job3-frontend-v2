@@ -89,6 +89,7 @@ export const Form: React.FC = () => {
 
     if (name === "cep" && value.replace(/\D/g, "").length === 8) {
       const cep = value.replace(/\D/g, "");
+      console.log(cep)
       try {
         const data = await consultaCep(cep);
         if (data) {
@@ -236,24 +237,40 @@ export const Form: React.FC = () => {
           />
         </Box>
         <Box>
-          <TextField
-            label="Telefone"
-            name="telefone"
+          <InputMask
+            mask="(99) 99999-9999"
             value={formData.telefone}
             onChange={handleChange}
-            fullWidth
-            required
-          />
+          >
+            {(inputProps: any) => (
+              <TextField
+                {...inputProps}
+                label="Telefone"
+                name="telefone"
+                fullWidth
+                required
+                onChange={handleChange}
+              />
+            )}
+          </InputMask>
         </Box>
         <Box>
-          <TextField
-            label="CEP"
-            name="cep"
+          <InputMask
+            mask="99999-999"
             value={formData.cep}
             onChange={handleChange}
-            fullWidth
-            required
-          />
+          >
+            {(inputProps: any) => (
+              <TextField
+                {...inputProps}
+                label="CEP"
+                name="cep"
+                fullWidth
+                required
+                onChange={handleChange}
+              />
+            )}
+          </InputMask>
         </Box>
         <Box>
           <TextField
