@@ -137,7 +137,7 @@ export const Form: React.FC = () => {
         message: "Empresa cadastrada com sucesso!",
       });
 
-      // handleClear();
+      handleClear();
     } catch (err: any) {
       setToast({
         open: true,
