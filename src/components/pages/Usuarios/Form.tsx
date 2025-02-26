@@ -25,20 +25,20 @@ export const UserForm: React.FC = () => {
     senha: "",
     nivel: 0,
   });
-  const [empresas, setEmpresas] = useState<any[]>([]); // Inicialize como um array vazio
-  const [error, setError] = useState<string | null>(null); // Estado para armazenar erros
+  const [error, setError] = useState<string | null>(null);
+  const [empresas, setEmpresas] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchEmpresas = async () => {
       try {
-        const empresasList = await getEmpresas(); // Assumindo que getEmpresas é uma função assíncrona
+        const empresasList = await getEmpresas();
         if (Array.isArray(empresasList)) {
-          setEmpresas(empresasList); // Atualiza o estado com a lista de empresas
+          setEmpresas(empresasList); 
         } else {
-          setError("Dados de empresas inválidos."); // Trata caso o retorno não seja um array
+          setError("Dados de empresas inválidos.");
         }
       } catch (err) {
-        setError("Erro ao carregar empresas."); // Trata erros na requisição
+        setError("Erro ao carregar empresas."); 
         console.error(err);
       }
     };
@@ -75,7 +75,7 @@ export const UserForm: React.FC = () => {
 
   const handleSubmit = () => {
     setIsLoading(true);
-    // handleClear();
+  
     addUser({
       nome: formData.nome,
       usuario: formData.usuario,
@@ -103,8 +103,8 @@ export const UserForm: React.FC = () => {
       <Typography variant="h5" sx={{ mb: 2 }}>
         Cadastro de Usuário
       </Typography>
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-        <Box sx={{ width: "100%", maxWidth: "400px" }}>
+      <Box display={'grid'} gridTemplateColumns={'repeat(auto-fit, minmax(400px, 1fr))'} gap={2}>
+        <Box sx={{ width: "100%" }}>
           <TextField
             label="Nome"
             name="nome"
@@ -113,7 +113,7 @@ export const UserForm: React.FC = () => {
             fullWidth
           />
         </Box>
-        <Box sx={{ width: "100%", maxWidth: "400px" }}>
+        <Box sx={{ width: "100%" }}>
           <TextField
             label="Usuário"
             name="usuario"
@@ -122,7 +122,7 @@ export const UserForm: React.FC = () => {
             fullWidth
           />
         </Box>
-        <Box sx={{ width: "100%", maxWidth: "400px" }}>
+        <Box sx={{ width: "100%" }}>
           <FormControl fullWidth>
             <InputLabel id="empresa-label">Empresa</InputLabel>
             <Select
@@ -147,7 +147,7 @@ export const UserForm: React.FC = () => {
             </Select>
           </FormControl>
         </Box>
-        <Box sx={{ width: "100%", maxWidth: "400px" }}>
+        <Box sx={{ width: "100%" }}>
           <TextField
             label="Email"
             name="email"
@@ -156,7 +156,7 @@ export const UserForm: React.FC = () => {
             fullWidth
           />
         </Box>
-        <Box sx={{ width: "100%", maxWidth: "400px" }}>
+        <Box sx={{ width: "100%" }}>
           <TextField
             label="Senha"
             name="senha"
@@ -165,7 +165,7 @@ export const UserForm: React.FC = () => {
             fullWidth
           />
         </Box>
-        <Box sx={{ width: "100%", maxWidth: "400px" }}>
+        <Box sx={{ width: "100%" }}>
           <TextField
             label="Nível"
             name="nivel"
