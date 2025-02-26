@@ -20,7 +20,6 @@ function CustomTabPanel(props: TabPanelProps) {
 }
 
 const UserIndex: React.FC = () => {
-    // const { users } = useUserContext(); // Mantém a estrutura do contexto, se necessário
     const [abaAtual, setAbaAtual] = useState(0);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {

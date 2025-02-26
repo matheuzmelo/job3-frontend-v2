@@ -13,7 +13,8 @@ import Pessoas from '../components/pages/Pessoas';
 import GroupIcon from '@mui/icons-material/Group';
 import Usuario from '../components/pages/Usuarios';
 import PersonIcon from '@mui/icons-material/Person';
-
+import BusinessIcon from '@mui/icons-material/Business';
+import { Empresas } from '../components/pages/Empresas';
 
 export const menuLayout: MenuLayout = [
     {
@@ -65,4 +66,11 @@ export const menuLayout: MenuLayout = [
         icon: <PersonIcon />,
         permission: undefined // adicionar a chave USUARIOS no enum de permissões 
     },
+    {
+        name: "Empresas",
+        route: "/empresas",
+        page: <Empresas />,
+        icon: <BusinessIcon />,
+        permission: undefined
+    }
 ]

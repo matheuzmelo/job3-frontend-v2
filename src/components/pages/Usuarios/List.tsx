@@ -22,13 +22,13 @@ interface UserListProps {
 }
 
 export const UserList: React.FC<UserListProps> = ({ setAbaAtual }) => {
-    const { users, setCurrentUser } = useUserContext();
-    const [isLoading, _] = React.useState(false);
+    const { users, setCurrentUser, isLoading } = useUserContext();
     const [page, setPage] = React.useState(1);
     const [searchTerm, setSearchTerm] = React.useState('');
     const itemsPerPage = 15;
 
     const handleEdit = (user: any) => {
+        console.log(user)
         setCurrentUser(user); // Define o usuário atual no contexto
         setAbaAtual(0); // Muda para a aba do formulário (aba 0)
     };

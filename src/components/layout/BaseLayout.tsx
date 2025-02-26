@@ -1,17 +1,17 @@
-import { Box } from "@mui/material"
-import Footer from "../templates/Footer"
-import Header from "../templates/Header"
-import useAuthGuard from "../../hooks/useAuthGuard"
+import { Box } from "@mui/material";
+import useAuthGuard from "../../hooks/useAuthGuard";
+import { Header } from "../templates/Header";
+import { Footer } from "../templates/Footer";
 
-export default ({ children }) => {
-  useAuthGuard()
+export const BaseLayout = ({ children }) => {
+  useAuthGuard();
   return (
     <>
       <Header />
-      <Box component={"main"} display="flex" flexDirection={'column'} gap={1}>
+      <Box component={"main"} display="flex" flexDirection={"column"} gap={1}>
         {children}
       </Box>
       <Footer />
     </>
-  )
-}
+  );
+};
