@@ -78,9 +78,6 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
         setIsLoading(false);
         return;
       }
-      if (axios.AxiosError) {
-        throw new Error("Erro ao adicionar a empresa");
-      }
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);

@@ -1,4 +1,5 @@
 import Api from "..";
+import { decodeJWT, isSuperAdmin } from "../../../Utils";
 
 const create = async (data: any) => {
   const token = localStorage.getItem("token");
@@ -21,7 +22,6 @@ const create = async (data: any) => {
     const response = await Api.request(options);
     return response; // Retorna os dados da resposta em caso de sucesso
   } catch (error: any) {
-    throw new Error(`Erro ao cadastrar empresa: ${error}`);
 
     if (error.response) {
       const { status, data } = error.response;
@@ -38,13 +38,11 @@ const create = async (data: any) => {
         case 500:
           throw new Error("Erro interno no servidor. Tente novamente mais tarde.");
         default:
-          throw new Error(data.message || "Erro desconhecido ao cadastrar empresa.");
+          throw new Error(data.message || `Erro desconhecido ao cadastrar empresa.${error}`);
       }
     } else if (error.request) {
-      // Erros de rede ou servidor indisponível
       throw new Error("Erro de conexão. Verifique sua internet e tente novamente.");
     } else {
-      // Erros gerais (ex: erro ao configurar a requisição)
       throw new Error("Erro ao processar a requisição. Tente novamente.");
     }
   }
@@ -52,19 +50,25 @@ const create = async (data: any) => {
 
 const getAll = async () => {
   const token = localStorage.getItem("token");
-  const options = {
-    method: "GET",
-    url: "/empresas/all",
-    headers: {
-      authorization: `Bearer ${token}`
+  if (!token) {
+    throw new Error("Token de autenticação não encontrado. Faça login novamente.");
+  }
+  const superAdm = isSuperAdmin(token);
+  if(superAdm) {
+    const options = {
+      method: "GET",
+      url: "/empresas/all",
+      headers: {
+        authorization: `Bearer ${token}`
+      }
+    };
+  
+    try {
+      const { data } = await Api.request(options);
+      return data;
+    } catch (error) {
+      console.error(error);
     }
-  };
-
-  try {
-    const { data } = await Api.request(options);
-    return data;
-  } catch (error) {
-    console.error(error);
   }
 };
 
@@ -72,7 +76,7 @@ const getById = async (id: number) => {
   const token = localStorage.getItem("token");
   const options = {
     method: "GET",
-    url: `/empresa/${id}`,
+    url: `/empresas/${id}`,
     headers: {
       authorization: `Bearer ${token}`
     }

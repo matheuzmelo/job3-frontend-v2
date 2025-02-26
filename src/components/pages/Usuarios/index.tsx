@@ -22,8 +22,7 @@ function CustomTabPanel(props: TabPanelProps) {
 const UserIndex: React.FC = () => {
     const [abaAtual, setAbaAtual] = useState(0);
 
-    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-        console.log(event)
+    const handleChange = (_, newValue: number) => {
         setAbaAtual(newValue);
     };
 

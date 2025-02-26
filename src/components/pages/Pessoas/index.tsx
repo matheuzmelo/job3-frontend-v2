@@ -36,8 +36,7 @@ function handleNavigateProposal(index: number) {
 function PessoasTabs() {
   const { abaAtual, setAbaAtual } = usePessoaContext();
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log(event)
+  const handleChange = (_, newValue: number) => {
     setAbaAtual(newValue);
   };
 
