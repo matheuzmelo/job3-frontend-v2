@@ -39,13 +39,15 @@ interface EmpresaContextData {
 }
 
 const EmpresasContext = createContext<EmpresaContextData | undefined>(
-  undefined
+  undefined,
 );
 
 export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [currentEmpresa, setCurrentEmpresa] = React.useState<Empresa | null>(null);
+  const [currentEmpresa, setCurrentEmpresa] = React.useState<Empresa | null>(
+    null,
+  );
   const [empresas, setEmpresas] = React.useState<Empresa[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<any>(null);
@@ -70,13 +72,16 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
   const addEmpresa = async (empresa: Empresa) => {
     try {
       setIsLoading(true);
-      const response = await EmpresasService.create(empresa);
-      console.log(response);
-      setIsLoading(false);
-      if(axios.AxiosError){
+      const response: any = await EmpresasService.create(empresa);
+      if (response.success) {
+        setEmpresas([...empresas, response.data]);
+        setIsLoading(false);
+        return;
+      }
+      if (axios.AxiosError) {
         throw new Error("Erro ao adicionar a empresa");
       }
-      setEmpresas([...empresas, response.data]);
+      setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       setError(error);
@@ -90,11 +95,22 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (error) {
       setError(error);
     }
-  }
+  };
 
   return (
     <EmpresasContext.Provider
-      value={{ empresas, setEmpresas, addEmpresa, getEmpresas, isLoading, consultaCep, currentEmpresa, setCurrentEmpresa, setError, error }}
+      value={{
+        empresas,
+        setEmpresas,
+        addEmpresa,
+        getEmpresas,
+        isLoading,
+        consultaCep,
+        currentEmpresa,
+        setCurrentEmpresa,
+        setError,
+        error,
+      }}
     >
       {children}
     </EmpresasContext.Provider>
@@ -103,6 +119,9 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useEmpresasContext = () => {
   const context = React.useContext(EmpresasContext);
-  if (context === undefined) throw new Error("useEmpresasContext must be used within a EmpresasProvider");
+  if (context === undefined)
+    throw new Error(
+      "useEmpresasContext must be used within a EmpresasProvider",
+    );
   return context;
-}
+};

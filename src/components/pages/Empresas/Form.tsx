@@ -1,21 +1,27 @@
+import React, { useEffect, useState, useRef } from "react";
 import { SaveAltRounded } from "@mui/icons-material";
 import {
   Box,
   Button,
   CircularProgress,
   Container,
-  Grid,
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
 import InputMask from "react-input-mask";
 import { useEmpresasContext } from "../../../context/empresas.context";
 import ToastMessage from "../../organisms/ToastMessage";
 
 export const Form: React.FC = () => {
-  const { currentEmpresa, isLoading, consultaCep, addEmpresa, error, setError } = useEmpresasContext();
-  const [formData, setFormData] = useState<any>({
+  const {
+    currentEmpresa,
+    isLoading,
+    consultaCep,
+    addEmpresa,
+    error,
+    setError,
+  } = useEmpresasContext();
+  const [formData, setFormData] = useState({
     cnpj: "",
     razao_social: "",
     nome_fantasia: "",
@@ -28,7 +34,11 @@ export const Form: React.FC = () => {
     complemento: "",
     cidade: "",
     uf: "",
+    inscricao_estadual: "",
+    site: "",
   });
+
+  const cnpjRef = useRef<HTMLInputElement>(null);
 
   // Estado para controlar o ToastMessage
   const [toast, setToast] = useState({
@@ -45,18 +55,20 @@ export const Form: React.FC = () => {
   useEffect(() => {
     if (currentEmpresa) {
       setFormData({
-        cnpj: currentEmpresa.cnpj,
-        razao_social: currentEmpresa.razao_social,
-        nome_fantasia: currentEmpresa.nome_fantasia,
-        email: currentEmpresa.email,
-        telefone: currentEmpresa.telefone,
-        cep: currentEmpresa.cep,
-        bairro: currentEmpresa.bairro,
-        logradouro: currentEmpresa.endereco,
-        numero: currentEmpresa.numero_endereco,
-        complemento: currentEmpresa.complemento,
-        cidade: currentEmpresa.cidade,
-        uf: currentEmpresa.uf,
+        cnpj: currentEmpresa.cnpj || "",
+        razao_social: currentEmpresa.razao_social || "",
+        nome_fantasia: currentEmpresa.nome_fantasia || "",
+        email: currentEmpresa.email || "",
+        telefone: currentEmpresa.telefone || "",
+        cep: currentEmpresa.cep || "",
+        bairro: currentEmpresa.bairro || "",
+        logradouro: currentEmpresa.endereco || "",
+        numero: currentEmpresa.numero_endereco || "",
+        complemento: currentEmpresa.complemento || "",
+        cidade: currentEmpresa.cidade || "",
+        uf: currentEmpresa.uf || "",
+        inscricao_estadual: currentEmpresa.inscricao_estadual || "",
+        site: currentEmpresa.site || "",
       });
     }
   }, [currentEmpresa]);
@@ -66,7 +78,7 @@ export const Form: React.FC = () => {
       setToast({
         open: true,
         status: "error",
-        message: error.message || error, // Garante que a mensagem seja uma string
+        message: error.message || "Erro desconhecido", // Garante que a mensagem seja uma string
       });
       setError(null);
     }
@@ -75,16 +87,26 @@ export const Form: React.FC = () => {
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    if (name === "cep" && value.length === 8) {
+    if (name === "cep" && value.replace(/\D/g, "").length === 8) {
       const cep = value.replace(/\D/g, "");
-      const data: any = await consultaCep(cep);
-      setFormData((prev) => ({
-        ...prev,
-        uf: data.state,
-        cidade: data.city,
-        bairro: data.neighborhood,
-        logradouro: data.street,
-      }));
+      try {
+        const data = await consultaCep(cep);
+        if (data) {
+          setFormData((prev) => ({
+            ...prev,
+            uf: data.state || "",
+            cidade: data.city || "",
+            bairro: data.neighborhood || "",
+            logradouro: data.street || "",
+          }));
+        }
+      } catch (err) {
+        setToast({
+          open: true,
+          status: "error",
+          message: "Erro ao consultar CEP. Verifique o CEP e tente novamente.",
+        });
+      }
     }
 
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -92,7 +114,7 @@ export const Form: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
-      const dataEmpresa: any = {
+      const dataEmpresa = {
         cnpj: formData.cnpj,
         razao_social: formData.razao_social,
         nome_fantasia: formData.nome_fantasia,
@@ -103,6 +125,8 @@ export const Form: React.FC = () => {
         endereco: `${formData.logradouro}, ${formData.numero}, ${formData.complemento}`,
         cidade: formData.cidade,
         uf: formData.uf,
+        inscricao_estadual: formData.inscricao_estadual,
+        site: formData.site,
       };
 
       await addEmpresa(dataEmpresa);
@@ -113,14 +137,12 @@ export const Form: React.FC = () => {
         message: "Empresa cadastrada com sucesso!",
       });
 
-      // Limpa o formulário após o sucesso
-      handleClear();
-    } catch (err) {
-      // Exibe mensagem de erro
+      // handleClear();
+    } catch (err: any) {
       setToast({
         open: true,
         status: "error",
-        message: error?.message || "Erro ao cadastrar a empresa.", // Acessa a propriedade `message` do erro
+        message: err.message || "Erro ao cadastrar a empresa.",
       });
     }
   };
@@ -139,11 +161,18 @@ export const Form: React.FC = () => {
       complemento: "",
       cidade: "",
       uf: "",
+      inscricao_estadual: "",
+      site: "",
     });
   };
 
   const isFormValid = () => {
-    return Object.values(formData).every((value: any) => value.trim() !== "");
+    return Object.values(formData).every((value) => {
+      if (typeof value === "string") {
+        return value.trim() !== "";
+      }
+      return true; // Para campos que não são strings
+    });
   };
 
   return (
@@ -157,7 +186,7 @@ export const Form: React.FC = () => {
         gap={2}
       >
         {/* Campo CNPJ com Máscara */}
-        <Grid item xs={12} sm={6} md={4}>
+        <Box>
           <InputMask
             mask="99.999.999/9999-99"
             value={formData.cnpj}
@@ -171,11 +200,12 @@ export const Form: React.FC = () => {
                 fullWidth
                 required
                 onChange={handleChange}
+                inputRef={cnpjRef} // Usando ref diretamente no TextField
               />
             )}
           </InputMask>
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box>
           <TextField
             label="Razão Social"
             name="razao_social"
@@ -184,8 +214,8 @@ export const Form: React.FC = () => {
             fullWidth
             required
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box>
           <TextField
             label="Nome Fantasia"
             name="nome_fantasia"
@@ -194,8 +224,8 @@ export const Form: React.FC = () => {
             fullWidth
             required
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box>
           <TextField
             label="Email"
             name="email"
@@ -204,8 +234,8 @@ export const Form: React.FC = () => {
             fullWidth
             required
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box>
           <TextField
             label="Telefone"
             name="telefone"
@@ -214,8 +244,8 @@ export const Form: React.FC = () => {
             fullWidth
             required
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box>
           <TextField
             label="CEP"
             name="cep"
@@ -224,8 +254,8 @@ export const Form: React.FC = () => {
             fullWidth
             required
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box>
           <TextField
             label="Bairro"
             name="bairro"
@@ -234,8 +264,8 @@ export const Form: React.FC = () => {
             fullWidth
             required
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box>
           <TextField
             label="Logradouro"
             name="logradouro"
@@ -244,8 +274,8 @@ export const Form: React.FC = () => {
             fullWidth
             required
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box>
           <TextField
             label="Número"
             name="numero"
@@ -254,8 +284,8 @@ export const Form: React.FC = () => {
             fullWidth
             required
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box>
           <TextField
             label="Complemento"
             name="complemento"
@@ -264,8 +294,8 @@ export const Form: React.FC = () => {
             fullWidth
             required
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box>
           <TextField
             label="Cidade"
             name="cidade"
@@ -274,8 +304,8 @@ export const Form: React.FC = () => {
             fullWidth
             required
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        </Box>
+        <Box>
           <TextField
             label="UF"
             name="uf"
@@ -284,7 +314,27 @@ export const Form: React.FC = () => {
             fullWidth
             required
           />
-        </Grid>
+        </Box>
+        <Box>
+          <TextField
+            label="Inscrição Estadual"
+            name="inscricao_estadual"
+            value={formData.inscricao_estadual}
+            onChange={handleChange}
+            fullWidth
+            required
+          />
+        </Box>
+        <Box>
+          <TextField
+            label="Site URL"
+            name="site"
+            value={formData.site}
+            onChange={handleChange}
+            fullWidth
+            required
+          />
+        </Box>
       </Box>
       <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
         <Button
