@@ -1,20 +1,16 @@
 import { LocalAtmRounded } from '@mui/icons-material';
-import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
+import BusinessIcon from '@mui/icons-material/Business';
+import GroupIcon from '@mui/icons-material/Group';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import InventoryIcon from '@mui/icons-material/Inventory';
-import NoteAltRoundedIcon from '@mui/icons-material/NoteAltRounded';
-import Clientes from '../components/pages/Clientes';
+import PersonIcon from '@mui/icons-material/Person';
+import { Empresas } from '../components/pages/Empresas';
 import Home from '../components/pages/Home';
 import Nfe from '../components/pages/nfe';
-import Produtos from '../components/pages/Produtos';
-import Proposta from '../components/pages/Proposal/Index';
-import { MenuLayout } from '../types/TMenu.type';
 import Pessoas from '../components/pages/Pessoas';
-import GroupIcon from '@mui/icons-material/Group';
+import Produtos from '../components/pages/Produtos';
 import Usuario from '../components/pages/Usuarios';
-import PersonIcon from '@mui/icons-material/Person';
-import BusinessIcon from '@mui/icons-material/Business';
-import { Empresas } from '../components/pages/Empresas';
+import { MenuLayout } from '../types/TMenu.type';
 
 export const menuLayout: MenuLayout = [
     {
