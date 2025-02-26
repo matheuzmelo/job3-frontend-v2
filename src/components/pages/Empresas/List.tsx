@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -15,6 +14,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import React, { useState } from "react";
 import { useEmpresasContext } from "../../../context/empresas.context";
 
 interface UserListProps {
