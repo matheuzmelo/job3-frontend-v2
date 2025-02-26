@@ -33,7 +33,7 @@ export const List: React.FC<UserListProps> = ({ setAbaAtual }) => {
   };
 
   const handleChangePage = (
-    event: React.ChangeEvent<unknown>,
+    _,
     newPage: number,
   ) => {
     setPage(newPage);
