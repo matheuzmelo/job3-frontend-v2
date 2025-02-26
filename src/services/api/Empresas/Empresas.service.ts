@@ -1,5 +1,5 @@
 import Api from "..";
-import { decodeJWT, isSuperAdmin } from "../../../Utils";
+import { isSuperAdmin } from "../../../Utils";
 
 const create = async (data: any) => {
   const token = localStorage.getItem("token");

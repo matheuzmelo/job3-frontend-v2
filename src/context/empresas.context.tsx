@@ -2,7 +2,6 @@ import React, { createContext, useEffect } from "react";
 import { EmpresasService } from "../services/api/Empresas/Empresas.service";
 import { CepService } from "../services/api/CEP/cep.service";
 import { DadosCep } from "../types/TCep.type";
-import axios from "axios";
 
 interface Empresa {
   id?: number;
