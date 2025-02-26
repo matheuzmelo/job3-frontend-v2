@@ -1,8 +1,9 @@
 import { Box, Tab, Tabs } from "@mui/material";
+import { useEffect, useState } from "react";
 import { EmpresaProvider } from "../../../context/empresas.context";
+import { isSuperAdmin } from "../../../Utils";
 import { Form } from "./Form";
 import { List } from "./List";
-import { useState } from "react";
 
 interface TabPanelProps {
   children: React.ReactNode;
@@ -26,11 +27,18 @@ const CustomTabPanel = (props: TabPanelProps) => {
 
 export const EmpresasIndex = () => {
   const [abaAtual, setAbaAtual] = useState(0);
+  const [superAdm, setSuperAdm] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log(event);
+  const handleChange = (_, newValue: number) => {
     setAbaAtual(newValue);
   };
+  
+  useEffect(() => {
+    const token = localStorage.getItem('token') || '';
+    setSuperAdm(isSuperAdmin(token));
+    setLoading(false);
+  }, []);
 
   const ContentTabs = [
     {
@@ -42,6 +50,10 @@ export const EmpresasIndex = () => {
       label: "Listar Empresas",
     },
   ];
+
+  if (loading) {
+    return <Box>Carregando...</Box>; // Ou algum componente de loading
+  }
 
   return (
     <Box sx={{ width: "100%", minHeight: "100vh" }}>
@@ -55,12 +67,9 @@ export const EmpresasIndex = () => {
       >
         <Tabs value={abaAtual} onChange={handleChange} aria-label="tabs">
           {ContentTabs.map((tab) => (
-            <Tab
-              key={tab.id}
-              label={tab.label}
-              id={`tab-${tab.id}`}
-              aria-controls={`tabpanel-${tab.id}`}
-            />
+            <Tab key={tab.id} label={`${tab.label}`} sx={{
+              display: !superAdm && tab.id == 1 ? 'none' : 'block'
+            }}/>
           ))}
         </Tabs>
       </Box>
@@ -68,10 +77,11 @@ export const EmpresasIndex = () => {
       <CustomTabPanel value={abaAtual} index={0}>
         <Form />
       </CustomTabPanel>
-      <CustomTabPanel value={abaAtual} index={1}>
-        <List setAbaAtual={setAbaAtual} />
-        {/* <List /> */}
-      </CustomTabPanel>
+      {superAdm && (
+        <CustomTabPanel value={abaAtual} index={1}>
+          <List setAbaAtual={setAbaAtual} />
+        </CustomTabPanel>
+      )}
     </Box>
   );
 };

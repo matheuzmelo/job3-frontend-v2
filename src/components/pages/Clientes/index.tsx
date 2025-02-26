@@ -37,8 +37,7 @@ function handleNavigateProposal(index: number) {
 function ClientesTabs() {
     const { abaAtual, setAbaAtual } = useClienteContext();
 
-    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-        console.log(event)
+    const handleChange = (_, newValue: number) => {
         setAbaAtual(newValue);
     };
 

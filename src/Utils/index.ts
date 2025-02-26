@@ -1,4 +1,4 @@
-export const decodeJWT = (token) => {
+export const decodeJWT = (token: string) => {
   try {
     const base64Url = token.split('.')[1];
     
@@ -12,3 +12,16 @@ export const decodeJWT = (token) => {
     return null;
   }
 };
+
+export const isSuperAdmin = (token: string): boolean | null => {
+  try {
+    const getTokenData = decodeJWT(token);
+
+    if(getTokenData.nivel == 99) return true
+
+    return false
+  } catch( error ) {
+    console.error('Erro ao identificar super admin:', error);
+    return null;
+  }
+}

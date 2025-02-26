@@ -28,14 +28,11 @@ export const List: React.FC<UserListProps> = ({ setAbaAtual }) => {
   const itemsPerPage = 15;
 
   const handleEdit = (empresa: any) => {
-    setCurrentEmpresa(empresa); // Define a empresa atual no contexto
-    setAbaAtual(0); // Muda para a aba do formulário (aba 0)
+    setCurrentEmpresa(empresa);
+    setAbaAtual(0);
   };
 
-  const handleChangePage = (
-    _,
-    newPage: number,
-  ) => {
+  const handleChangePage = (_, newPage: number) => {
     setPage(newPage);
   };
 
@@ -46,12 +43,14 @@ export const List: React.FC<UserListProps> = ({ setAbaAtual }) => {
 
   const filteredEmpresas = Array.isArray(empresas)
     ? empresas.filter((empresa) => {
+        const nomeFantasia = empresa.nome_fantasia?.toLowerCase() || "";
+        const email = empresa.email?.toLowerCase() || "";
+        const razaoSocial = empresa.razao_social?.toLowerCase() || "";
+
         return (
-          empresa.nome_fantasia
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          empresa.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          empresa.razao_social.toLowerCase().includes(searchTerm.toLowerCase())
+          nomeFantasia.includes(searchTerm.toLowerCase()) ||
+          email.includes(searchTerm.toLowerCase()) ||
+          razaoSocial.includes(searchTerm.toLowerCase())
         );
       })
     : [];
