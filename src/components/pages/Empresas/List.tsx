@@ -33,7 +33,7 @@ export const List: React.FC<UserListProps> = ({ setAbaAtual }) => {
   };
 
   const handleChangePage = (
-    event: React.ChangeEvent<unknown>,
+    _,
     newPage: number,
   ) => {
     setPage(newPage);
@@ -44,7 +44,6 @@ export const List: React.FC<UserListProps> = ({ setAbaAtual }) => {
     setPage(1);
   };
 
-  // Verifica se empresas é um array antes de usar .filter()
   const filteredEmpresas = Array.isArray(empresas)
     ? empresas.filter((empresa) => {
         return (

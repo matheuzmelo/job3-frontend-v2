@@ -5,7 +5,7 @@ import { DadosCep } from "../types/TCep.type";
 import axios from "axios";
 
 interface Empresa {
-  id: number;
+  id?: number;
   cnpj: string;
   inscricao_estadual: string;
   razao_social: string;
@@ -13,16 +13,16 @@ interface Empresa {
   email: string;
   site: string;
   telefone: string;
-  cep: string;
-  numero_endereco: any;
-  complemento: any;
-  bairro: string;
+  cep?: string;
+  numero_endereco?: any;
+  complemento?: any;
+  bairro?: string;
   endereco: string;
-  cidade: string;
+  cidade?: string;
   uf: string;
-  ativo: boolean;
-  created_at: string;
-  updated_at: string;
+  ativo?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface EmpresaContextData {

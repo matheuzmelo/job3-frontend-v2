@@ -54,7 +54,7 @@ const getAll = async () => {
   const token = localStorage.getItem("token");
   const options = {
     method: "GET",
-    url: "/empresas",
+    url: "/empresas/all",
     headers: {
       authorization: `Bearer ${token}`
     }
