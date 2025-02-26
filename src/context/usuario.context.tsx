@@ -51,12 +51,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getEmpresas = async () => {
-    const listEmpresas: any[] = []
     const empresas: any = await EmpresasService.getAll();
 
-    listEmpresas.push(empresas.data)
-    if (listEmpresas) {
-      return listEmpresas;
+    if (empresas) {
+      return empresas.data;
     }
   };
 
