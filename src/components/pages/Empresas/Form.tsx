@@ -89,7 +89,6 @@ export const Form: React.FC = () => {
 
     if (name === "cep" && value.replace(/\D/g, "").length === 8) {
       const cep = value.replace(/\D/g, "");
-      console.log(cep)
       try {
         const data = await consultaCep(cep);
         if (data) {

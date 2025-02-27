@@ -1,10 +1,12 @@
-import { SaveAltRounded } from "@mui/icons-material";
+import { SaveAltRounded, Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Box,
   Button,
   CircularProgress,
   Container,
   FormControl,
+  IconButton,
+  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
@@ -13,6 +15,7 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useUserContext } from "../../../context/usuario.context";
+import ToastMessage from "../../organisms/ToastMessage";
 
 export const UserForm: React.FC = () => {
   const { currentUser, addUser, getEmpresas } = useUserContext();
@@ -27,6 +30,13 @@ export const UserForm: React.FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [empresas, setEmpresas] = useState<any[]>([]);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isAdm] = useState(true); // Supondo que você tenha uma forma de definir isso
+
+  // Estados para o ToastMessage
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastStatus, setToastStatus] = useState<"success" | "error" | "warning">("success");
 
   useEffect(() => {
     const fetchEmpresas = async () => {
@@ -66,6 +76,19 @@ export const UserForm: React.FC = () => {
     }
   }, [currentUser, getEmpresas]);
 
+  useEffect(() => {
+    if (!isAdm && currentUser) {
+      setFormData({
+        nome: currentUser.nome,
+        usuario: currentUser.usuario,
+        tenant_id: String(currentUser.tenant_id),
+        email: currentUser.email,
+        senha: currentUser.senha,
+        nivel: Number(currentUser.nivel),
+      });
+    }
+  }, [isAdm, currentUser]);
+
   const handleChange: any = (
     e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>,
   ) => {
@@ -73,18 +96,32 @@ export const UserForm: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name as string]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsLoading(true);
-  
-    addUser({
-      nome: formData.nome,
-      usuario: formData.usuario,
-      tenant_id: String(formData.tenant_id),
-      email: formData.email,
-      senha: formData.senha,
-      nivel: Number(formData.nivel),
-    });
-    setIsLoading(false);
+
+    try {
+      await addUser({
+        nome: formData.nome,
+        usuario: formData.usuario,
+        tenant_id: String(formData.tenant_id),
+        email: formData.email,
+        senha: formData.senha,
+        nivel: Number(formData.nivel),
+      });
+
+      // Exibe toast de sucesso
+      setToastMessage("Usuário salvo com sucesso!");
+      setToastStatus("success");
+      setToastOpen(true);
+    } catch (err) {
+      // Exibe toast de erro
+      setToastMessage("Erro ao salvar usuário.");
+      setToastStatus("error");
+      setToastOpen(true);
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleClear = () => {
@@ -96,6 +133,14 @@ export const UserForm: React.FC = () => {
       senha: "",
       nivel: 0,
     });
+  };
+
+  const handleClickShowPassword = () => {
+    setShowPassword((prev) => !prev);
+  };
+
+  const handleCloseToast = () => {
+    setToastOpen(false);
   };
 
   return (
@@ -111,6 +156,7 @@ export const UserForm: React.FC = () => {
             value={formData.nome}
             onChange={handleChange}
             fullWidth
+            disabled={!isAdm}
           />
         </Box>
         <Box sx={{ width: "100%" }}>
@@ -120,10 +166,11 @@ export const UserForm: React.FC = () => {
             value={formData.usuario}
             onChange={handleChange}
             fullWidth
+            disabled={!isAdm}
           />
         </Box>
         <Box sx={{ width: "100%" }}>
-          <FormControl fullWidth>
+          <FormControl fullWidth disabled={!isAdm}>
             <InputLabel id="empresa-label">Empresa</InputLabel>
             <Select
               labelId="empresa-label"
@@ -154,15 +201,31 @@ export const UserForm: React.FC = () => {
             value={formData.email}
             onChange={handleChange}
             fullWidth
+            disabled={!isAdm}
           />
         </Box>
         <Box sx={{ width: "100%" }}>
           <TextField
             label="Senha"
             name="senha"
+            type={showPassword ? "text" : "password"}
             value={formData.senha}
             onChange={handleChange}
             fullWidth
+            disabled={!isAdm}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
         </Box>
         <Box sx={{ width: "100%" }}>
@@ -173,6 +236,7 @@ export const UserForm: React.FC = () => {
             onChange={handleChange}
             type="number"
             fullWidth
+            disabled={!isAdm}
           />
         </Box>
       </Box>
@@ -199,6 +263,14 @@ export const UserForm: React.FC = () => {
           Limpar
         </Button>
       </Box>
+
+      {/* ToastMessage */}
+      <ToastMessage
+        status={toastStatus}
+        message={toastMessage}
+        open={toastOpen}
+        onClose={handleCloseToast}
+      />
     </Container>
   );
 };

@@ -20,6 +20,7 @@ interface UserContextData {
   addUser: (user: User) => void;
   getEmpresas: () => any;
   isLoading: boolean;
+  getUser: () => any;
 }
 
 const UserContext = createContext<UserContextData | undefined>(undefined);
@@ -34,10 +35,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const getAllUsers = async () => {
     setIsLoading(true);
     const users = await UsuariosService.getAll();
-
+    console.log(users)
     if (users) {
       setIsLoading(false);
       setUsers(users.data);
+      return users.data
     }
   };
   useEffect(() => {
@@ -45,10 +47,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const addUser = async (user: User) => {
-    console.log(user);
+    setIsLoading(false)
     await UsuariosService.create(user);
     setUsers([...users, user]);
+    setIsLoading(true)
   };
+
+  const getUser = async () => {
+    const user = await UsuariosService.getUser()
+    return user
+  }
 
   const getEmpresas = async () => {
     const empresas: any = await EmpresasService.getAll();
@@ -68,6 +76,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         addUser,
         getEmpresas,
         isLoading,
+        getUser
       }}
     >
       {children}

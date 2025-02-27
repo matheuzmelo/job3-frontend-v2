@@ -60,7 +60,7 @@ export const menuLayout: MenuLayout = [
         route: "/usuarios",
         page: <Usuario />,
         icon: <PersonIcon />,
-        permission: 'USUARIOS'
+        permission: undefined
     },
     {
         name: "Empresas",
