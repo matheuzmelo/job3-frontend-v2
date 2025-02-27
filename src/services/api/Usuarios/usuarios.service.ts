@@ -33,8 +33,21 @@ const getAll = async () => {
   }
 }
 
-const getById = async () => {
+const getUser = async () => {
+  const token = localStorage.getItem('token');
 
+  const options = {
+    method: 'GET',
+    url: '/usuarios/dados-usuario',
+    headers: {authorization: `Bearer ${token}`}
+  };
+  
+  try {
+    const { data } = await Api.request(options);
+    return data
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 const updateById = async () => {
@@ -48,7 +61,7 @@ const deleteById = async () => {
 export const UsuariosService = {
   create,
   getAll,
-  getById,
+  getUser,
   updateById,
   deleteById
 }

@@ -10,14 +10,16 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useUserContext } from "../../../context/usuario.context";
+import { isSuperAdmin } from "../../../Utils";
 
 export const UserForm: React.FC = () => {
-  const { currentUser, addUser, getEmpresas } = useUserContext();
+  const { currentUser, addUser, getEmpresas, getUser } = useUserContext();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     nome: "",
@@ -31,66 +33,84 @@ export const UserForm: React.FC = () => {
   const [empresas, setEmpresas] = useState<any[]>([]);
   const [showPassword, setShowPassword] = useState(false);
 
+  const token = useMemo(() => localStorage.getItem("token") || "", []);
+  const isAdm = useMemo(() => isSuperAdmin(token), [token]);
+
+  const fetchEmpresas = useCallback(async () => {
+    try {
+      const empresasList = await getEmpresas();
+      if (Array.isArray(empresasList)) {
+        setEmpresas(empresasList);
+      } else {
+        setError("Dados de empresas inválidos.");
+      }
+    } catch (err) {
+      setError("Erro ao carregar empresas.");
+      console.error(err);
+    }
+  }, [getEmpresas]);
+
   useEffect(() => {
-    const fetchEmpresas = async () => {
-      try {
-        const empresasList = await getEmpresas();
-        if (Array.isArray(empresasList)) {
-          setEmpresas(empresasList); 
-        } else {
-          setError("Dados de empresas inválidos.");
+    fetchEmpresas();
+  }, [fetchEmpresas]);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!isAdm) {
+        const {data} = await getUser();
+        console.log(data)
+        if (data) {
+          setFormData({
+            nome: data.nome,
+            usuario: data.usuario,
+            tenant_id: String(data.tenant_id),
+            email: data.email,
+            senha: data.senha,
+            nivel: Number(data.nivel),
+          });
         }
-      } catch (err) {
-        setError("Erro ao carregar empresas."); 
-        console.error(err);
       }
     };
 
-    fetchEmpresas();
+    fetchUserData();
+  }, [isAdm, currentUser, getUser]);
 
-    if (currentUser) {
-      setFormData({
-        nome: currentUser.nome,
-        usuario: currentUser.usuario,
-        tenant_id: String(currentUser.tenant_id),
-        email: currentUser.email,
-        senha: currentUser.senha,
-        nivel: Number(currentUser.nivel),
-      });
-    } else {
-      setFormData({
-        nome: "",
-        usuario: "",
-        tenant_id: "",
-        email: "",
-        senha: "",
-        nivel: 0,
-      });
-    }
-  }, [currentUser, getEmpresas]);
+  const handleChange: any = useCallback(
+    (e: any) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name as string]: value }));
+    },
+    []
+  );
 
-  const handleChange: any = (
-    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name as string]: value }));
-  };
+  const handleSelectChange = useCallback(
+    (e: SelectChangeEvent<string>) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    },
+    []
+  );
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(async () => {
     setIsLoading(true);
-  
-    addUser({
-      nome: formData.nome,
-      usuario: formData.usuario,
-      tenant_id: String(formData.tenant_id),
-      email: formData.email,
-      senha: formData.senha,
-      nivel: Number(formData.nivel),
-    });
-    setIsLoading(false);
-  };
+    try {
+      await addUser({
+        nome: formData.nome,
+        usuario: formData.usuario,
+        tenant_id: String(formData.tenant_id),
+        email: formData.email,
+        senha: formData.senha,
+        nivel: Number(formData.nivel),
+      });
+    } catch (err) {
+      setError("Erro ao salvar usuário.");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [addUser, formData]);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setFormData({
       nome: "",
       usuario: "",
@@ -99,25 +119,35 @@ export const UserForm: React.FC = () => {
       senha: "",
       nivel: 0,
     });
-  };
+  }, []);
 
-  const handleClickShowPassword = () => {
+  const handleClickShowPassword = useCallback(() => {
     setShowPassword((prev) => !prev);
-  };
+  }, []);
+
+  const isFormValid = useMemo(
+    () => formData.nome && formData.usuario && formData.email,
+    [formData]
+  );
 
   return (
     <Container maxWidth="xl">
       <Typography variant="h5" sx={{ mb: 2 }}>
         Cadastro de Usuário
       </Typography>
-      <Box display={'grid'} gridTemplateColumns={'repeat(auto-fit, minmax(400px, 1fr))'} gap={2}>
+      <Box
+        display={"grid"}
+        gridTemplateColumns={'repeat(auto-fill ,minmax(400px, 1fr))'}
+        gap={2}
+      >
         <Box sx={{ width: "100%" }}>
           <TextField
             label="Nome"
             name="nome"
             value={formData.nome}
-            onChange={handleChange}
             fullWidth
+            onChange={handleChange}
+            disabled={!isAdm}
           />
         </Box>
         <Box sx={{ width: "100%" }}>
@@ -127,6 +157,7 @@ export const UserForm: React.FC = () => {
             value={formData.usuario}
             onChange={handleChange}
             fullWidth
+            disabled={!isAdm}
           />
         </Box>
         <Box sx={{ width: "100%" }}>
@@ -136,9 +167,10 @@ export const UserForm: React.FC = () => {
               labelId="empresa-label"
               id="empresa"
               name="tenant_id"
-              value={formData.tenant_id}
+              value={formData.tenant_id} // como pego a empresa do usuário sem destroir o front (ainda mais)?
               onChange={handleChange}
               label="Empresa"
+              disabled={!isAdm}
             >
               {error ? (
                 <MenuItem value="">Erro ao carregar empresas</MenuItem>
@@ -161,6 +193,7 @@ export const UserForm: React.FC = () => {
             value={formData.email}
             onChange={handleChange}
             fullWidth
+            disabled={!isAdm}
           />
         </Box>
         <Box sx={{ width: "100%" }}>
@@ -171,6 +204,7 @@ export const UserForm: React.FC = () => {
             value={formData.senha}
             onChange={handleChange}
             fullWidth
+            disabled={!isAdm}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -194,6 +228,7 @@ export const UserForm: React.FC = () => {
             onChange={handleChange}
             type="number"
             fullWidth
+            disabled={!isAdm}
           />
         </Box>
       </Box>
@@ -209,9 +244,7 @@ export const UserForm: React.FC = () => {
             )
           }
           onClick={handleSubmit}
-          disabled={
-            isLoading || !formData.nome || !formData.usuario || !formData.email
-          }
+          disabled={isLoading || !isFormValid}
           sx={{ opacity: isLoading ? 0.7 : 1 }}
         >
           {isLoading ? "Salvando..." : "Salvar Usuário"}
