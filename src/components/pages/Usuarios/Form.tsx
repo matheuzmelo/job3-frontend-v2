@@ -1,10 +1,12 @@
-import { SaveAltRounded } from "@mui/icons-material";
+import { SaveAltRounded, Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Box,
   Button,
   CircularProgress,
   Container,
   FormControl,
+  IconButton,
+  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
@@ -27,6 +29,7 @@ export const UserForm: React.FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [empresas, setEmpresas] = useState<any[]>([]);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const fetchEmpresas = async () => {
@@ -98,6 +101,10 @@ export const UserForm: React.FC = () => {
     });
   };
 
+  const handleClickShowPassword = () => {
+    setShowPassword((prev) => !prev);
+  };
+
   return (
     <Container maxWidth="xl">
       <Typography variant="h5" sx={{ mb: 2 }}>
@@ -160,9 +167,23 @@ export const UserForm: React.FC = () => {
           <TextField
             label="Senha"
             name="senha"
+            type={showPassword ? "text" : "password"}
             value={formData.senha}
             onChange={handleChange}
             fullWidth
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
         </Box>
         <Box sx={{ width: "100%" }}>
