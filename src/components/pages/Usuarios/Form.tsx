@@ -10,16 +10,15 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  SelectChangeEvent,
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useUserContext } from "../../../context/usuario.context";
-import { isSuperAdmin } from "../../../Utils";
+import ToastMessage from "../../organisms/ToastMessage";
 
 export const UserForm: React.FC = () => {
-  const { currentUser, addUser, getEmpresas, getUser } = useUserContext();
+  const { currentUser, addUser, getEmpresas } = useUserContext();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     nome: "",
@@ -32,67 +31,74 @@ export const UserForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [empresas, setEmpresas] = useState<any[]>([]);
   const [showPassword, setShowPassword] = useState(false);
+  const [isAdm] = useState(true); // Supondo que você tenha uma forma de definir isso
 
-  const token = useMemo(() => localStorage.getItem("token") || "", []);
-  const isAdm = useMemo(() => isSuperAdmin(token), [token]);
-
-  const fetchEmpresas = useCallback(async () => {
-    try {
-      const empresasList = await getEmpresas();
-      if (Array.isArray(empresasList)) {
-        setEmpresas(empresasList);
-      } else {
-        setError("Dados de empresas inválidos.");
-      }
-    } catch (err) {
-      setError("Erro ao carregar empresas.");
-      console.error(err);
-    }
-  }, [getEmpresas]);
+  // Estados para o ToastMessage
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastStatus, setToastStatus] = useState<"success" | "error" | "warning">("success");
 
   useEffect(() => {
-    fetchEmpresas();
-  }, [fetchEmpresas]);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!isAdm) {
-        const {data} = await getUser();
-        console.log(data)
-        if (data) {
-          setFormData({
-            nome: data.nome,
-            usuario: data.usuario,
-            tenant_id: String(data.tenant_id),
-            email: data.email,
-            senha: data.senha,
-            nivel: Number(data.nivel),
-          });
+    const fetchEmpresas = async () => {
+      try {
+        const empresasList = await getEmpresas();
+        if (Array.isArray(empresasList)) {
+          setEmpresas(empresasList); 
+        } else {
+          setError("Dados de empresas inválidos.");
         }
+      } catch (err) {
+        setError("Erro ao carregar empresas."); 
+        console.error(err);
       }
     };
 
-    fetchUserData();
-  }, [isAdm, currentUser, getUser]);
+    fetchEmpresas();
 
-  const handleChange: any = useCallback(
-    (e: any) => {
-      const { name, value } = e.target;
-      setFormData((prev) => ({ ...prev, [name as string]: value }));
-    },
-    []
-  );
+    if (currentUser) {
+      setFormData({
+        nome: currentUser.nome,
+        usuario: currentUser.usuario,
+        tenant_id: String(currentUser.tenant_id),
+        email: currentUser.email,
+        senha: currentUser.senha,
+        nivel: Number(currentUser.nivel),
+      });
+    } else {
+      setFormData({
+        nome: "",
+        usuario: "",
+        tenant_id: "",
+        email: "",
+        senha: "",
+        nivel: 0,
+      });
+    }
+  }, [currentUser, getEmpresas]);
 
-  const handleSelectChange = useCallback(
-    (e: SelectChangeEvent<string>) => {
-      const { name, value } = e.target;
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    },
-    []
-  );
+  useEffect(() => {
+    if (!isAdm && currentUser) {
+      setFormData({
+        nome: currentUser.nome,
+        usuario: currentUser.usuario,
+        tenant_id: String(currentUser.tenant_id),
+        email: currentUser.email,
+        senha: currentUser.senha,
+        nivel: Number(currentUser.nivel),
+      });
+    }
+  }, [isAdm, currentUser]);
 
-  const handleSubmit = useCallback(async () => {
+  const handleChange: any = (
+    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>,
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name as string]: value }));
+  };
+
+  const handleSubmit = async () => {
     setIsLoading(true);
+
     try {
       await addUser({
         nome: formData.nome,
@@ -102,15 +108,23 @@ export const UserForm: React.FC = () => {
         senha: formData.senha,
         nivel: Number(formData.nivel),
       });
+
+      // Exibe toast de sucesso
+      setToastMessage("Usuário salvo com sucesso!");
+      setToastStatus("success");
+      setToastOpen(true);
     } catch (err) {
-      setError("Erro ao salvar usuário.");
+      // Exibe toast de erro
+      setToastMessage("Erro ao salvar usuário.");
+      setToastStatus("error");
+      setToastOpen(true);
       console.error(err);
     } finally {
       setIsLoading(false);
     }
-  }, [addUser, formData]);
+  };
 
-  const handleClear = useCallback(() => {
+  const handleClear = () => {
     setFormData({
       nome: "",
       usuario: "",
@@ -119,34 +133,29 @@ export const UserForm: React.FC = () => {
       senha: "",
       nivel: 0,
     });
-  }, []);
+  };
 
-  const handleClickShowPassword = useCallback(() => {
+  const handleClickShowPassword = () => {
     setShowPassword((prev) => !prev);
-  }, []);
+  };
 
-  const isFormValid = useMemo(
-    () => formData.nome && formData.usuario && formData.email,
-    [formData]
-  );
+  const handleCloseToast = () => {
+    setToastOpen(false);
+  };
 
   return (
     <Container maxWidth="xl">
       <Typography variant="h5" sx={{ mb: 2 }}>
         Cadastro de Usuário
       </Typography>
-      <Box
-        display={"grid"}
-        gridTemplateColumns={'repeat(auto-fill ,minmax(400px, 1fr))'}
-        gap={2}
-      >
+      <Box display={'grid'} gridTemplateColumns={'repeat(auto-fit, minmax(400px, 1fr))'} gap={2}>
         <Box sx={{ width: "100%" }}>
           <TextField
             label="Nome"
             name="nome"
             value={formData.nome}
-            fullWidth
             onChange={handleChange}
+            fullWidth
             disabled={!isAdm}
           />
         </Box>
@@ -161,16 +170,15 @@ export const UserForm: React.FC = () => {
           />
         </Box>
         <Box sx={{ width: "100%" }}>
-          <FormControl fullWidth>
+          <FormControl fullWidth disabled={!isAdm}>
             <InputLabel id="empresa-label">Empresa</InputLabel>
             <Select
               labelId="empresa-label"
               id="empresa"
               name="tenant_id"
-              value={formData.tenant_id} // como pego a empresa do usuário sem destroir o front (ainda mais)?
+              value={formData.tenant_id}
               onChange={handleChange}
               label="Empresa"
-              disabled={!isAdm}
             >
               {error ? (
                 <MenuItem value="">Erro ao carregar empresas</MenuItem>
@@ -244,7 +252,9 @@ export const UserForm: React.FC = () => {
             )
           }
           onClick={handleSubmit}
-          disabled={isLoading || !isFormValid}
+          disabled={
+            isLoading || !formData.nome || !formData.usuario || !formData.email
+          }
           sx={{ opacity: isLoading ? 0.7 : 1 }}
         >
           {isLoading ? "Salvando..." : "Salvar Usuário"}
@@ -253,6 +263,14 @@ export const UserForm: React.FC = () => {
           Limpar
         </Button>
       </Box>
+
+      {/* ToastMessage */}
+      <ToastMessage
+        status={toastStatus}
+        message={toastMessage}
+        open={toastOpen}
+        onClose={handleCloseToast}
+      />
     </Container>
   );
 };
