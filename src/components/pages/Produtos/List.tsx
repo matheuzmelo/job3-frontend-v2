@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useProdutoContext } from '../../../context/produtos.context';
+import { useProdutoContext } from '../../../contexts/produtos.context';
 import { ProdutosService } from '../../../services/api/Produtos/produtos.service';
 
 export const List: React.FC = () => {

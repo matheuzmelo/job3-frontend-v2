@@ -15,7 +15,7 @@ import {
     Typography
 } from '@mui/material';
 import React from 'react';
-import { useUserContext } from '../../../context/usuario.context';
+import { useUserContext } from '../../../contexts/usuario.context';
 
 interface UserListProps {
     setAbaAtual: (value: number) => void; // Prop para mudar a aba ativa

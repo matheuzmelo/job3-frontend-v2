@@ -1,4 +1,6 @@
 import { createContext, useContext, useState } from 'react';
+import { DadosCep } from '../types/TCep.type';
+import { getDataCep } from '../Utils';
 
 export interface Pessoa {
   id: number;
@@ -18,8 +20,11 @@ export interface Pessoa {
 interface PessoaContextProps {
   pessoaAtual: Pessoa | null;
   setPessoaAtual: (pessoa: Pessoa | null) => void;
+  consultaCep: (cep: string) => Promise<DadosCep | undefined>;
   abaAtual: number;
   setAbaAtual: (value: number) => void;
+  error,
+  setError
 }
 
 const PessoaContext = createContext<PessoaContextProps | undefined>(undefined);
@@ -27,9 +32,20 @@ const PessoaContext = createContext<PessoaContextProps | undefined>(undefined);
 export const PessoaProvider = ({ children }: any) => {
   const [pessoaAtual, setPessoaAtual] = useState<Pessoa | null>(null);
   const [abaAtual, setAbaAtual] = useState<number>(0);
+  const [error, setError] = useState<any>()
+
+
+  const consultaCep = async (cep: string): Promise<DadosCep | undefined> => {
+      try {
+        const dados = await getDataCep(cep);
+        return dados;
+      } catch (err) {
+        setError(err);
+      }
+    };
 
   return (
-    <PessoaContext.Provider value={{ pessoaAtual, setPessoaAtual, abaAtual, setAbaAtual }}>
+    <PessoaContext.Provider value={{ pessoaAtual, setPessoaAtual, abaAtual, setAbaAtual, error, setError, consultaCep}}>
       {children}
     </PessoaContext.Provider>
   );

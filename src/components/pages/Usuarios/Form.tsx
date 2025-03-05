@@ -14,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useUserContext } from "../../../context/usuario.context";
+import { useUserContext } from "../../../contexts/usuario.context";
 import ToastMessage from "../../organisms/ToastMessage";
 
 export const UserForm: React.FC = () => {

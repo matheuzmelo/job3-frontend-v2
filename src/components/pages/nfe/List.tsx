@@ -13,7 +13,7 @@ import {
     Box
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { useNfeContext } from '../../../context/nfe.context';
+import { useNfeContext } from '../../../contexts/nfe.context';
 import { NotasFicaisService } from '../../../services/api/NotasFiscais/nfe.service';
 
 export const List: React.FC = () => {

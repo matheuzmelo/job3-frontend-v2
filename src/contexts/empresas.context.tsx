@@ -1,7 +1,7 @@
 import React, { createContext, useEffect } from "react";
 import { EmpresasService } from "../services/api/Empresas/Empresas.service";
-import { CepService } from "../services/api/CEP/cep.service";
 import { DadosCep } from "../types/TCep.type";
+import { getDataCep } from "../Utils";
 
 interface Empresa {
   id?: number;
@@ -35,6 +35,7 @@ interface EmpresaContextData {
   setCurrentEmpresa: (empresa: Empresa | null) => void;
   setError: (error: any) => any;
   error: any;
+  getEmpresa: (token: string) => Promise<Empresa>;
 }
 
 const EmpresasContext = createContext<EmpresaContextData | undefined>(
@@ -68,25 +69,30 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
     getEmpresas();
   }, []);
 
+  const getEmpresa = async (token) => {
+
+  }
+
   const addEmpresa = async (empresa: Empresa) => {
     try {
       setIsLoading(true);
       const response: any = await EmpresasService.create(empresa);
       if (response.success) {
-        setEmpresas([...empresas, response.data]);
+        setEmpresas((prevEmpresas) => [...prevEmpresas, response.data]);
         setIsLoading(false);
-        return;
+        return response.data;
       }
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       setError(error);
+      throw error;
     }
   };
 
   const consultaCep = async (cep: string): Promise<DadosCep | undefined> => {
     try {
-      const dados = await CepService.getCepData(cep);
+      const dados = await getDataCep(cep);
       return dados;
     } catch (error) {
       setError(error);
@@ -100,6 +106,7 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
         setEmpresas,
         addEmpresa,
         getEmpresas,
+        getEmpresa,
         isLoading,
         consultaCep,
         currentEmpresa,

@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import InputMask from "react-input-mask";
-import { useEmpresasContext } from "../../../context/empresas.context";
+import { useEmpresasContext } from "../../../contexts/empresas.context";
 import ToastMessage from "../../organisms/ToastMessage";
 
 export const Form: React.FC = () => {
@@ -40,14 +40,12 @@ export const Form: React.FC = () => {
 
   const cnpjRef = useRef<HTMLInputElement>(null);
 
-  // Estado para controlar o ToastMessage
   const [toast, setToast] = useState({
     open: false,
     status: "success" as "success" | "error",
     message: "",
   });
 
-  // Fecha o ToastMessage
   const handleCloseToast = () => {
     setToast((prev) => ({ ...prev, open: false }));
   };

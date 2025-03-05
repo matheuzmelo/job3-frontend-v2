@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import { ClienteProvider, useClienteContext } from '../../../context/clientes.context';
+import { ClienteProvider, useClienteContext } from '../../../contexts/clientes.context';
 import { Form } from './Form';
 import { List } from './List';
 

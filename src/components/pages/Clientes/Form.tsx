@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import InputMask from 'react-input-mask';
-import { useClienteContext } from '../../../context/clientes.context';
+import { useClienteContext } from '../../../contexts/clientes.context';
 
 export const Form = () => {
   const { clienteAtual }: any = useClienteContext();
