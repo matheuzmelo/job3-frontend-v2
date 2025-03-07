@@ -6,7 +6,7 @@ import {
     Typography
 } from '@mui/material';
 import React from 'react';
-import { Cliente, useClienteContext } from '../../../context/clientes.context';
+import { Cliente, useClienteContext } from '../../../contexts/clientes.context';
 
 export const List: React.FC = () => {
     const { setClienteAtual, setAbaAtual } = useClienteContext();

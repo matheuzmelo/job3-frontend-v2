@@ -9,12 +9,12 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import InputMask from 'react-input-mask';
-import { usePessoaContext } from '../../../context/pessoas.context';
+import { usePessoaContext } from '../../../contexts/pessoas.context';
 import { PessoasService } from '../../../services/api/Pessoas/pessoas.service';
 import ToastMessage from '../../organisms/ToastMessage';
 
 export const Form = () => {
-  const { pessoaAtual }: any = usePessoaContext();
+  const { pessoaAtual, consultaCep }: any = usePessoaContext();
   const [openToast, setOpenToast] = useState(false);
   const [toastStatus, setToastStatus] = useState<"success" | "alert" | "warn">(
     "success"
@@ -36,7 +36,7 @@ export const Form = () => {
   });
 
   const [cpfCnpjMask, setCpfCnpjMask] = useState('999.999.999-99');
-  const [isLoading, setIsLoading] = useState(false); // Estado para controlar o loading
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (pessoaAtual) {
@@ -46,16 +46,40 @@ export const Form = () => {
     }
   }, [pessoaAtual]);
 
-  const handleChange = (e) => {
+  
+
+  const handleChange = async (e) => {
     const { name, value } = e.target;
 
     if (name === 'cpfCnpj') {
+      console.log(name)
       const onlyNumbers = value.replace(/\D/g, '');
+      console.log(onlyNumbers)
       setCpfCnpjMask(
         onlyNumbers.length > 11
           ? '99.999.999/9999-99'
-          : '999.999.999-99'
+          : '999.999.999-999'
       );
+    }
+
+    if (name === "zip" && value.replace(/\D/g, "").length === 8) {
+      const cep = value.replace(/\D/g, "");
+      try {
+        const data = await consultaCep(cep);
+        if (data) {
+          setFormData((prev) => ({
+            ...prev,
+            uf: data.state || "",
+            city: data.city || "",
+            neighborhood: data.neighborhood || "",
+            address: data.street || "",
+          }));
+        }
+      } catch (err) {
+        setMessage("Erro ao consultar CEP. Verifique o CEP e tente novamente.")
+        setToastStatus("warn")
+        setOpenToast(true);
+      }
     }
 
     setFormData((prevData) => ({

@@ -1,11 +1,14 @@
+import { CepService } from "../services/api/CEP/cep.service";
+import { DadosCep } from "../types/TCep.type";
+
 export const decodeJWT = (token: string) => {
   try {
     const base64Url = token.split('.')[1];
-    
+
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    
+
     const payload = JSON.parse(atob(base64));
-    
+
     return payload;
   } catch (error) {
     console.error('Erro ao decodificar o token:', error);
@@ -13,7 +16,7 @@ export const decodeJWT = (token: string) => {
   }
 };
 
-export const isSuperAdmin = (token: string): boolean | null => {
+export const isSuperAdmin = (token: string): boolean => {
   try {
     const getTokenData = decodeJWT(token);
 
@@ -22,6 +25,15 @@ export const isSuperAdmin = (token: string): boolean | null => {
     return false
   } catch( error ) {
     console.error('Erro ao identificar super admin:', error);
-    return null;
+    return false;
   }
 }
+
+export const getDataCep = async (cep: string): Promise<DadosCep | undefined | any> => {
+  try {
+    const dados = await CepService.getCepData(cep);
+    return dados;
+  } catch (error) {
+    return error;
+  }
+};

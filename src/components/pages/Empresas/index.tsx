@@ -1,6 +1,6 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import { useEffect, useState } from "react";
-import { EmpresaProvider } from "../../../context/empresas.context";
+import { EmpresaProvider } from "../../../contexts/empresas.context";
 import { isSuperAdmin } from "../../../Utils";
 import { Form } from "./Form";
 import { List } from "./List";
@@ -33,7 +33,7 @@ export const EmpresasIndex = () => {
   const handleChange = (_, newValue: number) => {
     setAbaAtual(newValue);
   };
-  
+
   useEffect(() => {
     const token = localStorage.getItem('token') || '';
     setSuperAdm(isSuperAdmin(token));

@@ -8,7 +8,7 @@ import {
     Typography
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { useProdutoContext } from '../../../context/produtos.context';
+import { useProdutoContext } from '../../../contexts/produtos.context';
 import { ProdutosService } from '../../../services/api/Produtos/produtos.service';
 import ToastMessage from '../../organisms/ToastMessage';
 import { SaveAltRounded } from '@mui/icons-material';

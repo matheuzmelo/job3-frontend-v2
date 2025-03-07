@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import { Form } from './Form';
-import { PessoaProvider, usePessoaContext } from '../../../context/pessoas.context';
+import { PessoaProvider, usePessoaContext } from '../../../contexts/pessoas.context';
 import { List } from './List';
 
 interface ITabPanelProps {

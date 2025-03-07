@@ -1,7 +1,7 @@
 import React, { createContext, useEffect } from "react";
 import { EmpresasService } from "../services/api/Empresas/Empresas.service";
-import { CepService } from "../services/api/CEP/cep.service";
 import { DadosCep } from "../types/TCep.type";
+import { getDataCep, isSuperAdmin } from "../Utils";
 
 interface Empresa {
   id?: number;
@@ -52,6 +52,12 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
   const [error, setError] = React.useState<any>(null);
 
   const getEmpresas = async () => {
+
+    const token = localStorage.getItem('token') || ``
+    const adm = isSuperAdmin(token)
+
+    if(!adm) return
+
     try {
       setIsLoading(true);
       const response = await EmpresasService.getAll();
@@ -68,25 +74,28 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
     getEmpresas();
   }, []);
 
+
+
   const addEmpresa = async (empresa: Empresa) => {
     try {
       setIsLoading(true);
       const response: any = await EmpresasService.create(empresa);
       if (response.success) {
-        setEmpresas([...empresas, response.data]);
+        setEmpresas((prevEmpresas) => [...prevEmpresas, response.data]);
         setIsLoading(false);
-        return;
+        return response.data;
       }
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       setError(error);
+      throw error;
     }
   };
 
   const consultaCep = async (cep: string): Promise<DadosCep | undefined> => {
     try {
-      const dados = await CepService.getCepData(cep);
+      const dados = await getDataCep(cep);
       return dados;
     } catch (error) {
       setError(error);

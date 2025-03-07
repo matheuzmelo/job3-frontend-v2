@@ -14,8 +14,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
-import { useEmpresasContext } from "../../../context/empresas.context";
+import React, { useEffect, useState } from "react";
+import { useEmpresasContext } from "../../../contexts/empresas.context";
+import { isSuperAdmin } from "../../../Utils";
 
 interface UserListProps {
   setAbaAtual: (value: number) => void; // Prop para mudar a aba ativa
@@ -26,6 +27,11 @@ export const List: React.FC<UserListProps> = ({ setAbaAtual }) => {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const itemsPerPage = 15;
+  const [showCollumn, setShowCollumn] = useState(true)
+
+  useEffect(() => {
+    setShowCollumn(isSuperAdmin(localStorage.getItem('token') || ''))
+  }, [])
 
   const handleEdit = (empresa: any) => {
     setCurrentEmpresa(empresa);
@@ -88,7 +94,7 @@ export const List: React.FC<UserListProps> = ({ setAbaAtual }) => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Nome Fantasia</TableCell>
+                  {showCollumn ? <TableCell>Nome Fantasia</TableCell> : ''}
                   <TableCell>Razão Social</TableCell>
                   <TableCell>Email</TableCell>
                   <TableCell>Ações</TableCell>

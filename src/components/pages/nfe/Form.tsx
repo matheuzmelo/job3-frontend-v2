@@ -26,7 +26,7 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React, { useEffect, useState } from "react";
-import { useNfeContext } from "../../../context/nfe.context";
+import { useNfeContext } from "../../../contexts/nfe.context";
 import { EmpresasService } from "../../../services/api/Empresas/Empresas.service";
 import { NotasFicaisService } from "../../../services/api/NotasFiscais/nfe.service";
 import { PessoasService } from "../../../services/api/Pessoas/pessoas.service";

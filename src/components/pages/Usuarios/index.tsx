@@ -1,8 +1,8 @@
 import { Box, Tab, Tabs } from '@mui/material';
 import React, { useState } from 'react';
-import { UserProvider } from '../../../context/usuario.context';
+import { UserProvider } from '../../../contexts/usuario.context';
 import { UserForm } from './Form';
-import { UserList } from './List';
+import { List } from './List';
 
 interface TabPanelProps {
     children: React.ReactNode;
@@ -56,7 +56,7 @@ const UserIndex: React.FC = () => {
                 <UserForm />
             </CustomTabPanel>
             <CustomTabPanel value={abaAtual} index={1}>
-                <UserList setAbaAtual={setAbaAtual} />
+                <List setAbaAtual={setAbaAtual} />
             </CustomTabPanel>
         </Box>
     );
