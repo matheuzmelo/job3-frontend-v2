@@ -35,7 +35,6 @@ interface EmpresaContextData {
   setCurrentEmpresa: (empresa: Empresa | null) => void;
   setError: (error: any) => any;
   error: any;
-  getEmpresa: (token: string) => Promise<Empresa>;
 }
 
 const EmpresasContext = createContext<EmpresaContextData | undefined>(
@@ -75,9 +74,7 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
     getEmpresas();
   }, []);
 
-  const getEmpresa = async (token) => {
 
-  }
 
   const addEmpresa = async (empresa: Empresa) => {
     try {
@@ -112,7 +109,6 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
         setEmpresas,
         addEmpresa,
         getEmpresas,
-        getEmpresa,
         isLoading,
         consultaCep,
         currentEmpresa,
