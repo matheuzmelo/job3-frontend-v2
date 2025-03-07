@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { UsuariosService } from "../services/api/Usuarios/usuarios.service";
 import { EmpresasService } from "../services/api/Empresas/Empresas.service";
+import { isSuperAdmin } from "../Utils";
 
 interface User {
   id?: number;
@@ -10,6 +11,7 @@ interface User {
   email: string;
   senha: string;
   nivel: number;
+  created_at?: string;
 }
 
 interface UserContextData {
@@ -33,36 +35,60 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const getAllUsers = async () => {
+    const token = localStorage.getItem('token') || ``;
+    const adm = isSuperAdmin(token)
+    console.log(adm)
+    if(!adm) return
+
     setIsLoading(true);
-    const users = await UsuariosService.getAll();
-    console.log(users)
-    if (users) {
+    try {
+      const { data } = await UsuariosService.getAll();
+      const dataSorted = data.sort((itemA, itemB) => {
+        if (itemA.created_at && itemB.created_at) {
+          if (itemA.created_at > itemB.created_at) return -1;
+          if (itemA.created_at < itemB.created_at) return 1;
+        }
+        return 0;
+      });
+      setUsers(dataSorted);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    } finally {
       setIsLoading(false);
-      setUsers(users.data);
-      return users.data
     }
   };
+
   useEffect(() => {
     getAllUsers();
   }, []);
 
   const addUser = async (user: User) => {
-    setIsLoading(false)
-    await UsuariosService.create(user);
-    setUsers([...users, user]);
-    setIsLoading(true)
+    setIsLoading(true);
+    try {
+      await UsuariosService.create(user);
+      await getAllUsers(); // Atualiza a lista de usuários após adicionar um novo
+    } catch (error) {
+      console.error("Failed to add user:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getUser = async () => {
-    const user = await UsuariosService.getUser()
-    return user
-  }
+    try {
+      const user = await UsuariosService.getUser();
+      return user;
+    } catch (error) {
+      console.error("Failed to fetch user:", error);
+    }
+  };
 
   const getEmpresas = async () => {
-    const empresas: any = await EmpresasService.getAll();
-
-    if (empresas) {
+    try {
+      const empresas = await EmpresasService.getAll();
       return empresas.data;
+    } catch (error) {
+      console.error("Failed to fetch empresas:", error);
     }
   };
 
@@ -76,7 +102,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         addUser,
         getEmpresas,
         isLoading,
-        getUser
+        getUser,
       }}
     >
       {children}

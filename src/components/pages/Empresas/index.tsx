@@ -33,7 +33,7 @@ export const EmpresasIndex = () => {
   const handleChange = (_, newValue: number) => {
     setAbaAtual(newValue);
   };
-  
+
   useEffect(() => {
     const token = localStorage.getItem('token') || '';
     setSuperAdm(isSuperAdmin(token));

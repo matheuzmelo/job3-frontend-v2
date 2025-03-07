@@ -1,7 +1,7 @@
 import React, { createContext, useEffect } from "react";
 import { EmpresasService } from "../services/api/Empresas/Empresas.service";
 import { DadosCep } from "../types/TCep.type";
-import { getDataCep } from "../Utils";
+import { getDataCep, isSuperAdmin } from "../Utils";
 
 interface Empresa {
   id?: number;
@@ -53,6 +53,12 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
   const [error, setError] = React.useState<any>(null);
 
   const getEmpresas = async () => {
+
+    const token = localStorage.getItem('token') || ``
+    const adm = isSuperAdmin(token)
+
+    if(!adm) return
+
     try {
       setIsLoading(true);
       const response = await EmpresasService.getAll();

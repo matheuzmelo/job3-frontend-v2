@@ -39,21 +39,21 @@ export const menuLayout: MenuLayout = [
         route: "/produtos",
         page: <Produtos />,
         icon: <InventoryIcon />,
-        permission: 'PRODUTOS',
+        permission: undefined,
     },
     {
         name: "Notas Fiscais",
         route: "/notas-fiscais",
         page: <Nfe />,
         icon: <LocalAtmRounded />,
-        permission: 'NOTAS_FISCAIS',
+        permission: undefined,
     },
     {
         name: "Pessoas",
         route: "/pessoas",
         page: <Pessoas />,
         icon: <GroupIcon />,
-        permission: 'PESSOAS'
+        permission: undefined
     },
     {
         name: "Usuários",
@@ -67,6 +67,6 @@ export const menuLayout: MenuLayout = [
         route: "/empresas",
         page: <Empresas />,
         icon: <BusinessIcon />,
-        permission: 'EMPRESAS'
+        permission: undefined
     }
 ]
