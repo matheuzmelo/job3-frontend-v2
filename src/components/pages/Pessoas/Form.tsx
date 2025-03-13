@@ -7,13 +7,13 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import InputMask from 'react-input-mask';
 import { usePessoaContext } from '../../../contexts/pessoas.context';
 import { PessoasService } from '../../../services/api/Pessoas/pessoas.service';
 import ToastMessage from '../../organisms/ToastMessage';
 
-export const Form = () => {
+export const Form: React.FC = () => {
   const { pessoaAtual, consultaCep }: any = usePessoaContext();
   const [openToast, setOpenToast] = useState(false);
   const [toastStatus, setToastStatus] = useState<"success" | "alert" | "warn">(
@@ -37,6 +37,7 @@ export const Form = () => {
 
   const [cpfCnpjMask, setCpfCnpjMask] = useState('999.999.999-99');
   const [isLoading, setIsLoading] = useState(false);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     if (pessoaAtual) {
@@ -46,7 +47,7 @@ export const Form = () => {
     }
   }, [pessoaAtual]);
 
-  
+
 
   const handleChange = async (e) => {
     const { name, value } = e.target;
@@ -194,13 +195,15 @@ export const Form = () => {
               value={formData.cpfCnpj}
               onChange={handleChange}
               maskChar=""
+              inputRef={inputRef}
             >
-              {(inputProps) => (
+              {(inputProps: any) => (
                 <TextField
                   {...inputProps}
                   label="CPF/CNPJ *"
                   name="cpfCnpj"
                   fullWidth
+                  inputRef={inputRef}
                 />
               )}
             </InputMask>

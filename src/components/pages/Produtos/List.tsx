@@ -78,7 +78,7 @@ export const List: React.FC = () => {
 
             {!isLoading && filteredAndSortedProdutos.length == 0 && (
                 <Box padding={5}>
-                    <Typography variant='h5' textAlign={'center'}>Nenhuma pessoa listada</Typography>
+                    <Typography variant='h5' textAlign={'center'}>Nenhuma produtos listada</Typography>
                 </Box>
             )}
 

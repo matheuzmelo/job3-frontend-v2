@@ -1,6 +1,9 @@
 import {
+    Box,
     Button,
+    CircularProgress,
     Container,
+    Pagination,
     Paper,
     Table,
     TableBody,
@@ -8,95 +11,126 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    TextField,
     Typography,
-    CircularProgress,
-    Box
-} from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { useNfeContext } from '../../../contexts/nfe.context';
-import { NotasFicaisService } from '../../../services/api/NotasFiscais/nfe.service';
+  } from "@mui/material";
+  import React, { useEffect, useState } from "react";
+import { useNotasFiscaisContext } from "../../../contexts/nfe.context";
+import { formatCurrency } from "../../../Utils";
 
-export const List: React.FC = () => {
-    const { setNfeAtual, setAbaAtual }: any = useNfeContext();
-    const [notas, setNotas] = useState<any>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [isEmpty, setIsEmpty] = useState<boolean>(false);
+  interface NotaFiscalListProps {
+    setAbaAtual: (value: number) => void;
+  }
 
-    const carregarNotas = async () => {
-        setLoading(true);
-        try {
-            const dadosSalvos = await NotasFicaisService.getAll();
-            if (dadosSalvos.data) {
-                setNotas(dadosSalvos.data);
-                setIsEmpty(dadosSalvos.data.length === 0);
-            } else {
-                setIsEmpty(true);
-            }
-        } catch (error) {
-            console.error(error);
-            setIsEmpty(true);
-        } finally {
-            setLoading(false);
-        }
+  export const List: React.FC<NotaFiscalListProps> = ({ setAbaAtual }) => {
+    const { notasFiscais, setCurrentNotaFiscal, isLoading } = useNotasFiscaisContext();
+    const [page, setPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState("");
+    const itemsPerPage = 15;
+
+    const handleEdit = (notaFiscal: any) => {
+      setCurrentNotaFiscal(notaFiscal);
+      setAbaAtual(0);
     };
 
-    useEffect(() => {
-        carregarNotas();
-    }, []);
-
-    const handleEdit = (nota) => {
-        setNfeAtual({
-            ...nota 
-        });
-        setAbaAtual(0); 
+    const handleChangePage = (_, newPage: number) => {
+      setPage(newPage);
     };
 
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchTerm(event.target.value);
+      setPage(1);
+    };
+
+    const filteredNotasFiscais = Array.isArray(notasFiscais)
+      ? notasFiscais.filter((notaFiscal) => {
+          const numero = notaFiscal.numero?.toString() || "";
+          const nomeCompleto = `${notaFiscal.pessoa?.primeiro_nome || ''} ${notaFiscal.pessoa?.segundo_nome || ''}`.toLowerCase();
+          const observacoes = notaFiscal.observacoes?.toLowerCase() || "";
+
+          return (
+            numero.includes(searchTerm.toLowerCase()) ||
+            nomeCompleto.includes(searchTerm.toLowerCase()) ||
+            observacoes.includes(searchTerm.toLowerCase())
+          );
+        })
+      : [];
+
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentNotasFiscais = filteredNotasFiscais.slice(startIndex, endIndex);
+    console.log(notasFiscais)
     return (
-        <Container maxWidth="xl" sx={{ mt: 4 }}>
-            <Typography variant="h5" gutterBottom>
-                Lista de Notas Fiscais Eletrônicas
-            </Typography>
-
-            {loading ? (
-                <Box display="flex" justifyContent="center" alignItems="center" height="200px">
-                    <CircularProgress />
-                </Box>
-            ) : isEmpty ? (
-                <Typography variant="body1" align="center" sx={{ mt: 4 }}>
-                    Nenhuma nota fiscal encontrada.
-                </Typography>
-            ) : (
-                <TableContainer component={Paper}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Número</TableCell>
-                                <TableCell>Cliente</TableCell>
-                                <TableCell>Total</TableCell>
-                                <TableCell>Ações</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {notas.map((nota, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>{nota.numero}</TableCell>
-                                    <TableCell>{nota.pessoa.primeiro_nome} {nota.pessoa.segundo_nome}</TableCell>
-                                    <TableCell>R$ {nota.total_notal_fiscal}</TableCell>
-                                    <TableCell>
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            onClick={() => handleEdit(nota)} // Passa o objeto completo da nota fiscal
-                                        >
-                                            Editar
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            )}
-        </Container>
+      <Container maxWidth="xl" sx={{ mt: 4 }}>
+        <Typography variant="h5">Lista de Notas Fiscais</Typography>
+        <Box sx={{ mt: 2, mb: 2 }}>
+          <TextField
+            label="Buscar por Número, Nome do Cliente ou Observações"
+            variant="outlined"
+            fullWidth
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+        </Box>
+        {isLoading ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "50vh",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        ) : (
+          <>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Número</TableCell>
+                    {/* <TableCell>Data de Emissão</TableCell> */}
+                    <TableCell>Cliente/Destinatário</TableCell>
+                    {/* <TableCell>Observações</TableCell> */}
+                    <TableCell>Total</TableCell>
+                    {/* <TableCell>Ações</TableCell> */}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {currentNotasFiscais.map((notaFiscal) => (
+                    <TableRow key={notaFiscal.id}>
+                      <TableCell>{notaFiscal.numero}</TableCell>
+                      {/* <TableCell>{notaFiscal.data_emissao}</TableCell> */}
+                      <TableCell>
+                        {`${notaFiscal.pessoa?.primeiro_nome || ''} ${notaFiscal.pessoa?.segundo_nome || ''}`}
+                      </TableCell>
+                      {/* <TableCell>{notaFiscal.observacoes}</TableCell> */}
+                      <TableCell>{formatCurrency(notaFiscal.total_notal_fiscal)}</TableCell>
+                      {/* <TableCell>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleEdit(notaFiscal)}
+                        >
+                          Editar
+                        </Button>
+                      </TableCell> */}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+              <Pagination
+                count={Math.ceil(filteredNotasFiscais.length / itemsPerPage)}
+                page={page}
+                onChange={handleChangePage}
+                color="primary"
+              />
+            </Box>
+          </>
+        )}
+      </Container>
     );
-};
+  };

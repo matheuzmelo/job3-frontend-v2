@@ -4,10 +4,9 @@ import { Box, Drawer, IconButton, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { decodeJWT } from "../../Utils";
-import { BotaoGenerico } from "../atoms/BotaoGenerico";
 import { MenuList } from "../molecules/MenuList";
 
-export const Menu = () => {
+export const Menu: React.FC = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [permissions, setPermissions] = useState<string[]>([]); // Tipagem explícita para as permissões
   const navigate = useNavigate();
@@ -76,12 +75,13 @@ export const Menu = () => {
               <Typography variant="h5" sx={{ textAlign: "left" }}>
                 Módulos
               </Typography>
-              <BotaoGenerico
-                icon={<KeyboardArrowRightRoundedIcon />}
-                variant="black"
+              <IconButton
+                onClick={toggleDrawer}
+                sx={{ color: 'black' }}
                 aria-label="Fechar menu"
-                component="button"
-              />
+              >
+                <KeyboardArrowRightRoundedIcon />
+              </IconButton>
             </Box>
             <Typography sx={{ textAlign: "left", marginTop: "10px" }}>
               Job3
