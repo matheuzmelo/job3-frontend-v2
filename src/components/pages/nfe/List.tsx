@@ -1,37 +1,32 @@
 import {
-    Box,
-    Button,
-    CircularProgress,
-    Container,
-    Pagination,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    TextField,
-    Typography,
-  } from "@mui/material";
-  import React, { useEffect, useState } from "react";
+  Box,
+  CircularProgress,
+  Container,
+  Pagination,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography
+} from "@mui/material";
+import React, { useState } from "react";
 import { useNotasFiscaisContext } from "../../../contexts/nfe.context";
 import { formatCurrency } from "../../../Utils";
+import { TNotaFiscal } from "./TNotaFiscal.type";
 
   interface NotaFiscalListProps {
     setAbaAtual: (value: number) => void;
   }
 
-  export const List: React.FC<NotaFiscalListProps> = ({ setAbaAtual }) => {
-    const { notasFiscais, setCurrentNotaFiscal, isLoading } = useNotasFiscaisContext();
+  export const List: React.FC<NotaFiscalListProps> = () => {
+    const { notasFiscais, isLoading } = useNotasFiscaisContext();
     const [page, setPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
     const itemsPerPage = 15;
-
-    const handleEdit = (notaFiscal: any) => {
-      setCurrentNotaFiscal(notaFiscal);
-      setAbaAtual(0);
-    };
 
     const handleChangePage = (_, newPage: number) => {
       setPage(newPage);
@@ -41,9 +36,8 @@ import { formatCurrency } from "../../../Utils";
       setSearchTerm(event.target.value);
       setPage(1);
     };
-
     const filteredNotasFiscais = Array.isArray(notasFiscais)
-      ? notasFiscais.filter((notaFiscal) => {
+      ? notasFiscais.filter((notaFiscal) : TNotaFiscal => {
           const numero = notaFiscal.numero?.toString() || "";
           const nomeCompleto = `${notaFiscal.pessoa?.primeiro_nome || ''} ${notaFiscal.pessoa?.segundo_nome || ''}`.toLowerCase();
           const observacoes = notaFiscal.observacoes?.toLowerCase() || "";
@@ -59,7 +53,6 @@ import { formatCurrency } from "../../../Utils";
     const startIndex = (page - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const currentNotasFiscais = filteredNotasFiscais.slice(startIndex, endIndex);
-    console.log(notasFiscais)
     return (
       <Container maxWidth="xl" sx={{ mt: 4 }}>
         <Typography variant="h5">Lista de Notas Fiscais</Typography>
@@ -98,8 +91,8 @@ import { formatCurrency } from "../../../Utils";
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {currentNotasFiscais.map((notaFiscal) => (
-                    <TableRow key={notaFiscal.id}>
+                  {currentNotasFiscais.map((notaFiscal, index) => (
+                    <TableRow key={index}>
                       <TableCell>{notaFiscal.numero}</TableCell>
                       {/* <TableCell>{notaFiscal.data_emissao}</TableCell> */}
                       <TableCell>

@@ -1,8 +1,8 @@
 import { Box, Tab, Tabs } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { NotaFiscalProvider } from "../../../contexts/nfe.context";
 import { Form } from "./Form";
 import { List } from "./List";
-import { NotaFiscalProvider } from "../../../contexts/nfe.context";
 
 interface TabPanelProps {
   children: React.ReactNode;
