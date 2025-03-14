@@ -23,7 +23,6 @@ import {
 import ToastMessage from "../../organisms/ToastMessage";
 import { useNotasFiscaisContext } from "../../../contexts/nfe.context";
 import { formatCurrency } from "../../../Utils";
-import { convertFieldResponseIntoMuiTextFieldProps } from "@mui/x-date-pickers/internals";
 
 export const Form: React.FC = () => {
   const {
@@ -32,6 +31,9 @@ export const Form: React.FC = () => {
     addNotaFiscal,
     error,
     setError,
+    clientes,
+    produtos,
+    getNotasFiscais,
   } = useNotasFiscaisContext();
 
   const [formData, setFormData] = useState({
@@ -106,6 +108,7 @@ export const Form: React.FC = () => {
       const dataToSubmit = prepareDataForSubmission();
       console.log(dataToSubmit);
       await addNotaFiscal(dataToSubmit);
+      await getNotasFiscais();
       setToast({
         open: true,
         status: "success",
@@ -213,8 +216,11 @@ export const Form: React.FC = () => {
               value={formData.pessoa_id}
               onChange={(e) => setFormData((prev) => ({ ...prev, pessoa_id: e.target.value as number }))}
             >
-              <MenuItem value={1}>Cliente 1</MenuItem>
-              <MenuItem value={2}>Cliente 2</MenuItem>
+              {clientes.map((cliente) => (
+                <MenuItem key={cliente.id} value={cliente.id}>
+                  {cliente.primeiro_nome} {cliente.segundo_nome}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Box>
@@ -251,8 +257,11 @@ export const Form: React.FC = () => {
                   fullWidth
                 >
                   <MenuItem value={0}>Selecione um produto</MenuItem>
-                  <MenuItem value={1}>Produto 1</MenuItem>
-                  <MenuItem value={2}>Produto 2</MenuItem>
+                  {produtos.map((produto) => (
+                    <MenuItem key={produto.id} value={produto.id}>
+                      {produto.descricao}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
               <TextField

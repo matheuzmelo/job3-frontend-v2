@@ -1,5 +1,7 @@
 import React, { createContext, useEffect, useState } from "react";
 import { NotasFicaisService } from "../services/api/NotasFiscais/nfe.service";
+import { PessoasService } from "../services/api/Pessoas/pessoas.service";
+import { ProdutosService } from "../services/api/Produtos/produtos.service";
 
 interface NotaFiscal {
   id?: number;
@@ -26,6 +28,10 @@ interface NotaFiscalContextData {
   setCurrentNotaFiscal: (notaFiscal: NotaFiscal | null) => void;
   setError: (error: any) => any;
   error: any;
+  clientes: any[];
+  setClientes: (clientes: any[]) => void;
+  produtos: any[];
+  setProdutos: (produtos: any[]) => void;
 }
 
 const NotasFiscaisContext = createContext<NotaFiscalContextData | undefined>(undefined);
@@ -35,6 +41,8 @@ export const NotaFiscalProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [notasFiscais, setNotasFiscais] = useState<NotaFiscal[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<any>(null);
+  const [clientes, setClientes] = useState<any[]>([]);
+  const [produtos, setProdutos] = useState<any[]>([]);
 
   const getNotasFiscais = async () => {
     try {
@@ -50,8 +58,38 @@ export const NotaFiscalProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
+  const getClientes = async () => {
+    try {
+      setIsLoading(true);
+      const response = await PessoasService.getAll();
+      setIsLoading(false);
+      if (response) {
+        setClientes(response.data);
+      }
+    } catch (error) {
+      setIsLoading(false);
+      setError(error);
+    }
+  }
+
+  const getProdutos = async () => {
+    try {
+      setIsLoading(true);
+      const response = await ProdutosService.getAll();
+      setIsLoading(false);
+      if (response) {
+        setProdutos(response.data);
+      }
+    } catch (error) {
+      setIsLoading(false);
+      setError(error);
+    }
+  }
+
   useEffect(() => {
     getNotasFiscais();
+    getClientes();
+    getProdutos();
   }, []);
 
   const addNotaFiscal = async (notaFiscal: NotaFiscal) => {
@@ -83,6 +121,10 @@ export const NotaFiscalProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setCurrentNotaFiscal,
         setError,
         error,
+        produtos,
+        setProdutos,
+        clientes,
+        setClientes
       }}
     >
       {children}
