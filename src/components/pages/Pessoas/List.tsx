@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { PessoasService } from '../../../services/api/Pessoas/pessoas.service';
 
 export const List: React.FC = () => {
-  const [pessoas, setPessoas] = useState<any[]>([]);
+  const [pessoas, setPessoas] = useState<any[]>([]); // Initialize as empty array
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
@@ -27,15 +27,16 @@ export const List: React.FC = () => {
     if (!token) {
       alert('Sessão expirada. Efetue o Login novamente');
       navigate(`/`);
+      return;
     }
 
     try {
-      const pessoasList = await PessoasService.getAll();
-      if (pessoasList) {
-        setPessoas(pessoasList);
-      }
+      const {data} = await PessoasService.getAll();
+
+      setPessoas(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Erro ao buscar as pessoas:', error);
+      setPessoas([]);
     } finally {
       setIsLoading(false);
     }
@@ -45,12 +46,26 @@ export const List: React.FC = () => {
     fetchPessoas();
   }, []);
 
+  console.log(pessoas)
+
   const filteredPessoas = pessoas
-    .filter(pessoa =>
-      `${pessoa.primeiro_nome} ${pessoa.segundo_nome}`
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-    );
+    .filter(pessoa => {
+      const searchTermLower = searchTerm.toLowerCase();
+      return (
+        (pessoa.primeiro_nome?.toLowerCase() || '').includes(searchTermLower) ||
+        (pessoa.segundo_nome?.toLowerCase() || '').includes(searchTermLower) ||
+        (pessoa.cpf_cnpj?.toLowerCase() || '').includes(searchTermLower) ||
+        (pessoa.email?.toLowerCase() || '').includes(searchTermLower) ||
+        (pessoa.cidade?.toLowerCase() || '').includes(searchTermLower)
+      );
+    })
+    .sort((a, b) => {
+      const nomeA = `${a.primeiro_nome} ${a.segundo_nome}`.toLowerCase();
+      const nomeB = `${b.primeiro_nome} ${b.segundo_nome}`.toLowerCase();
+      return nomeA.localeCompare(nomeB);
+    });
+
+    console.log(filteredPessoas)
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4 }}>
@@ -82,7 +97,7 @@ export const List: React.FC = () => {
           <CircularProgress />
         </Box>
       ) : (
-        filteredPessoas.length > 1 && (
+        filteredPessoas.length >= 1 && (
           <TableContainer component={Paper} sx={{ mt: 2 }}>
             <Table>
               <TableHead>
@@ -94,12 +109,12 @@ export const List: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredPessoas.map((pessoa) => (
+                {filteredPessoas && filteredPessoas.map((pessoa) => (
                   <TableRow key={pessoa.cpf_cnpj}>
-                    <TableCell>{`${pessoa.primeiro_nome} ${pessoa.segundo_nome}`}</TableCell>
-                    <TableCell>{pessoa.cpf_cnpj}</TableCell>
-                    <TableCell>{pessoa.email}</TableCell>
-                    <TableCell>{`${pessoa.cidade} - ${pessoa.uf}`}</TableCell>
+                    {pessoa.primeiro_nome && (<TableCell>{`${pessoa.primeiro_nome}`}</TableCell>)}
+                    {pessoa.cpf_cnpj && (<TableCell>{pessoa.cpf_cnpj}</TableCell>)}
+                    {pessoa.email && (<TableCell>{pessoa.email}</TableCell>)}
+                    {pessoa.cidade && (<TableCell>{`${pessoa.cidade} - ${pessoa.uf}`}</TableCell>)}
                   </TableRow>
                 ))}
 

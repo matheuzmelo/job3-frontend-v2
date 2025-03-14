@@ -1,467 +1,366 @@
-import {
-  ClearRounded,
-  DeleteRounded,
-  SaveAltRounded,
-} from "@mui/icons-material";
-import EditNoteRoundedIcon from "@mui/icons-material/EditNoteRounded";
+import React, { useEffect, useState } from "react";
+import { SaveAltRounded, AddCircleOutline, DeleteOutline } from "@mui/icons-material";
 import {
   Box,
   Button,
   CircularProgress,
   Container,
-  InputLabel,
-  MenuItem,
-  Paper,
+  TextField,
+  Typography,
   Select,
-  SelectChangeEvent,
+  MenuItem,
+  InputLabel,
+  FormControl,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  Typography,
+  Paper,
+  Divider,
 } from "@mui/material";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import React, { useEffect, useState } from "react";
-import { useNfeContext } from "../../../contexts/nfe.context";
-import { EmpresasService } from "../../../services/api/Empresas/Empresas.service";
-import { NotasFicaisService } from "../../../services/api/NotasFiscais/nfe.service";
-import { PessoasService } from "../../../services/api/Pessoas/pessoas.service";
-import { ProdutosService } from "../../../services/api/Produtos/produtos.service";
 import ToastMessage from "../../organisms/ToastMessage";
-
-interface ProdutoSelecionado {
-  produto_id: number;
-  quantidade: number;
-  valor_unitario: number;
-}
-
-interface Cliente {
-  id: number;
-  primeiro_nome: string;
-  segundo_nome: string;
-  empresa_id: number;
-}
-
-interface Produto {
-  id: number;
-  nome: string;
-  preco: number;
-}
+import { useNotasFiscaisContext } from "../../../contexts/nfe.context";
+import { formatCurrency } from "../../../Utils";
+import { TNotaFiscal } from "./TNotaFiscal.type";
 
 export const Form: React.FC = () => {
-  const { nfeAtual }: any = useNfeContext();
-  const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    numero: "",
-    primeiro_nome: "",
-    segundo_nome: "",
-    total_notal_fiscal: "",
+  const {
+    currentNotaFiscal,
+    isLoading,
+    addNotaFiscal,
+    error,
+    setError,
+    clientes,
+    produtos,
+    getNotasFiscais,
+  } = useNotasFiscaisContext();
+
+  const [formData, setFormData] = useState<TNotaFiscal>({
+    numero: 0,
+    pessoa_id: 0,
+    observacoes: "",
+    data_emissao: "",
+    produtos: [],
   });
-  const [empresaId, setEmpresaId] = useState("");
-  const [clienteId, setClienteId] = useState("");
-  const [produtoId, setProdutoId] = useState("");
-  const [quantidade, setQuantidade] = useState(1);
-  const [produtosDaProposta, setProdutosDaProposta] = useState<ProdutoSelecionado[]>([]);
-  const [pessoas, setPessoas] = useState<Cliente[]>([]);
-  const [empresas, setEmpresas] = useState<any[]>([]);
-  const [produtosComPrecos, setProdutosComPrecos] = useState<Produto[]>([]);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [openToast, setOpenToast] = useState(false);
-  const [toastStatus, setToastStatus] = useState<"success" | "alert" | "warn">("success");
-  const [message, setMessage] = useState("");
 
-  // Carrega empresas e produtos ao iniciar o componente
-  useEffect(() => {
-    const carregarDados = async () => {
-      try {
-        const empresasResponse = await EmpresasService.getAll();
-        setEmpresas(empresasResponse.data);
+  const [toast, setToast] = useState({
+    open: false,
+    status: "success" as "success" | "error",
+    message: "",
+  });
 
-        const produtosResponse = await ProdutosService.getAll();
-        setProdutosComPrecos(produtosResponse.data);
-      } catch (error) {
-        console.error("Erro ao carregar dados:", error);
-        handleOpenToast("warn", "Erro ao carregar empresas ou produtos.");
-      }
-    };
-
-    carregarDados();
-  }, []);
-
-  // Carrega pessoas da empresa selecionada
-  useEffect(() => {
-    const carregarPessoas = async () => {
-      if (empresaId) {
-        try {
-          const pessoasResponse = await PessoasService.getAll();
-          const pessoasFiltradas = pessoasResponse.data.filter(
-            (pessoa: any) => pessoa.empresa_id === Number(empresaId)
-          );
-          setPessoas(pessoasFiltradas);
-        } catch (error) {
-          console.error("Erro ao carregar pessoas:", error);
-          handleOpenToast("warn", "Erro ao carregar clientes.");
-        }
-      }
-    };
-
-    carregarPessoas();
-  }, [empresaId]);
-
-  // Preenche o formulário com os dados da nota fiscal atual
-  useEffect(() => {
-    if (nfeAtual) {
-      setFormData({
-        numero: nfeAtual.numero.toString(),
-        primeiro_nome: nfeAtual.pessoa.primeiro_nome,
-        segundo_nome: nfeAtual.pessoa.segundo_nome,
-        total_notal_fiscal: nfeAtual.total_notal_fiscal,
-      });
-
-      // Preenche os produtos da nota fiscal (se houver)
-      if (nfeAtual.produtos) {
-        const produtosFormatados = nfeAtual.produtos.map((produto: any) => ({
-          produto_id: produtosComPrecos.find((p) => p.nome === produto.descricao)?.id || 0,
-          quantidade: Number(produto.quantidade),
-          valor_unitario: Number(produto.valor_unitario),
-        }));
-        setProdutosDaProposta(produtosFormatados);
-      }
-
-      // Tenta encontrar a empresa e o cliente com base nos dados da nota fiscal
-      if (nfeAtual.pessoa) {
-        const cliente = pessoas.find(
-          (p) =>
-            p.primeiro_nome === nfeAtual.pessoa.primeiro_nome &&
-            p.segundo_nome === nfeAtual.pessoa.segundo_nome
-        );
-        if (cliente) {
-          setClienteId(cliente.id.toString());
-          setEmpresaId(cliente.empresa_id.toString());
-        }
-      }
-    }
-  }, [nfeAtual, produtosComPrecos, pessoas]);
-
-  const handleEmpresaChange = (event: SelectChangeEvent): void => {
-    const selectedEmpresaId = event.target.value;
-    setEmpresaId(selectedEmpresaId);
-    setClienteId(""); // Limpa o cliente ao mudar a empresa
-    setFormData((prev) => ({ ...prev, primeiro_nome: "", segundo_nome: "" }));
+  const handleCloseToast = () => {
+    setToast((prev) => ({ ...prev, open: false }));
   };
 
-  const handleClienteChange = (event: SelectChangeEvent): void => {
-    const selectedClienteId = event.target.value;
-    setClienteId(selectedClienteId);
+  useEffect(() => {
+    if (currentNotaFiscal) {
+      setFormData(currentNotaFiscal);
+    }
+  }, [currentNotaFiscal]);
 
-    // Preenche os campos de nome do cliente
-    const clienteSelecionado = pessoas.find((p) => p.id === Number(selectedClienteId));
-    if (clienteSelecionado) {
-      setFormData({
-        ...formData,
-        primeiro_nome: clienteSelecionado.primeiro_nome,
-        segundo_nome: clienteSelecionado.segundo_nome,
+  useEffect(() => {
+    if (error) {
+      setToast({
+        open: true,
+        status: "error",
+        message: error.message || "Erro desconhecido",
+      });
+      setError(null);
+    }
+  }, [error, setError]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRemoveProduct = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      produtos: prev.produtos.filter((_, i) => i !== index)
+    }));
+  };
+
+  const prepareDataForSubmission = () => {
+    // Destructure to omit total and data_emissao
+    const { total, data_emissao, ...dataToSubmit } = formData;
+    return dataToSubmit;
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const dataToSubmit = prepareDataForSubmission();
+      console.log(dataToSubmit);
+      await addNotaFiscal(dataToSubmit);
+      await getNotasFiscais();
+      setToast({
+        open: true,
+        status: "success",
+        message: "Nota fiscal cadastrada com sucesso!",
+      });
+    } catch (err: any) {
+      setToast({
+        open: true,
+        status: "error",
+        message: err.message || "Erro ao cadastrar a nota fiscal.",
       });
     }
   };
 
-  const handleAddProduct = () => {
-    const produtoSelecionado = produtosComPrecos.find(
-      (p) => p.id === Number(produtoId)
-    );
-    if (!produtoSelecionado) return;
+  const [productForm, setProductForm] = useState({
+    produto_id: 0, // changed from nome to produto_id
+    descricao: '',
+    preco: 0,
+    estoque: 0,
+  });
 
-    const novoProduto: ProdutoSelecionado = {
-      produto_id: produtoSelecionado.id,
-      quantidade,
-      valor_unitario: produtoSelecionado.preco,
-    };
-
-    setProdutosDaProposta((prev) => {
-      const newProducts =
-        editIndex !== null
-          ? prev.map((p, i) => (i === editIndex ? novoProduto : p))
-          : [...prev, novoProduto];
-
-      localStorage.setItem("produtosDaProposta", JSON.stringify(newProducts));
-      return newProducts;
-    });
-
-    setProdutoId("");
-    setQuantidade(1);
-    setEditIndex(null);
+  const handleProductFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProductForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleEditProduct = (index: number) => {
-    const produto = produtosDaProposta[index];
-    setProdutoId(produto.produto_id.toString());
-    setQuantidade(produto.quantidade);
-    setEditIndex(index);
-  };
-
-  const handleDeleteProduct = (index: number) => {
-    const novosProdutos = produtosDaProposta.filter((_, i) => i !== index);
-    setProdutosDaProposta(novosProdutos);
-    localStorage.setItem("produtosDaProposta", JSON.stringify(novosProdutos));
-  };
-
-  const handleSave = async () => {
-    if (
-      !formData.numero ||
-      !formData.primeiro_nome ||
-      !formData.segundo_nome ||
-      produtosDaProposta.length === 0
-    ) {
-      handleOpenToast("warn", "Preencha todos os campos obrigatórios!");
+  const handleProductFormSubmit = () => {
+    if (!productForm.produto_id || productForm.preco <= 0) { // updated validation
+      setToast({
+        open: true,
+        status: 'error',
+        message: 'Preencha os campos obrigatórios do produto',
+      });
       return;
     }
 
-    setIsLoading(true); // Ativa o loading
+    setFormData(prev => ({
+      ...prev,
+      produtos: [
+        ...prev.produtos,
+        {
+          produto_id: productForm.produto_id, // using selected produto_id
+          quantidade: productForm.estoque,
+          valor_unitario: productForm.preco,
+          desconto: 0
+        }
+      ]
+    }));
 
-    const nfeData = {
-      numero: Number(formData.numero),
-      pessoa_id: Number(clienteId),
-      empresa_id: Number(empresaId),
-      total_notal_fiscal: formData.total_notal_fiscal,
-      produtos: produtosDaProposta,
-    };
-
-    try {
-      const createNfe = await NotasFicaisService.create(nfeData);
-
-      if (createNfe) {
-        handleOpenToast("success", "NFe salva com sucesso!");
-        handleClear();
-      }
-    } catch (error) {
-      handleOpenToast("warn", "Erro ao salvar NFe!");
-    } finally {
-      setIsLoading(false); // Desativa o loading em qualquer caso
-    }
-  };
-
-  const handleClear = () => {
-    setFormData({
-      numero: "",
-      primeiro_nome: "",
-      segundo_nome: "",
-      total_notal_fiscal: "",
+    // Reset product form
+    setProductForm({
+      produto_id: 0, // reset produto_id instead of nome
+      descricao: '',
+      preco: 0,
+      estoque: 0,
     });
-    setProdutosDaProposta([]);
-    setEmpresaId("");
-    setClienteId("");
-    setPessoas([]);
-    localStorage.removeItem("produtosDaProposta");
   };
 
-  const handleOpenToast = (
-    status: "success" | "alert" | "warn",
-    msg: string
-  ) => {
-    setToastStatus(status);
-    setMessage(msg);
-    setOpenToast(true);
-  };
+  // Add this effect to calculate total
+  useEffect(() => {
+    const total = formData.produtos.reduce((acc, produto) => {
+      return acc + (produto.quantidade * produto.valor_unitario - produto.desconto);
+    }, 0);
 
-  const getNomeProduto = (produtoId: number) => {
-    return (
-      produtosComPrecos.find((p) => p.id === produtoId)?.nome || "Desconhecido"
-    );
-  };
+    setFormData(prev => ({ ...prev, total }));
+  }, [formData.produtos]);
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Container maxWidth="xl">
-        <Typography variant="h5" sx={{ mb: 2 }}>
-          Cadastro de Nota Fiscal Eletrônica
-        </Typography>
-
-        <Box display={"grid"} gridTemplateColumns={"1fr 1fr"} gap={2}>
-          <Box>
-            <InputLabel>Número da nota fiscal</InputLabel>
-            <TextField
-              name="numero"
-              value={formData.numero}
-              onChange={(e) =>
-                setFormData({ ...formData, numero: e.target.value })
-              }
-              fullWidth
-              type="number"
-            />
-          </Box>
-
-          <Box>
-            <InputLabel>Empresa</InputLabel>
+    <Container maxWidth="xl">
+      <Typography variant="h5" sx={{ mb: 2 }}>
+        Cadastro de Nota Fiscal
+      </Typography>
+      <Box display={'grid'} gap={2}>
+      <Box
+        display={"grid"}
+        gridTemplateColumns={"repeat(auto-fill, minmax(30%, 1fr))"}
+        gap={2}
+      >
+        <Box >
+          <TextField
+            label="Número"
+            name="numero"
+            value={formData.numero}
+            onChange={handleChange}
+            sx={{ width: "33%" }}
+            disabled
+          />
+        </Box>
+        <Box display={'flex'} justifyContent={'flex-end'}>
+          <TextField
+            label="Data de Emissão"
+            name="data_emissao"
+            type="date"
+            value={formData.data_emissao}
+            onChange={handleChange}
+            sx={{ width: "50%" }}
+          />
+        </Box>
+        <Box >
+          <FormControl fullWidth variant="outlined">
+            <InputLabel>Cliente/Destinatário</InputLabel>
             <Select
-              fullWidth
-              value={empresaId}
-              onChange={handleEmpresaChange}
-              disabled={!!nfeAtual}
+              label="Cliente/Destinatário"
+              name="pessoa_id"
+              value={formData.pessoa_id}
+              onChange={(e) => setFormData((prev) => ({ ...prev, pessoa_id: e.target.value as number }))}
             >
-              <MenuItem value="">Selecione a empresa</MenuItem>
-              {empresas.map((empresa) => (
-                <MenuItem key={empresa.id} value={empresa.id}>
-                  {empresa.nome_fantasia}
-                </MenuItem>
-              ))}
-            </Select>
-          </Box>
-
-          <Box>
-            <InputLabel>Cliente</InputLabel>
-            <Select
-              fullWidth
-              value={clienteId}
-              onChange={handleClienteChange}
-              disabled={!empresaId}
-            >
-              <MenuItem value="">Selecione o cliente</MenuItem>
-              {pessoas.map((cliente) => (
+              {clientes.map((cliente) => (
                 <MenuItem key={cliente.id} value={cliente.id}>
                   {cliente.primeiro_nome} {cliente.segundo_nome}
                 </MenuItem>
               ))}
             </Select>
-          </Box>
-
-          <Box>
-            <InputLabel>Total da Nota Fiscal</InputLabel>
-            <TextField
-              name="total_notal_fiscal"
-              value={formData.total_notal_fiscal}
-              onChange={(e) =>
-                setFormData({ ...formData, total_notal_fiscal: e.target.value })
-              }
-              fullWidth
-              type="number"
-            />
-          </Box>
+          </FormControl>
         </Box>
+      </Box>
+        <Box>
+          <TextField
+            label="Observações"
+            name="observacoes"
+            value={formData.observacoes}
+            onChange={handleChange}
+            fullWidth
+            multiline
+            rows={4}
+          />
+        </Box>
+        <Box>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Produtos
+          </Typography>
 
-        <Box mt={4}>
-          <Typography variant="h6">Produtos</Typography>
-          <Box display="flex" gap={2} mt={2}>
-            <Select
-              fullWidth
-              value={produtoId}
-              onChange={(e) => setProdutoId(e.target.value as string)}
+          <Box display="grid" gap={2} sx={{ mb: 2 }}>
+            <Box
+              display="grid"
+              gridTemplateColumns="repeat(auto-fill, minmax(20%, 1fr))"
+              gap={2}
             >
-              <MenuItem value="">Selecione um produto</MenuItem>
-              {produtosComPrecos.map((produto) => (
-                <MenuItem key={produto.id} value={produto.id}>
-                  {produto.nome} - R$ {produto.preco}
-                </MenuItem>
-              ))}
-            </Select>
-
-            <TextField
-              label="Quantidade"
-              type="number"
-              value={quantidade}
-              onChange={(e) =>
-                setQuantidade(Math.max(1, Number(e.target.value)))
-              }
-              sx={{ width: 150 }}
-            />
-
-            <Button
-              variant="contained"
-              onClick={handleAddProduct}
-              disabled={!produtoId}
-            >
-              {editIndex !== null ? "Atualizar" : "Adicionar"}
-            </Button>
+              <FormControl fullWidth size="small">
+                <InputLabel>Produto</InputLabel>
+                <Select
+                  label="Produto"
+                  name="produto_id"
+                  value={productForm.produto_id}
+                  onChange={(e) => setProductForm(prev => ({ ...prev, produto_id: e.target.value as number }))}
+                  fullWidth
+                >
+                  <MenuItem value={0}>Selecione um produto</MenuItem>
+                  {produtos.map((produto) => (
+                    <MenuItem key={produto.id} value={produto.id}>
+                      {produto.descricao}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <TextField
+                label="Preço"
+                name="preco"
+                type="number"
+                value={productForm.preco}
+                onChange={handleProductFormChange}
+                size="small"
+                fullWidth
+              />
+              <TextField
+                label="Quantidade"
+                name="estoque"
+                type="number"
+                value={productForm.estoque}
+                onChange={handleProductFormChange}
+                size="small"
+                fullWidth
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleProductFormSubmit}
+                startIcon={<AddCircleOutline />}
+              >
+                Adicionar à Lista
+              </Button>
+            </Box>
           </Box>
 
-          <TableContainer component={Paper} sx={{ mt: 2 }}>
+          <TableContainer component={Paper}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Ações</TableCell>
                   <TableCell>Produto</TableCell>
-                  <TableCell>Valor Unitário</TableCell>
-                  <TableCell>Quantidade</TableCell>
-                  <TableCell>Total</TableCell>
+                  <TableCell align="right">Quantidade</TableCell>
+                  <TableCell align="right">Valor Unitário</TableCell>
+                  <TableCell align="right">Subtotal</TableCell>
+                  <TableCell align="center">Ações</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {produtosDaProposta.map((produto, index) => (
+                {formData.produtos.map((produto, index) => (
                   <TableRow key={index}>
                     <TableCell>
-                      <Button onClick={() => handleEditProduct(index)}>
-                        <EditNoteRoundedIcon />
-                      </Button>
+                      {produto.produto_id === 1 ? 'Produto 1' : 'Produto 2'}
+                    </TableCell>
+                    <TableCell align="right">
+                      {produto.quantidade}
+                    </TableCell>
+                    <TableCell align="right">
+                      {formatCurrency(produto.valor_unitario)}
+                    </TableCell>
+                    <TableCell align="right">
+                      {formatCurrency(produto.quantidade * produto.valor_unitario - produto.desconto)}
+                    </TableCell>
+                    <TableCell align="center">
                       <Button
-                        onClick={() => handleDeleteProduct(index)}
                         color="error"
+                        onClick={() => handleRemoveProduct(index)}
+                        startIcon={<DeleteOutline />}
                       >
-                        <DeleteRounded />
+                        Remover
                       </Button>
-                    </TableCell>
-                    <TableCell>{getNomeProduto(produto.produto_id)}</TableCell>
-                    <TableCell>
-                      R$ {produto.valor_unitario.toFixed(2)}
-                    </TableCell>
-                    <TableCell>{produto.quantidade}</TableCell>
-                    <TableCell>
-                      R${" "}
-                      {(produto.quantidade * produto.valor_unitario).toFixed(2)}
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
+              <TableRow>
+                <TableCell colSpan={3} align="right">
+                  <Typography variant="subtitle1" fontWeight="bold">
+                    Total Geral:
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography variant="subtitle1" fontWeight="bold">
+                    {formatCurrency(formData.total)}
+                  </Typography>
+                </TableCell>
+                <TableCell />
+              </TableRow>
             </Table>
           </TableContainer>
         </Box>
+    </Box>
+      <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={
+            isLoading ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              <SaveAltRounded />
+            )
+          }
+          onClick={handleSubmit}
+          disabled={isLoading}
+          sx={{ opacity: isLoading ? 0.7 : 1 }}
+        >
+          {isLoading ? "Salvando..." : "Salvar Nota Fiscal"}
+        </Button>
+      </Box>
+      <Divider sx={{ my: 4 }} />
 
-        <Box mt={4} display="flex" gap={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={
-              isLoading ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : (
-                <SaveAltRounded />
-              )
-            }
-            onClick={handleSave}
-            disabled={
-              isLoading ||
-              !formData.numero ||
-              !formData.primeiro_nome ||
-              !formData.segundo_nome ||
-              produtosDaProposta.length === 0
-            }
-            sx={{
-              opacity: isLoading ? 0.7 : 1,
-              cursor: isLoading ? "progress" : "pointer",
-            }}
-          >
-            {isLoading ? "Salvando..." : "Salvar NFe"}
-          </Button>
-
-          <Button
-            variant="outlined"
-            color="secondary"
-            startIcon={<ClearRounded />}
-            onClick={handleClear}
-          >
-            Limpar Tudo
-          </Button>
-        </Box>
-
-        <ToastMessage
-          status={toastStatus}
-          message={message}
-          open={openToast}
-          onClose={() => setOpenToast(false)}
-        />
-      </Container>
-    </LocalizationProvider>
+      <ToastMessage
+        status={toast.status}
+        open={toast.open}
+        message={toast.message}
+        onClose={handleCloseToast}
+      />
+    </Container>
   );
 };

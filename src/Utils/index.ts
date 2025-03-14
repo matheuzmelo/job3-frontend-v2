@@ -37,3 +37,10 @@ export const getDataCep = async (cep: string): Promise<DadosCep | undefined | an
     return error;
   }
 };
+
+export const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format(value);
+};

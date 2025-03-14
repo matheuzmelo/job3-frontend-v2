@@ -6,11 +6,11 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import PersonIcon from '@mui/icons-material/Person';
 import { Empresas } from '../components/pages/Empresas';
 import Home from '../components/pages/Home';
-import Nfe from '../components/pages/nfe';
 import Pessoas from '../components/pages/Pessoas';
 import Produtos from '../components/pages/Produtos';
 import Usuario from '../components/pages/Usuarios';
 import { MenuLayout } from '../types/TMenu.type';
+import { NotasFiscais } from '../components/pages/nfe';
 
 export const menuLayout: MenuLayout = [
     {
@@ -44,7 +44,7 @@ export const menuLayout: MenuLayout = [
     {
         name: "Notas Fiscais",
         route: "/notas-fiscais",
-        page: <Nfe />,
+        page: <NotasFiscais />,
         icon: <LocalAtmRounded />,
         permission: undefined,
     },
