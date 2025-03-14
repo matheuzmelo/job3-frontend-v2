@@ -16,7 +16,6 @@ import {
 import React, { useState } from "react";
 import { useNotasFiscaisContext } from "../../../contexts/nfe.context";
 import { formatCurrency } from "../../../Utils";
-import { TNotaFiscal } from "./TNotaFiscal.type";
 
   interface NotaFiscalListProps {
     setAbaAtual: (value: number) => void;
@@ -37,7 +36,7 @@ import { TNotaFiscal } from "./TNotaFiscal.type";
       setPage(1);
     };
     const filteredNotasFiscais = Array.isArray(notasFiscais)
-      ? notasFiscais.filter((notaFiscal) : TNotaFiscal => {
+      ? notasFiscais.filter(notaFiscal  => {
           const numero = notaFiscal.numero?.toString() || "";
           const nomeCompleto = `${notaFiscal.pessoa?.primeiro_nome || ''} ${notaFiscal.pessoa?.segundo_nome || ''}`.toLowerCase();
           const observacoes = notaFiscal.observacoes?.toLowerCase() || "";
@@ -99,7 +98,7 @@ import { TNotaFiscal } from "./TNotaFiscal.type";
                         {`${notaFiscal.pessoa?.primeiro_nome || ''} ${notaFiscal.pessoa?.segundo_nome || ''}`}
                       </TableCell>
                       {/* <TableCell>{notaFiscal.observacoes}</TableCell> */}
-                      <TableCell>{formatCurrency(notaFiscal.total_notal_fiscal)}</TableCell>
+                      <TableCell>{notaFiscal.total_notal_fiscal !== undefined ? formatCurrency(notaFiscal.total_notal_fiscal) : '-'}</TableCell>
                       {/* <TableCell>
                         <Button
                           variant="contained"

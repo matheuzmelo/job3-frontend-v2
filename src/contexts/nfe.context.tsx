@@ -2,30 +2,16 @@ import React, { createContext, useEffect, useState } from "react";
 import { NotasFicaisService } from "../services/api/NotasFiscais/nfe.service";
 import { PessoasService } from "../services/api/Pessoas/pessoas.service";
 import { ProdutosService } from "../services/api/Produtos/produtos.service";
-
-interface NotaFiscal {
-  id?: number;
-  numero: number;
-  data_emissao: string;
-  pessoa_id: number;
-  observacoes: string;
-  total: number;
-  produtos: {
-    produto_id: number;
-    quantidade: number;
-    valor_unitario: number;
-    desconto: number;
-  }[];
-}
+import { TNotaFiscal, TNotaFiscalGroup } from "../components/pages/nfe/TNotaFiscal.type";
 
 interface NotaFiscalContextData {
-  notasFiscais: NotaFiscal[];
-  setNotasFiscais: (notasFiscais: NotaFiscal[]) => void;
-  addNotaFiscal: (notaFiscal: NotaFiscal) => Promise<void>;
+  notasFiscais: TNotaFiscalGroup;
+  setNotasFiscais: (notasFiscais: TNotaFiscalGroup) => void;
+  addNotaFiscal: (notaFiscal: TNotaFiscal) => Promise<void>;
   getNotasFiscais: () => any;
   isLoading: boolean;
-  currentNotaFiscal: NotaFiscal | null;
-  setCurrentNotaFiscal: (notaFiscal: NotaFiscal | null) => void;
+  currentNotaFiscal: TNotaFiscal | null;
+  setCurrentNotaFiscal: (notaFiscal: TNotaFiscal | null) => void;
   setError: (error: any) => any;
   error: any;
   clientes: any[];
@@ -37,8 +23,8 @@ interface NotaFiscalContextData {
 const NotasFiscaisContext = createContext<NotaFiscalContextData | undefined>(undefined);
 
 export const NotaFiscalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentNotaFiscal, setCurrentNotaFiscal] = useState<NotaFiscal | null>(null);
-  const [notasFiscais, setNotasFiscais] = useState<NotaFiscal[]>([]);
+  const [currentNotaFiscal, setCurrentNotaFiscal] = useState<TNotaFiscal | null>(null);
+  const [notasFiscais, setNotasFiscais] = useState<TNotaFiscalGroup>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<any>(null);
   const [clientes, setClientes] = useState<any[]>([]);
@@ -92,7 +78,7 @@ export const NotaFiscalProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     getProdutos();
   }, []);
 
-  const addNotaFiscal = async (notaFiscal: NotaFiscal) => {
+  const addNotaFiscal = async (notaFiscal: TNotaFiscal) => {
     try {
       setIsLoading(true);
       const response: any = await NotasFicaisService.create(notaFiscal);

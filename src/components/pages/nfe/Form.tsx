@@ -23,6 +23,7 @@ import {
 import ToastMessage from "../../organisms/ToastMessage";
 import { useNotasFiscaisContext } from "../../../contexts/nfe.context";
 import { formatCurrency } from "../../../Utils";
+import { TNotaFiscal } from "./TNotaFiscal.type";
 
 export const Form: React.FC = () => {
   const {
@@ -36,17 +37,12 @@ export const Form: React.FC = () => {
     getNotasFiscais,
   } = useNotasFiscaisContext();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<TNotaFiscal>({
     numero: 0,
     pessoa_id: 0,
     observacoes: "",
     data_emissao: "",
-    produtos: [] as {
-      produto_id: number;
-      quantidade: number;
-      valor_unitario: number;
-      desconto: number;
-    }[],
+    produtos: [],
   });
 
   const [toast, setToast] = useState({
@@ -85,15 +81,6 @@ export const Form: React.FC = () => {
     setFormData(prev => ({
       ...prev,
       produtos: prev.produtos.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleProductChange = (index: number, field: string, value: number) => {
-    setFormData(prev => ({
-      ...prev,
-      produtos: prev.produtos.map((produto, i) =>
-        i === index ? { ...produto, [field]: value } : produto
-      )
     }));
   };
 
