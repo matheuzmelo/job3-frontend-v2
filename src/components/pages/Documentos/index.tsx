@@ -38,7 +38,7 @@ export const DocumentosIndex = () => {
     },
     {
       id: 1,
-      label: "Listar Notas Fiscais",
+      label: "Listar Documentos",
     },
   ];
 
