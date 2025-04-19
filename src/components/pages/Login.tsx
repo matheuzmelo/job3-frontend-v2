@@ -28,6 +28,8 @@ export default () => {
                 senha: password,
             });
 
+            console.log(response)
+
             localStorage.setItem('token', response.data.data);
             navigate(`/`);
         } catch (e) {
