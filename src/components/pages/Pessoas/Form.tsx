@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import InputMask from 'react-input-mask';
 import { usePessoaContext } from '../../../contexts/pessoas.context';
 import { PessoasService } from '../../../services/api/Pessoas/pessoas.service';
@@ -53,9 +53,7 @@ export const Form: React.FC = () => {
     const { name, value } = e.target;
 
     if (name === 'cpfCnpj') {
-      console.log(name)
       const onlyNumbers = value.replace(/\D/g, '');
-      console.log(onlyNumbers)
       setCpfCnpjMask(
         onlyNumbers.length > 11
           ? '99.999.999/9999-99'

@@ -1,6 +1,7 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import { useEffect, useState } from "react";
 import { EmpresaProvider } from "../../../contexts/empresas.context";
+import { UserProvider } from "../../../contexts/usuario.context";
 import { isSuperAdmin } from "../../../Utils";
 import { Form } from "./Form";
 import { List } from "./List";
@@ -35,7 +36,7 @@ export const EmpresasIndex = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token') || '';
+    const token = localStorage.getItem("token") || "";
     setSuperAdm(isSuperAdmin(token));
     setLoading(false);
   }, []);
@@ -67,9 +68,13 @@ export const EmpresasIndex = () => {
       >
         <Tabs value={abaAtual} onChange={handleChange} aria-label="tabs">
           {ContentTabs.map((tab) => (
-            <Tab key={tab.id} label={`${tab.label}`} sx={{
-              display: !superAdm && tab.id == 1 ? 'none' : 'block'
-            }}/>
+            <Tab
+              key={tab.id}
+              label={`${tab.label}`}
+              sx={{
+                display: !superAdm && tab.id == 1 ? "none" : "block",
+              }}
+            />
           ))}
         </Tabs>
       </Box>
@@ -89,7 +94,9 @@ export const EmpresasIndex = () => {
 export const Empresas = () => {
   return (
     <EmpresaProvider>
-      <EmpresasIndex />
+      <UserProvider>
+        <EmpresasIndex />
+      </UserProvider>
     </EmpresaProvider>
   );
 };

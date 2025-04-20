@@ -1,28 +1,19 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { UsuariosService } from "../services/api/Usuarios/usuarios.service";
 import { EmpresasService } from "../services/api/Empresas/Empresas.service";
+import { UsuariosService } from "../services/api/Usuarios/usuarios.service";
+import { TUser } from "../types/TUser.type";
 import { isSuperAdmin } from "../Utils";
 
-interface User {
-  id?: number;
-  nome: string;
-  usuario: string;
-  tenant_id: string;
-  email: string;
-  senha: string;
-  nivel: number;
-  created_at?: string;
-}
-
 interface UserContextData {
-  currentUser: User | null;
-  setCurrentUser: (user: User | null) => void;
-  users: User[];
-  setUsers: (users: User[]) => void;
-  addUser: (user: User) => void;
+  currentUser: TUser | null;
+  setCurrentUser: (user: TUser | null) => void;
+  users: TUser[];
+  setUsers: (users: TUser[]) => void;
+  addUser: (user: TUser) => Promise<TUser>;
   getEmpresas: () => any;
   isLoading: boolean;
   getUser: () => any;
+  getAllUsers: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextData | undefined>(undefined);
@@ -30,15 +21,14 @@ const UserContext = createContext<UserContextData | undefined>(undefined);
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
+  const [currentUser, setCurrentUser] = useState<TUser | null>(null);
+  const [users, setUsers] = useState<TUser[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const getAllUsers = async () => {
-    const token = localStorage.getItem('token') || ``;
-    const adm = isSuperAdmin(token)
-    console.log(adm)
-    if(!adm) return
+    const token = localStorage.getItem("token") || ``;
+    const adm = isSuperAdmin(token);
+    if (!adm) return;
 
     setIsLoading(true);
     try {
@@ -62,13 +52,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     getAllUsers();
   }, []);
 
-  const addUser = async (user: User) => {
+  const addUser = async (user: TUser): Promise<TUser> => {
     setIsLoading(true);
     try {
-      await UsuariosService.create(user);
-      await getAllUsers(); // Atualiza a lista de usuários após adicionar um novo
+      const createdUser = await UsuariosService.create(user);
+      setUsers((prevUsers) => [...prevUsers, createdUser]);
+      return createdUser;
     } catch (error) {
       console.error("Failed to add user:", error);
+      throw error; // Re-throw the error to maintain the Promise<User> contract
     } finally {
       setIsLoading(false);
     }
@@ -103,6 +95,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         getEmpresas,
         isLoading,
         getUser,
+        getAllUsers,
       }}
     >
       {children}

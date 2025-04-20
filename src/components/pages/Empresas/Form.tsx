@@ -1,16 +1,32 @@
-import React, { useEffect, useState, useRef } from "react";
-import { SaveAltRounded } from "@mui/icons-material";
+import { DeleteOutline, SaveAltRounded } from "@mui/icons-material";
 import {
   Box,
   Button,
   CircularProgress,
   Container,
+  IconButton,
+  MenuItem,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
 import InputMask from "react-input-mask";
 import { useEmpresasContext } from "../../../contexts/empresas.context";
+import {
+  UserProvider,
+  useUserContext,
+} from "../../../contexts/usuario.context";
+import { isSuperAdmin } from "../../../Utils";
+import GenericModal from "../../organisms/Modal";
 import ToastMessage from "../../organisms/ToastMessage";
+import { UserForm } from "../Usuarios/Form";
 
 export const Form: React.FC = () => {
   const {
@@ -20,7 +36,9 @@ export const Form: React.FC = () => {
     addEmpresa,
     error,
     setError,
+    empresas,
   } = useEmpresasContext();
+  const { users, isLoading: userLoading, getAllUsers } = useUserContext();
   const [formData, setFormData] = useState({
     cnpj: "",
     razao_social: "",
@@ -45,6 +63,37 @@ export const Form: React.FC = () => {
     status: "success" as "success" | "error",
     message: "",
   });
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [associatedUsers, setAssociatedUsers] = useState<
+    { id: string; nome: string; email: string }[]
+  >([]);
+  const [selectedUserId, setSelectedUserId] = useState("");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = async () => {
+    setIsModalOpen(false);
+    await getAllUsers(); // Recarrega a lista de usuários ao fechar o modal
+  };
+
+  const handleAddUser = () => {
+    const user = users.find((u) => u.id === Number(selectedUserId));
+    if (user) {
+      setAssociatedUsers((prev) => [
+        ...prev,
+        { id: String(user.id), nome: user.nome, email: user.email },
+      ]);
+      setSelectedUserId("");
+    }
+  };
+
+  const handleRemoveUser = (userId: string) => {
+    setAssociatedUsers((prev) => prev.filter((user) => user.id !== userId));
+  };
 
   const handleCloseToast = () => {
     setToast((prev) => ({ ...prev, open: false }));
@@ -72,11 +121,23 @@ export const Form: React.FC = () => {
   }, [currentEmpresa]);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setToast({
+        open: true,
+        status: "error",
+        message: "Token de autenticação não encontrado. Faça login novamente.",
+      });
+      return;
+    }
+    const adm = isSuperAdmin(token);
+    setIsAdmin(!adm);
+
     if (error) {
       setToast({
         open: true,
         status: "error",
-        message: error.message || "Erro desconhecido", // Garante que a mensagem seja uma string
+        message: error.message || "Erro desconhecido",
       });
       setError(null);
     }
@@ -112,6 +173,13 @@ export const Form: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
+      if (associatedUsers.length === 0) {
+        setToast({
+          open: true,
+          status: "error",
+          message: "Selecione pelo menos um usuário para associar.",
+        });
+      }
       const dataEmpresa = {
         cnpj: formData.cnpj,
         razao_social: formData.razao_social,
@@ -125,6 +193,7 @@ export const Form: React.FC = () => {
         uf: formData.uf,
         inscricao_estadual: formData.inscricao_estadual,
         site: formData.site,
+        associatedUsers: associatedUsers.map((user) => user.id),
       };
 
       await addEmpresa(dataEmpresa);
@@ -162,6 +231,7 @@ export const Form: React.FC = () => {
       inscricao_estadual: "",
       site: "",
     });
+    setAssociatedUsers([]);
   };
 
   const isFormValid = () => {
@@ -169,7 +239,7 @@ export const Form: React.FC = () => {
       if (typeof value === "string") {
         return value.trim() !== "";
       }
-      return true; // Para campos que não são strings
+      return true;
     });
   };
 
@@ -189,6 +259,7 @@ export const Form: React.FC = () => {
             mask="99.999.999/9999-99"
             value={formData.cnpj}
             onChange={handleChange}
+            disabled={isAdmin}
           >
             {(inputProps: any) => (
               <TextField
@@ -197,6 +268,7 @@ export const Form: React.FC = () => {
                 name="cnpj"
                 fullWidth
                 required
+                disabled={isAdmin}
                 onChange={handleChange}
                 inputRef={cnpjRef} // Usando ref diretamente no TextField
               />
@@ -211,6 +283,7 @@ export const Form: React.FC = () => {
             onChange={handleChange}
             fullWidth
             required
+            disabled={isAdmin}
           />
         </Box>
         <Box>
@@ -221,6 +294,7 @@ export const Form: React.FC = () => {
             onChange={handleChange}
             fullWidth
             required
+            disabled={isAdmin}
           />
         </Box>
         <Box>
@@ -231,6 +305,7 @@ export const Form: React.FC = () => {
             onChange={handleChange}
             fullWidth
             required
+            disabled={isAdmin}
           />
         </Box>
         <Box>
@@ -238,6 +313,7 @@ export const Form: React.FC = () => {
             mask="(99) 99999-9999"
             value={formData.telefone}
             onChange={handleChange}
+            disabled={isAdmin}
           >
             {(inputProps: any) => (
               <TextField
@@ -246,6 +322,7 @@ export const Form: React.FC = () => {
                 name="telefone"
                 fullWidth
                 required
+                disabled={isAdmin}
                 onChange={handleChange}
               />
             )}
@@ -256,6 +333,7 @@ export const Form: React.FC = () => {
             mask="99999-999"
             value={formData.cep}
             onChange={handleChange}
+            disabled={isAdmin}
           >
             {(inputProps: any) => (
               <TextField
@@ -265,6 +343,7 @@ export const Form: React.FC = () => {
                 fullWidth
                 required
                 onChange={handleChange}
+                disabled={isAdmin}
               />
             )}
           </InputMask>
@@ -277,6 +356,7 @@ export const Form: React.FC = () => {
             onChange={handleChange}
             fullWidth
             required
+            disabled={isAdmin}
           />
         </Box>
         <Box>
@@ -287,6 +367,7 @@ export const Form: React.FC = () => {
             onChange={handleChange}
             fullWidth
             required
+            disabled={isAdmin}
           />
         </Box>
         <Box>
@@ -297,6 +378,7 @@ export const Form: React.FC = () => {
             onChange={handleChange}
             fullWidth
             required
+            disabled={isAdmin}
           />
         </Box>
         <Box>
@@ -307,6 +389,7 @@ export const Form: React.FC = () => {
             onChange={handleChange}
             fullWidth
             required
+            disabled={isAdmin}
           />
         </Box>
         <Box>
@@ -317,6 +400,7 @@ export const Form: React.FC = () => {
             onChange={handleChange}
             fullWidth
             required
+            disabled={isAdmin}
           />
         </Box>
         <Box>
@@ -327,6 +411,7 @@ export const Form: React.FC = () => {
             onChange={handleChange}
             fullWidth
             required
+            disabled={isAdmin}
           />
         </Box>
         <Box>
@@ -337,6 +422,7 @@ export const Form: React.FC = () => {
             onChange={handleChange}
             fullWidth
             required
+            disabled={isAdmin}
           />
         </Box>
         <Box>
@@ -347,9 +433,95 @@ export const Form: React.FC = () => {
             onChange={handleChange}
             fullWidth
             required
+            disabled={isAdmin}
           />
         </Box>
       </Box>
+      {users && (
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Associar Usuários à Empresa
+          </Typography>
+
+          {/* Formulário para adicionar usuários */}
+          <Box
+            display="grid"
+            gridTemplateColumns={"1fr 200px 200px"}
+            gap={2}
+            alignItems="center"
+          >
+            <TextField
+              label="Usuário"
+              select
+              disabled={isAdmin || userLoading}
+              value={selectedUserId}
+              onChange={(e) => setSelectedUserId(e.target.value)}
+              fullWidth
+              onClick={async () => {
+                await getAllUsers();
+              }}
+            >
+              {users.map((user) => (
+                <MenuItem key={user.id} value={user.id}>
+                  {user.nome} - {user.email}
+                </MenuItem>
+              ))}
+            </TextField>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleAddUser}
+              disabled={!selectedUserId}
+              sx={{ height: "100%" }}
+            >
+              Adicionar
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleOpenModal} // Abre o modal
+              sx={{ height: "100%" }}
+              disabled={isAdmin}
+            >
+              Criar usuário
+            </Button>
+          </Box>
+
+          {/* Lista de usuários associados em forma de tabela */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle1" sx={{ mb: 1 }}>
+              Usuários Associados
+            </Typography>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Nome</TableCell>
+                    <TableCell>Email</TableCell>
+                    <TableCell align="center">Ações</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {associatedUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>{user.nome}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell align="center">
+                        <IconButton
+                          edge="end"
+                          color="error"
+                          onClick={() => handleRemoveUser(user.id)}
+                        >
+                          <DeleteOutline />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        </Box>
+      )}
       <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
         <Button
           variant="contained"
@@ -362,7 +534,7 @@ export const Form: React.FC = () => {
             )
           }
           onClick={handleSubmit}
-          disabled={isLoading || !isFormValid()}
+          disabled={isLoading || !isFormValid() || associatedUsers.length === 0}
           sx={{ opacity: isLoading ? 0.7 : 1 }}
         >
           {isLoading ? "Salvando..." : "Salvar Empresa"}
@@ -371,12 +543,27 @@ export const Form: React.FC = () => {
           Limpar
         </Button>
       </Box>
+
       <ToastMessage
         status={toast.status}
         open={toast.open}
         message={toast.message}
         onClose={handleCloseToast}
       />
+      <GenericModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        title="Criar Usuário"
+        actions={
+          <Button variant="contained" onClick={handleCloseModal}>
+            Fechar
+          </Button>
+        }
+      >
+        <UserProvider>
+          <UserForm />
+        </UserProvider>
+      </GenericModal>
     </Container>
   );
 };

@@ -5,7 +5,9 @@ const create = async (data: any) => {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    throw new Error("Token de autenticação não encontrado. Faça login novamente.");
+    throw new Error(
+      "Token de autenticação não encontrado. Faça login novamente."
+    );
   }
 
   const options = {
@@ -22,26 +24,36 @@ const create = async (data: any) => {
     const response = await Api.request(options);
     return response; // Retorna os dados da resposta em caso de sucesso
   } catch (error: any) {
-
     if (error.response) {
       const { status, data } = error.response;
 
       switch (status) {
         case 400:
-          throw new Error(data.message || "Dados inválidos. Verifique os campos e tente novamente.");
+          throw new Error(
+            data.message ||
+              "Dados inválidos. Verifique os campos e tente novamente."
+          );
         case 401:
           throw new Error("Não autorizado. Faça login novamente.");
         case 403:
-          throw new Error("Acesso negado. Você não tem permissão para realizar esta ação.");
+          throw new Error(
+            "Acesso negado. Você não tem permissão para realizar esta ação."
+          );
         case 404:
           throw new Error("Recurso não encontrado.");
         case 500:
-          throw new Error("Erro interno no servidor. Tente novamente mais tarde.");
+          throw new Error(
+            "Erro interno no servidor. Tente novamente mais tarde."
+          );
         default:
-          throw new Error(data.message || `Erro desconhecido ao cadastrar empresa.${error}`);
+          throw new Error(
+            data.message || `Erro desconhecido ao cadastrar empresa.${error}`
+          );
       }
     } else if (error.request) {
-      throw new Error("Erro de conexão. Verifique sua internet e tente novamente.");
+      throw new Error(
+        "Erro de conexão. Verifique sua internet e tente novamente."
+      );
     } else {
       throw new Error("Erro ao processar a requisição. Tente novamente.");
     }
@@ -51,18 +63,20 @@ const create = async (data: any) => {
 const getAll = async () => {
   const token = localStorage.getItem("token");
   if (!token) {
-    throw new Error("Token de autenticação não encontrado. Faça login novamente.");
+    throw new Error(
+      "Token de autenticação não encontrado. Faça login novamente."
+    );
   }
   const superAdm = isSuperAdmin(token);
-  if(superAdm) {
+  if (superAdm) {
     const options = {
       method: "GET",
       url: "/empresas/all",
       headers: {
-        authorization: `Bearer ${token}`
-      }
+        authorization: `Bearer ${token}`,
+      },
     };
-  
+
     try {
       const { data } = await Api.request(options);
       return data;
@@ -72,14 +86,14 @@ const getAll = async () => {
   }
 };
 
-const getById = async (id: number) => {
+const getEmpresa = async () => {
   const token = localStorage.getItem("token");
   const options = {
     method: "GET",
-    url: `/empresas/${id}`,
+    url: `/empresas`,
     headers: {
-      authorization: `Bearer ${token}`
-    }
+      authorization: `Bearer ${token}`,
+    },
   };
 
   try {
@@ -97,7 +111,7 @@ const deleteById = async () => {};
 export const EmpresasService = {
   create,
   getAll,
-  getById,
+  getEmpresa,
   updateById,
   deleteById,
 };

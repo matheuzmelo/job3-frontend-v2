@@ -1,5 +1,6 @@
 import React, { createContext, useEffect } from "react";
 import { EmpresasService } from "../services/api/Empresas/Empresas.service";
+import { UsuariosService } from "../services/api/Usuarios/usuarios.service";
 import { DadosCep } from "../types/TCep.type";
 import { getDataCep, isSuperAdmin } from "../Utils";
 
@@ -35,46 +36,59 @@ interface EmpresaContextData {
   setCurrentEmpresa: (empresa: Empresa | null) => void;
   setError: (error: any) => any;
   error: any;
+  users: any | null;
 }
 
 const EmpresasContext = createContext<EmpresaContextData | undefined>(
-  undefined,
+  undefined
 );
 
 export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [currentEmpresa, setCurrentEmpresa] = React.useState<Empresa | null>(
-    null,
+    null
   );
   const [empresas, setEmpresas] = React.useState<Empresa[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<any>(null);
+  const [users, setUsers] = React.useState<any | null>(null);
+
+  const getUsers = async () => {
+    try {
+      const response = await UsuariosService.getAll();
+
+      if (response.success) {
+        setUsers(response.data);
+      }
+    } catch (error) {
+      setError(error);
+    }
+  };
 
   const getEmpresas = async () => {
+    const token = localStorage.getItem("token") || ``;
+    const adm = isSuperAdmin(token);
 
-    const token = localStorage.getItem('token') || ``
-    const adm = isSuperAdmin(token)
-
-    if(!adm) return
+    if (adm) return;
 
     try {
       setIsLoading(true);
-      const response = await EmpresasService.getAll();
+      const response = await EmpresasService.getEmpresa();
       setIsLoading(false);
       if (response) {
-        setEmpresas(response.data);
+        setCurrentEmpresa(response.data);
       }
     } catch (error) {
       setIsLoading(false);
       setError(error);
     }
   };
+
   useEffect(() => {
     getEmpresas();
+    getUsers();
   }, []);
-
-
 
   const addEmpresa = async (empresa: Empresa) => {
     try {
@@ -115,6 +129,7 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
         setCurrentEmpresa,
         setError,
         error,
+        users,
       }}
     >
       {children}
@@ -126,7 +141,7 @@ export const useEmpresasContext = () => {
   const context = React.useContext(EmpresasContext);
   if (context === undefined)
     throw new Error(
-      "useEmpresasContext must be used within a EmpresasProvider",
+      "useEmpresasContext must be used within a EmpresasProvider"
     );
   return context;
 };

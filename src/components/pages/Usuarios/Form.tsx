@@ -36,19 +36,21 @@ export const UserForm: React.FC = () => {
   // Estados para o ToastMessage
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-  const [toastStatus, setToastStatus] = useState<"success" | "error" | "warning">("success");
+  const [toastStatus, setToastStatus] = useState<
+    "success" | "error" | "warning"
+  >("success");
 
   useEffect(() => {
     const fetchEmpresas = async () => {
       try {
         const empresasList = await getEmpresas();
         if (Array.isArray(empresasList)) {
-          setEmpresas(empresasList); 
+          setEmpresas(empresasList);
         } else {
           setError("Dados de empresas inválidos.");
         }
       } catch (err) {
-        setError("Erro ao carregar empresas."); 
+        setError("Erro ao carregar empresas.");
         console.error(err);
       }
     };
@@ -90,7 +92,7 @@ export const UserForm: React.FC = () => {
   }, [isAdm, currentUser]);
 
   const handleChange: any = (
-    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>,
+    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name as string]: value }));
@@ -148,7 +150,11 @@ export const UserForm: React.FC = () => {
       <Typography variant="h5" sx={{ mb: 2 }}>
         Cadastro de Usuário
       </Typography>
-      <Box display={'grid'} gridTemplateColumns={'repeat(auto-fit, minmax(400px, 1fr))'} gap={2}>
+      <Box
+        display={"grid"}
+        gridTemplateColumns={"repeat(auto-fit, minmax(400px, 1fr))"}
+        gap={2}
+      >
         <Box sx={{ width: "100%" }}>
           <TextField
             label="Nome"

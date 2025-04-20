@@ -1,28 +1,32 @@
-import React, { useEffect, useState } from "react";
-import { SaveAltRounded, AddCircleOutline, DeleteOutline } from "@mui/icons-material";
+import {
+  AddCircleOutline,
+  DeleteOutline,
+  SaveAltRounded,
+} from "@mui/icons-material";
 import {
   Box,
   Button,
   CircularProgress,
   Container,
-  TextField,
-  Typography,
-  Select,
-  MenuItem,
-  InputLabel,
+  Divider,
   FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Divider,
+  TextField,
+  Typography,
 } from "@mui/material";
-import ToastMessage from "../../organisms/ToastMessage";
+import React, { useEffect, useState } from "react";
 import { useNotasFiscaisContext } from "../../../contexts/nfe.context";
 import { formatCurrency } from "../../../Utils";
+import ToastMessage from "../../organisms/ToastMessage";
 import { TNotaFiscal } from "./TNotaFiscal.type";
 
 export const Form: React.FC = () => {
@@ -78,9 +82,9 @@ export const Form: React.FC = () => {
   };
 
   const handleRemoveProduct = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      produtos: prev.produtos.filter((_, i) => i !== index)
+      produtos: prev.produtos.filter((_, i) => i !== index),
     }));
   };
 
@@ -93,7 +97,6 @@ export const Form: React.FC = () => {
   const handleSubmit = async () => {
     try {
       const dataToSubmit = prepareDataForSubmission();
-      console.log(dataToSubmit);
       await addNotaFiscal(dataToSubmit);
       await getNotasFiscais();
       setToast({
@@ -112,27 +115,28 @@ export const Form: React.FC = () => {
 
   const [productForm, setProductForm] = useState({
     produto_id: 0, // changed from nome to produto_id
-    descricao: '',
+    descricao: "",
     preco: 0,
     estoque: 0,
   });
 
   const handleProductFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setProductForm(prev => ({ ...prev, [name]: value }));
+    setProductForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleProductFormSubmit = () => {
-    if (!productForm.produto_id || productForm.preco <= 0) { // updated validation
+    if (!productForm.produto_id || productForm.preco <= 0) {
+      // updated validation
       setToast({
         open: true,
-        status: 'error',
-        message: 'Preencha os campos obrigatórios do produto',
+        status: "error",
+        message: "Preencha os campos obrigatórios do produto",
       });
       return;
     }
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       produtos: [
         ...prev.produtos,
@@ -140,15 +144,15 @@ export const Form: React.FC = () => {
           produto_id: productForm.produto_id, // using selected produto_id
           quantidade: productForm.estoque,
           valor_unitario: productForm.preco,
-          desconto: 0
-        }
-      ]
+          desconto: 0,
+        },
+      ],
     }));
 
     // Reset product form
     setProductForm({
       produto_id: 0, // reset produto_id instead of nome
-      descricao: '',
+      descricao: "",
       preco: 0,
       estoque: 0,
     });
@@ -157,10 +161,12 @@ export const Form: React.FC = () => {
   // Add this effect to calculate total
   useEffect(() => {
     const total = formData.produtos.reduce((acc, produto) => {
-      return acc + (produto.quantidade * produto.valor_unitario - produto.desconto);
+      return (
+        acc + (produto.quantidade * produto.valor_unitario - produto.desconto)
+      );
     }, 0);
 
-    setFormData(prev => ({ ...prev, total }));
+    setFormData((prev) => ({ ...prev, total }));
   }, [formData.produtos]);
 
   return (
@@ -168,50 +174,55 @@ export const Form: React.FC = () => {
       <Typography variant="h5" sx={{ mb: 2 }}>
         Cadastro de Nota Fiscal
       </Typography>
-      <Box display={'grid'} gap={2}>
-      <Box
-        display={"grid"}
-        gridTemplateColumns={"repeat(auto-fill, minmax(30%, 1fr))"}
-        gap={2}
-      >
-        <Box >
-          <TextField
-            label="Número"
-            name="numero"
-            value={formData.numero}
-            onChange={handleChange}
-            sx={{ width: "33%" }}
-            disabled
-          />
+      <Box display={"grid"} gap={2}>
+        <Box
+          display={"grid"}
+          gridTemplateColumns={"repeat(auto-fill, minmax(30%, 1fr))"}
+          gap={2}
+        >
+          <Box>
+            <TextField
+              label="Número"
+              name="numero"
+              value={formData.numero}
+              onChange={handleChange}
+              sx={{ width: "33%" }}
+              disabled
+            />
+          </Box>
+          <Box display={"flex"} justifyContent={"flex-end"}>
+            <TextField
+              label="Data de Emissão"
+              name="data_emissao"
+              type="date"
+              value={formData.data_emissao}
+              onChange={handleChange}
+              sx={{ width: "50%" }}
+            />
+          </Box>
+          <Box>
+            <FormControl fullWidth variant="outlined">
+              <InputLabel>Cliente/Destinatário</InputLabel>
+              <Select
+                label="Cliente/Destinatário"
+                name="pessoa_id"
+                value={formData.pessoa_id}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    pessoa_id: e.target.value as number,
+                  }))
+                }
+              >
+                {clientes.map((cliente) => (
+                  <MenuItem key={cliente.id} value={cliente.id}>
+                    {cliente.primeiro_nome} {cliente.segundo_nome}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
         </Box>
-        <Box display={'flex'} justifyContent={'flex-end'}>
-          <TextField
-            label="Data de Emissão"
-            name="data_emissao"
-            type="date"
-            value={formData.data_emissao}
-            onChange={handleChange}
-            sx={{ width: "50%" }}
-          />
-        </Box>
-        <Box >
-          <FormControl fullWidth variant="outlined">
-            <InputLabel>Cliente/Destinatário</InputLabel>
-            <Select
-              label="Cliente/Destinatário"
-              name="pessoa_id"
-              value={formData.pessoa_id}
-              onChange={(e) => setFormData((prev) => ({ ...prev, pessoa_id: e.target.value as number }))}
-            >
-              {clientes.map((cliente) => (
-                <MenuItem key={cliente.id} value={cliente.id}>
-                  {cliente.primeiro_nome} {cliente.segundo_nome}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
-      </Box>
         <Box>
           <TextField
             label="Observações"
@@ -240,7 +251,12 @@ export const Form: React.FC = () => {
                   label="Produto"
                   name="produto_id"
                   value={productForm.produto_id}
-                  onChange={(e) => setProductForm(prev => ({ ...prev, produto_id: e.target.value as number }))}
+                  onChange={(e) =>
+                    setProductForm((prev) => ({
+                      ...prev,
+                      produto_id: e.target.value as number,
+                    }))
+                  }
                   fullWidth
                 >
                   <MenuItem value={0}>Selecione um produto</MenuItem>
@@ -295,16 +311,17 @@ export const Form: React.FC = () => {
                 {formData.produtos.map((produto, index) => (
                   <TableRow key={index}>
                     <TableCell>
-                      {produto.produto_id === 1 ? 'Produto 1' : 'Produto 2'}
+                      {produto.produto_id === 1 ? "Produto 1" : "Produto 2"}
                     </TableCell>
-                    <TableCell align="right">
-                      {produto.quantidade}
-                    </TableCell>
+                    <TableCell align="right">{produto.quantidade}</TableCell>
                     <TableCell align="right">
                       {formatCurrency(produto.valor_unitario)}
                     </TableCell>
                     <TableCell align="right">
-                      {formatCurrency(produto.quantidade * produto.valor_unitario - produto.desconto)}
+                      {formatCurrency(
+                        produto.quantidade * produto.valor_unitario -
+                          produto.desconto
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       <Button
@@ -334,7 +351,7 @@ export const Form: React.FC = () => {
             </Table>
           </TableContainer>
         </Box>
-    </Box>
+      </Box>
       <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
         <Button
           variant="contained"
