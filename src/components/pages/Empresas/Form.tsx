@@ -36,7 +36,6 @@ export const Form: React.FC = () => {
     addEmpresa,
     error,
     setError,
-    empresas,
   } = useEmpresasContext();
   const { users, isLoading: userLoading, getAllUsers } = useUserContext();
   const [formData, setFormData] = useState({
