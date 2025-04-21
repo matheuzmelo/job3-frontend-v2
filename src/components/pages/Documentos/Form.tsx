@@ -559,6 +559,7 @@ export const Form: React.FC = () => {
               color="error"
               onClick={() => {
                 setFormData({
+                  numero_pedido: formData.numero_pedido,
                   pessoa_id: 0,
                   total: 0,
                   observacoes: "",
