@@ -43,7 +43,7 @@ interface Product {
 }
 
 export const Form: React.FC = () => {
-  const { parametros, isLoading, setError, produtos } = useDocumentosContext();
+  const { parametros, setError, produtos } = useDocumentosContext();
   const { pessoas, getPessoas } = usePessoaContext();
 
   const [formData, setFormData] = useState({
