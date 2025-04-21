@@ -1,6 +1,7 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
 import { DocumentosProvider } from "../../../contexts/documentos.context";
+import { PessoaProvider } from "../../../contexts/pessoas.context";
 import { Form } from "./Form";
 import { List } from "./List";
 
@@ -72,7 +73,9 @@ export const DocumentosIndex = () => {
 export const Documentos = () => {
   return (
     <DocumentosProvider>
-      <DocumentosIndex />
+      <PessoaProvider>
+        <DocumentosIndex />
+      </PessoaProvider>
     </DocumentosProvider>
   );
 };

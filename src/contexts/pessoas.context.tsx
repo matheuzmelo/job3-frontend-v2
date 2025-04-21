@@ -1,6 +1,7 @@
-import { createContext, useContext, useState } from 'react';
-import { DadosCep } from '../types/TCep.type';
-import { getDataCep } from '../Utils';
+import { createContext, useContext, useEffect, useState } from "react";
+import { PessoasService } from "../services/api/Pessoas/pessoas.service";
+import { DadosCep } from "../types/TCep.type";
+import { getDataCep } from "../Utils";
 
 export interface Pessoa {
   id: number;
@@ -23,8 +24,10 @@ interface PessoaContextProps {
   consultaCep: (cep: string) => Promise<DadosCep | undefined>;
   abaAtual: number;
   setAbaAtual: (value: number) => void;
-  error,
-  setError
+  error;
+  setError;
+  pessoas: any;
+  getPessoas: () => Promise<void>;
 }
 
 const PessoaContext = createContext<PessoaContextProps | undefined>(undefined);
@@ -32,20 +35,45 @@ const PessoaContext = createContext<PessoaContextProps | undefined>(undefined);
 export const PessoaProvider = ({ children }: any) => {
   const [pessoaAtual, setPessoaAtual] = useState<Pessoa | null>(null);
   const [abaAtual, setAbaAtual] = useState<number>(0);
-  const [error, setError] = useState<any>()
-
+  const [error, setError] = useState<any>();
+  const [pessoas, setPessoas] = useState<any>([]);
 
   const consultaCep = async (cep: string): Promise<DadosCep | undefined> => {
-      try {
-        const dados = await getDataCep(cep);
-        return dados;
-      } catch (err) {
-        setError(err);
-      }
-    };
+    try {
+      const dados = await getDataCep(cep);
+      return dados;
+    } catch (err) {
+      setError(err);
+    }
+  };
+
+  const getPessoas = async () => {
+    try {
+      const { data } = await PessoasService.getAll();
+      setPessoas(data);
+    } catch (err) {
+      setError(err);
+    }
+  };
+
+  useEffect(() => {
+    getPessoas();
+  }, []);
 
   return (
-    <PessoaContext.Provider value={{ pessoaAtual, setPessoaAtual, abaAtual, setAbaAtual, error, setError, consultaCep}}>
+    <PessoaContext.Provider
+      value={{
+        pessoaAtual,
+        setPessoaAtual,
+        abaAtual,
+        setAbaAtual,
+        error,
+        setError,
+        consultaCep,
+        pessoas,
+        getPessoas,
+      }}
+    >
       {children}
     </PessoaContext.Provider>
   );
@@ -54,7 +82,9 @@ export const PessoaProvider = ({ children }: any) => {
 export const usePessoaContext = (): PessoaContextProps => {
   const context = useContext(PessoaContext);
   if (!context) {
-    throw new Error('usePessoaContext deve ser usado dentro de um PessoaProvider');
+    throw new Error(
+      "usePessoaContext deve ser usado dentro de um PessoaProvider"
+    );
   }
   return context;
 };

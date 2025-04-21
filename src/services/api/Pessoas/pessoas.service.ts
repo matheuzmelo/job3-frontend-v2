@@ -23,9 +23,9 @@ const create = async (data: any) => {
 const getAll = async () => {
   const token = localStorage.getItem("token");
   const options = {
-    method: 'GET',
-    url: '/pessoas',
-    headers: {authorization: `Bearer ${token}`}
+    method: "GET",
+    url: "/pessoas",
+    headers: { authorization: `Bearer ${token}` },
   };
 
   try {

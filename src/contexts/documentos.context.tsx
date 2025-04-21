@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 import { TNotaFiscalGroup } from "../components/pages/nfe/TNotaFiscal.type";
+import { ProdutosService } from "../services/api/Produtos/produtos.service";
 import { TData } from "../types/TParametros.type";
 
 interface IDocumentosContext {
@@ -97,28 +98,10 @@ export const DocumentosProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setIsLoading(true);
 
-      const response = {
-        success: true,
-        data: [
-          {
-            id: 1,
-            nome: "Produto 1",
-            descricao: "Descrição do Produto 1",
-            preco: 10.0,
-          },
-          {
-            id: 2,
-            nome: "Produto 2",
-            descricao: "Descrição do Produto 2",
-            preco: 20.0,
-          },
-        ],
-      };
-
+      const { data } = await ProdutosService.getAll();
+      console.log("produtos", data);
       setIsLoading(false);
-      if (response.success) {
-        setProdutos(response.data);
-      }
+      setProdutos(data);
     } catch (error) {
       setIsLoading(false);
       setError(error);

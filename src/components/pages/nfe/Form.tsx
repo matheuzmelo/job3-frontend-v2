@@ -89,7 +89,6 @@ export const Form: React.FC = () => {
   };
 
   const prepareDataForSubmission = () => {
-    // Destructure to omit total and data_emissao
     const { total, data_emissao, ...dataToSubmit } = formData;
     return dataToSubmit;
   };

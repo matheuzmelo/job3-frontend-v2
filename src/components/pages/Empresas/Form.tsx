@@ -485,7 +485,6 @@ export const Form: React.FC = () => {
             </Button>
           </Box>
 
-          {/* Lista de usuários associados em forma de tabela */}
           <Box sx={{ mt: 2 }}>
             <Typography variant="subtitle1" sx={{ mb: 1 }}>
               Usuários Associados
