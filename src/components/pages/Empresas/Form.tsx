@@ -158,6 +158,8 @@ export const Form: React.FC = () => {
             logradouro: data.street || "",
           }));
         }
+        
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         setToast({
           open: true,

@@ -29,6 +29,8 @@ import {
 } from "../../../contexts/pessoas.context";
 import GenericModal from "../../organisms/Modal";
 import { Form as PessoaForm } from "../../pages/Pessoas/Form";
+import { FormSkeleton } from "./Loader";
+import ToastMessage from "../../organisms/ToastMessage";
 
 interface Product {
   id: number;
@@ -43,13 +45,18 @@ interface Product {
 }
 
 export const Form: React.FC = () => {
-  const { parametros, setError, produtos } = useDocumentosContext();
+  const { parametros, setError, produtos, isLoading, createDocument } = useDocumentosContext();
   const { pessoas, getPessoas } = usePessoaContext();
-
+  const [toast, setToast] = useState({
+    open: false,
+    status: "success",
+    message: "",
+  });
   const [formData, setFormData] = useState({
     numero_pedido: 0,
     pessoa_id: 0,
     total: 0,
+    natureza_operacao: '',
     observacoes: "",
     movimenta_estoque: true,
     tipo_documento: "",
@@ -109,7 +116,6 @@ export const Form: React.FC = () => {
       );
 
       if (existingProductIndex !== -1) {
-        // Produto já existe, atualiza a quantidade e subtotal
         const updatedProducts = [...prev.produtos];
         const existingProduct = updatedProducts[existingProductIndex];
 
@@ -129,7 +135,6 @@ export const Form: React.FC = () => {
         };
       }
 
-      // Produto não existe, adiciona à lista
       return {
         ...prev,
         produtos: [
@@ -138,14 +143,14 @@ export const Form: React.FC = () => {
             ...productForm,
             total_produto: totalProduto,
             valor_unidade: selectedProduct.valor_unidade,
-            unidade: selectedProduct.unidade || "unidade", // Default to "unidade" if not provided
+            unidade: selectedProduct.unidade || "unidade",
           },
         ],
         total: prev.total + totalProduto,
       };
     });
 
-    // Reseta o formulário do produto
+
     setProductForm({
       id: 0,
       quantidade: 0,
@@ -175,18 +180,56 @@ export const Form: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleSubmit = async () => {
-    try {
-      console.log("Dados para envio:", formData);
-    } catch (err) {
-      setError("Erro ao salvar documento");
-    }
+  const handleCloseToast = () => {
+    setToast((prev) => ({ ...prev, open: false }));
   };
+
+  const handleCreateDocument = async () => {
+   
+     try{
+      const novoDocumento = {
+        numero_pedido: formData.numero_pedido,
+        pessoa_id: formData.pessoa_id,
+        total: Number(formData.total),
+        observacoes: formData.observacoes,
+        movimenta_estoque: formData.movimenta_estoque,
+        tipo_documento: formData.tipo_documento,
+        produtos: formData.produtos.map((produto) => ({
+          produto_id: produto.id,
+          quantidade: produto.quantidade,
+          valor_unitario: Number(produto.valor_unidade),
+          total_produto: Number(produto.total_produto),
+          valor_desconto: Number(produto.valor_desconto),
+          percentual_desconto: Number(produto.percentual_desconto),
+          observacoes: produto.observacoes,
+        })),
+      };
+      
+      await createDocument(novoDocumento);   
+      
+      setToast({
+        message: 'Documento de pedido gerado com sucesso',
+        open: true,
+        status: 'success'
+      })
+     }catch(error){
+      setToast({
+        message: `Erro ao gerar pedido: ${error}`,
+        open: true,
+        status: 'warn'
+      })
+     }
+  };
+  
 
   const handleCloseModal = async () => {
     setIsModalOpen(false);
     await getPessoas();
   };
+
+  if(isLoading){
+    return <FormSkeleton />
+  }
 
   return (
     <Container maxWidth="xl">
@@ -312,9 +355,9 @@ export const Form: React.FC = () => {
             <TextField
               label="Natureza da Operação"
               name="natureza_operacao"
-              value={formData.observacoes}
+              value={formData.natureza_operacao}
               onChange={(e) =>
-                setFormData({ ...formData, observacoes: e.target.value })
+                setFormData({ ...formData, natureza_operacao: e.target.value })
               }
               fullWidth
             />
@@ -377,7 +420,7 @@ export const Form: React.FC = () => {
               label="Subtotal"
               name="subtotal"
               disabled
-              value={productForm.subtotal.toLocaleString("pt-BR", {
+              value={isNaN(productForm.subtotal) ? 'R$ 0,00' : productForm.subtotal.toLocaleString("pt-BR", {
                 style: "currency",
                 currency: "BRL",
               })}
@@ -524,18 +567,9 @@ export const Form: React.FC = () => {
 
         <Box display={"flex"} justifyContent={"space-between"} mt={2}>
           <Box display={"flex"} gap={2}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSubmit}
-              sx={{
-                padding: "10px 30px",
-                marginTop: "20px",
-                color: "white",
-              }}
-            >
-              Salvar
-            </Button>
+          <button onClick={handleCreateDocument} disabled={isLoading}>
+            {isLoading ? "Criando..." : "Criar Documento"}
+          </button>
             {/* TODO: Fazer a integração com emissão da nota */}
             <Button
               variant="outlined"
@@ -552,7 +586,6 @@ export const Form: React.FC = () => {
               Emitir NFE
             </Button>
           </Box>
-          {/* limpar formulário */}
           <Box>
             <Button
               variant="contained"
@@ -562,6 +595,7 @@ export const Form: React.FC = () => {
                   numero_pedido: formData.numero_pedido,
                   pessoa_id: 0,
                   total: 0,
+                  natureza_operacao: '',
                   observacoes: "",
                   movimenta_estoque: true,
                   tipo_documento: "",
@@ -594,6 +628,13 @@ export const Form: React.FC = () => {
           <PessoaForm />
         </PessoaProvider>
       </GenericModal>
+
+      <ToastMessage
+        status={toast.status}
+        open={toast.open}
+        message={toast.message}
+        onClose={handleCloseToast}
+      />
     </Container>
   );
 };
