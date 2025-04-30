@@ -45,7 +45,8 @@ interface Product {
 }
 
 export const Form: React.FC = () => {
-  const { parametros, setError, produtos, isLoading, createDocument } = useDocumentosContext();
+  const { parametros, setError, produtos, isLoading, createDocument, createDocumentNFE } =
+    useDocumentosContext();
   const { pessoas, getPessoas } = usePessoaContext();
   const [toast, setToast] = useState({
     open: false,
@@ -56,7 +57,7 @@ export const Form: React.FC = () => {
     numero_pedido: 0,
     pessoa_id: 0,
     total: 0,
-    natureza_operacao: '',
+    natureza_operacao: "",
     observacoes: "",
     movimenta_estoque: true,
     tipo_documento: "",
@@ -150,7 +151,6 @@ export const Form: React.FC = () => {
       };
     });
 
-
     setProductForm({
       id: 0,
       quantidade: 0,
@@ -184,16 +184,16 @@ export const Form: React.FC = () => {
     setToast((prev) => ({ ...prev, open: false }));
   };
 
-  const handleCreateDocument = async () => {
-   
-     try{
+  const handleCreateDocumentNFE = async () => {
+
+    if(parametros?.proximo_numero_nota) {
       const novoDocumento = {
-        numero_pedido: formData.numero_pedido,
+        numero_pedido: parametros?.proximo_numero_nota,
         pessoa_id: formData.pessoa_id,
         total: Number(formData.total),
         observacoes: formData.observacoes,
         movimenta_estoque: formData.movimenta_estoque,
-        tipo_documento: formData.tipo_documento,
+        tipo_documento: 'NOTA_FISCAL',
         produtos: formData.produtos.map((produto) => ({
           produto_id: produto.id,
           quantidade: produto.quantidade,
@@ -204,31 +204,66 @@ export const Form: React.FC = () => {
           observacoes: produto.observacoes,
         })),
       };
-      
-      await createDocument(novoDocumento);   
-      
-      setToast({
-        message: 'Documento de pedido gerado com sucesso',
-        open: true,
-        status: 'success'
-      })
-     }catch(error){
-      setToast({
-        message: `Erro ao gerar pedido: ${error}`,
-        open: true,
-        status: 'warn'
-      })
-     }
+      const result = await createDocumentNFE(parametros?.proximo_numero_nota, novoDocumento);
+
+      if (!result) {
+        setToast({
+          message: "Documento não gerado. Erro ao emitir.",
+          open: true,
+          status: "warn",
+        });
+      }
+    }
+       
+    setToast({
+      message: "Documento de pedido gerado com sucesso",
+      open: true,
+      status: "success",
+    });
   };
-  
+
+  const handleCreateDocument = async () => {
+    const novoDocumento = {
+      numero_pedido: formData.numero_pedido,
+      pessoa_id: formData.pessoa_id,
+      total: Number(formData.total),
+      observacoes: formData.observacoes,
+      movimenta_estoque: formData.movimenta_estoque,
+      tipo_documento: formData.tipo_documento,
+      produtos: formData.produtos.map((produto) => ({
+        produto_id: produto.id,
+        quantidade: produto.quantidade,
+        valor_unitario: Number(produto.valor_unidade),
+        total_produto: Number(produto.total_produto),
+        valor_desconto: Number(produto.valor_desconto),
+        percentual_desconto: Number(produto.percentual_desconto),
+        observacoes: produto.observacoes,
+      })),
+    };
+
+    const result = await createDocument(novoDocumento);
+
+    if (!result) {
+      setToast({
+        message: "Documento não gerado. Erro ao emitir.",
+        open: true,
+        status: "warn",
+      });
+    }
+    setToast({
+      message: "Documento de pedido gerado com sucesso",
+      open: true,
+      status: "success",
+    });
+  };
 
   const handleCloseModal = async () => {
     setIsModalOpen(false);
     await getPessoas();
   };
 
-  if(isLoading){
-    return <FormSkeleton />
+  if (isLoading) {
+    return <FormSkeleton />;
   }
 
   return (
@@ -420,10 +455,14 @@ export const Form: React.FC = () => {
               label="Subtotal"
               name="subtotal"
               disabled
-              value={isNaN(productForm.subtotal) ? 'R$ 0,00' : productForm.subtotal.toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              })}
+              value={
+                isNaN(productForm.subtotal)
+                  ? "R$ 0,00"
+                  : productForm.subtotal.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })
+              }
               fullWidth
             />
           </Box>
@@ -567,16 +606,24 @@ export const Form: React.FC = () => {
 
         <Box display={"flex"} justifyContent={"space-between"} mt={2}>
           <Box display={"flex"} gap={2}>
-          <button onClick={handleCreateDocument} disabled={isLoading}>
-            {isLoading ? "Criando..." : "Criar Documento"}
-          </button>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{
+                padding: "10px 30px",
+                marginTop: "20px",
+                color: "white",
+              }}
+              onClick={handleCreateDocument}
+              disabled={isLoading}
+            >
+              {isLoading ? "Criando..." : "Criar Documento"}
+            </Button>
             {/* TODO: Fazer a integração com emissão da nota */}
             <Button
               variant="outlined"
               color="primary"
-              onClick={() => {
-                console.log("Emitir NFE");
-              }}
+              onClick={handleCreateDocumentNFE}
               sx={{
                 padding: "10px 30px",
                 marginTop: "20px",
@@ -595,7 +642,7 @@ export const Form: React.FC = () => {
                   numero_pedido: formData.numero_pedido,
                   pessoa_id: 0,
                   total: 0,
-                  natureza_operacao: '',
+                  natureza_operacao: "",
                   observacoes: "",
                   movimenta_estoque: true,
                   tipo_documento: "",

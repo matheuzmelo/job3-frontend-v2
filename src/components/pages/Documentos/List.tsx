@@ -11,23 +11,22 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
+  Typography
 } from "@mui/material";
 import React, { useState } from "react";
-import { useNotasFiscaisContext } from "../../../contexts/nfe.context";
-import { formatCurrency } from "../../../Utils";
+import { useDocumentosContext } from "../../../contexts/documentos.context";
 
-interface NotaFiscalListProps {
-  setAbaAtual: (value: number) => void;
+interface DocumentosListProps {
+  setAbaAtual?: (value: number) => void;
 }
 
-export const List: React.FC<NotaFiscalListProps> = () => {
-  const { notasFiscais, isLoading } = useNotasFiscaisContext();
+export const List: React.FC<DocumentosListProps> = () => {
+  const { documentos, isLoading } = useDocumentosContext();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const itemsPerPage = 15;
 
-  const handleChangePage = (_, newPage: number) => {
+  const handleChangePage = (_: React.ChangeEvent<unknown>, newPage: number) => {
     setPage(newPage);
   };
 
@@ -35,37 +34,38 @@ export const List: React.FC<NotaFiscalListProps> = () => {
     setSearchTerm(event.target.value);
     setPage(1);
   };
-  const filteredNotasFiscais = Array.isArray(notasFiscais)
-    ? notasFiscais.filter((notaFiscal) => {
-        const numero = notaFiscal.numero?.toString() || "";
-        const nomeCompleto = `${notaFiscal.pessoa?.primeiro_nome || ""} ${
-          notaFiscal.pessoa?.segundo_nome || ""
-        }`.toLowerCase();
-        const observacoes = notaFiscal.observacoes?.toLowerCase() || "";
+
+  const filteredDocumentos = Array.isArray(documentos)
+    ? documentos.filter((doc) => {
+        const numeroPedido = String(doc.numero_pedido || "").toLowerCase();
+        const cliente = String(doc.cliente || "").toLowerCase();
+        const data = String(doc.data_criacao || "").toLowerCase();
 
         return (
-          numero.includes(searchTerm.toLowerCase()) ||
-          nomeCompleto.includes(searchTerm.toLowerCase()) ||
-          observacoes.includes(searchTerm.toLowerCase())
+          numeroPedido.includes(searchTerm.toLowerCase()) ||
+          cliente.includes(searchTerm.toLowerCase()) ||
+          data.includes(searchTerm.toLowerCase())
         );
       })
     : [];
 
   const startIndex = (page - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentNotasFiscais = filteredNotasFiscais.slice(startIndex, endIndex);
+  const currentDocumentos = filteredDocumentos.slice(startIndex, endIndex);
+
   return (
     <Container maxWidth="xl" sx={{ mt: 4 }}>
-      <Typography variant="h5">Lista de Notas Fiscais</Typography>
+      <Typography variant="h5">Lista de Documentos</Typography>
       <Box sx={{ mt: 2, mb: 2 }}>
         <TextField
-          label="Buscar por Número, Nome do Cliente ou Observações"
+          label="Buscar por Nº Pedido, Cliente ou Data"
           variant="outlined"
           fullWidth
           value={searchTerm}
           onChange={handleSearchChange}
         />
       </Box>
+
       {isLoading ? (
         <Box
           sx={{
@@ -83,47 +83,32 @@ export const List: React.FC<NotaFiscalListProps> = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Número</TableCell>
-                  {/* <TableCell>Data de Emissão</TableCell> */}
-                  <TableCell>Cliente/Destinatário</TableCell>
-                  {/* <TableCell>Observações</TableCell> */}
+                  <TableCell>Nº Pedido</TableCell>
+                  <TableCell>Cliente</TableCell>
+                  <TableCell>Tipo de Documento</TableCell>
                   <TableCell>Total</TableCell>
-                  {/* <TableCell>Ações</TableCell> */}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {currentNotasFiscais.map((notaFiscal, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{notaFiscal.numero}</TableCell>
-                    {/* <TableCell>{notaFiscal.data_emissao}</TableCell> */}
+                {currentDocumentos.map((doc: any) => (
+                  <TableRow key={doc.id}>
+                    <TableCell>{doc.numero_pedido}</TableCell>
+                    <TableCell>{doc.cliente || '-'}</TableCell>
                     <TableCell>
-                      {`${notaFiscal.pessoa?.primeiro_nome || ""} ${
-                        notaFiscal.pessoa?.segundo_nome || ""
-                      }`}
+                      {doc.tipo_documento}
                     </TableCell>
-                    {/* <TableCell>{notaFiscal.observacoes}</TableCell> */}
                     <TableCell>
-                      {notaFiscal.total_notal_fiscal !== undefined
-                        ? formatCurrency(notaFiscal.total_notal_fiscal)
-                        : "-"}
+                      {doc.total}
                     </TableCell>
-                    {/* <TableCell>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => handleEdit(notaFiscal)}
-                        >
-                          Editar
-                        </Button>
-                      </TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
+
           <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
             <Pagination
-              count={Math.ceil(filteredNotasFiscais.length / itemsPerPage)}
+              count={Math.ceil(filteredDocumentos.length / itemsPerPage)}
               page={page}
               onChange={handleChangePage}
               color="primary"
