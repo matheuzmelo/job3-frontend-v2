@@ -41,7 +41,7 @@ export const menuLayout: MenuLayout = [
     route: "/documentos",
     page: <Documentos />,
     icon: <ConfirmationNumberIcon />,
-    permission: "DOCUMENTOS",
+    permission: undefined,
   },
   {
     name: "Produtos",
