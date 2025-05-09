@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { EmpresasService } from "../services/api/Empresas/Empresas.service";
+// import { EmpresasService } from "../services/api/Empresas/Empresas.service";
 import { UsuariosService } from "../services/api/Usuarios/usuarios.service";
 import { TUser } from "../types/TUser.type";
 import { isSuperAdmin } from "../Utils";
@@ -77,8 +77,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const getEmpresas = async () => {
     try {
-      const empresas = await EmpresasService.getAll();
-      return empresas.data;
+      // const empresas = await EmpresasService.getAll();
+      // return empresas.data;
     } catch (error) {
       console.error("Failed to fetch empresas:", error);
     }
