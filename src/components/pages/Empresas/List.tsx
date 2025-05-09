@@ -15,21 +15,47 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useEmpresasContext } from "../../../contexts/empresas.context";
 import { isSuperAdmin } from "../../../Utils";
+import { useEmpresasContext } from "../../../hooks/useEmpresaContext";
+import Api from "../../../services/api";
+import { TEmpresa } from "../../../types/TEmpresa";
 
-interface UserListProps {
-  setAbaAtual: (value: number) => void; // Prop para mudar a aba ativa
+interface EmpresaListProps {
+  setAbaAtual: (value: number) => void;
 }
 
-export const List: React.FC<UserListProps> = ({ setAbaAtual }) => {
+export const List: React.FC<EmpresaListProps> = ({ setAbaAtual }) => {
   const { empresas, setCurrentEmpresa, isLoading } = useEmpresasContext();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const itemsPerPage = 15;
   const [showCollumn, setShowCollumn] = useState(true)
+  const [business, setBusiness] = useState<TEmpresa[]>([])
+
+
+  // medida de contorno, LEGITI TEM QUE ARRUMAR ISSO o Foda é descobrir onde tá quebrando
+  function fetchData() {
+    const token = localStorage.getItem('token')
+    const options = {
+      method: 'GET',
+      url: '/empresas/all',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      data: {}
+    };
+
+    Api.request(options).then(function (response) {
+      console.log(response.data.data)
+      setBusiness(response.data.data)
+    }).catch(function (error) {
+      console.error(error);
+    });
+  }
 
   useEffect(() => {
+    fetchData()
     setShowCollumn(isSuperAdmin(localStorage.getItem('token') || ''))
   }, [])
 
@@ -47,7 +73,7 @@ export const List: React.FC<UserListProps> = ({ setAbaAtual }) => {
     setPage(1);
   };
 
-  const filteredEmpresas = Array.isArray(empresas)
+  const filteredEmpresas = Array.isArray(business)
     ? empresas.filter((empresa) => {
         const nomeFantasia = empresa.nome_fantasia?.toLowerCase() || "";
         const email = empresa.email?.toLowerCase() || "";
@@ -61,9 +87,9 @@ export const List: React.FC<UserListProps> = ({ setAbaAtual }) => {
       })
     : [];
 
-  const startIndex = (page - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentEmpresas = filteredEmpresas.slice(startIndex, endIndex);
+  // const startIndex = (page - 1) * itemsPerPage;
+  // const endIndex = startIndex + itemsPerPage;
+  // const currentEmpresas = filteredEmpresas.slice(startIndex, endIndex);
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4 }}>
@@ -101,7 +127,7 @@ export const List: React.FC<UserListProps> = ({ setAbaAtual }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {currentEmpresas.map((empresa) => (
+                {business.map((empresa) => (
                   <TableRow key={empresa.id}>
                     <TableCell>{empresa.nome_fantasia}</TableCell>
                     <TableCell>{empresa.razao_social}</TableCell>

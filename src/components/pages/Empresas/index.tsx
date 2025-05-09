@@ -1,10 +1,10 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import { useEffect, useState } from "react";
-import { EmpresaProvider } from "../../../contexts/empresas.context";
-import { UserProvider } from "../../../contexts/usuario.context";
 import { isSuperAdmin } from "../../../Utils";
 import { Form } from "./Form";
 import { List } from "./List";
+import { EmpresaProvider } from "../../../providers/empresa.provider";
+import { UserProvider } from "../../../contexts/usuario.context";
 
 interface TabPanelProps {
   children: React.ReactNode;
@@ -93,10 +93,10 @@ export const EmpresasIndex = () => {
 
 export const Empresas = () => {
   return (
-    <EmpresaProvider>
-      <UserProvider>
+    <UserProvider>
+      <EmpresaProvider>
         <EmpresasIndex />
-      </UserProvider>
-    </EmpresaProvider>
+      </EmpresaProvider>
+    </UserProvider>
   );
 };

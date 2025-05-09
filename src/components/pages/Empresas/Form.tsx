@@ -18,7 +18,6 @@ import {
 } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import InputMask from "react-input-mask";
-import { useEmpresasContext } from "../../../contexts/empresas.context";
 import {
   UserProvider,
   useUserContext,
@@ -27,6 +26,7 @@ import { isSuperAdmin } from "../../../Utils";
 import GenericModal from "../../organisms/Modal";
 import ToastMessage from "../../organisms/ToastMessage";
 import { UserForm } from "../Usuarios/Form";
+import { useEmpresasContext } from "../../../hooks/useEmpresaContext";
 
 export const Form: React.FC = () => {
   const {

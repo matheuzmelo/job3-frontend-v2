@@ -68,25 +68,44 @@ const getAll = async () => {
     );
   }
   const superAdm = isSuperAdmin(token);
+
   if (superAdm) {
-    const options = {
-      method: "GET",
-      url: "/empresas/all",
-      headers: {
-        authorization: `Bearer ${token}`,
-      },
-    };
+    // const options = {
+    //   method: "GET",
+    //   url: "/empresas",
+    //   headers: {
+    //     authorization: `Bearer ${token}`,
+    //   },
+    // };
 
     try {
-      const { data } = await Api.request(options);
-      return data;
+      // const { data } = await Api.request(options);
+      return {
+        data: [
+          {
+            id: 1,
+            cnpj: "07720423000125",
+            nome_fantasia: "Job3",
+            razao_social: "MLC - Informática e Manutenção de Software Ltda",
+            ativo: true,
+          },
+          {
+            id: 2,
+            cnpj: "92312312312305",
+            nome_fantasia: "Nome Fantasia Empresa Exemplo 2",
+            razao_social: "Nome Empresa Exemplo 2",
+            ativo: true,
+          },
+        ],
+      };
     } catch (error) {
       console.error(error);
     }
   }
 };
 
-const getEmpresa = async () => {
+const getEmpresas = async () => {
+  console.log("chama empresas");
   const token = localStorage.getItem("token");
   const options = {
     method: "GET",
@@ -98,20 +117,33 @@ const getEmpresa = async () => {
 
   try {
     const { data } = await Api.request(options);
-    return data;
+    console.log(data);
+    if (data)
+      return {
+        data: [
+          {
+            id: 1,
+            cnpj: "07720423000125",
+            nome_fantasia: "Job3",
+            razao_social: "MLC - Informática e Manutenção de Software Ltda",
+            ativo: true,
+          },
+          {
+            id: 2,
+            cnpj: "92312312312305",
+            nome_fantasia: "Nome Fantasia Empresa Exemplo 2",
+            razao_social: "Nome Empresa Exemplo 2",
+            ativo: true,
+          },
+        ],
+      };
   } catch (error) {
     console.error(error);
   }
 };
 
-const updateById = async () => {};
-
-const deleteById = async () => {};
-
 export const EmpresasService = {
   create,
   getAll,
-  getEmpresa,
-  updateById,
-  deleteById,
+  getEmpresas,
 };
