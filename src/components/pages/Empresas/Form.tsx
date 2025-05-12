@@ -22,11 +22,11 @@ import {
   UserProvider,
   useUserContext,
 } from "../../../contexts/usuario.context";
+import { useEmpresasContext } from "../../../hooks/useEmpresaContext";
 import { isSuperAdmin } from "../../../Utils";
 import GenericModal from "../../organisms/Modal";
 import ToastMessage from "../../organisms/ToastMessage";
 import { UserForm } from "../Usuarios/Form";
-import { useEmpresasContext } from "../../../hooks/useEmpresaContext";
 
 export const Form: React.FC = () => {
   const {
@@ -35,7 +35,6 @@ export const Form: React.FC = () => {
     consultaCep,
     addEmpresa,
     error,
-    setError,
   } = useEmpresasContext();
   const { users, isLoading: userLoading, getAllUsers } = useUserContext();
   const [formData, setFormData] = useState({
@@ -138,9 +137,8 @@ export const Form: React.FC = () => {
         status: "error",
         message: error.message || "Erro desconhecido",
       });
-      setError(null);
     }
-  }, [error, setError]);
+  }, [error]);
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

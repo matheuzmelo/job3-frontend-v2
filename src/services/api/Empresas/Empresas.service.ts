@@ -105,41 +105,24 @@ const getAll = async () => {
 };
 
 const getEmpresas = async () => {
-  console.log("chama empresas");
-  const token = localStorage.getItem("token");
-  const options = {
-    method: "GET",
-    url: `/empresas`,
-    headers: {
-      authorization: `Bearer ${token}`,
-    },
-  };
-
-  try {
-    const { data } = await Api.request(options);
-    console.log(data);
-    if (data)
-      return {
-        data: [
-          {
-            id: 1,
-            cnpj: "07720423000125",
-            nome_fantasia: "Job3",
-            razao_social: "MLC - Informática e Manutenção de Software Ltda",
-            ativo: true,
-          },
-          {
-            id: 2,
-            cnpj: "92312312312305",
-            nome_fantasia: "Nome Fantasia Empresa Exemplo 2",
-            razao_social: "Nome Empresa Exemplo 2",
-            ativo: true,
-          },
-        ],
+    try {
+      const token = localStorage.getItem('token')
+      const options = {
+        method: 'GET',
+        url: '/empresas/all',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data: {}
       };
-  } catch (error) {
-    console.error(error);
-  }
+
+      const response = await Api.request(options)
+
+      return response.data
+    } catch (error) {
+      console.error(error)
+    }
 };
 
 export const EmpresasService = {
