@@ -8,7 +8,7 @@ const useAuthGuard = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    if (!token && location.pathname !== "/login") {
+    if (!token) {
       navigate(`/login`, { replace: true });
     }
   }, [location, navigate]);

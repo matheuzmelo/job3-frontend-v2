@@ -14,8 +14,8 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useUserContext } from "../../../contexts/usuario.context";
 import ToastMessage from "../../organisms/ToastMessage";
+import { useUserContext } from "../../../hooks/useUsuarioContext";
 
 export const UserForm: React.FC = () => {
   const { currentUser, addUser, getEmpresas } = useUserContext();
@@ -263,7 +263,7 @@ export const UserForm: React.FC = () => {
           }
           sx={{ opacity: isLoading ? 0.7 : 1 }}
         >
-          {isLoading ? "Salvando..." : "Salvar Usuário"}
+          {isLoading ? "Incluindo..." : "Incluir"}
         </Button>
         <Button variant="outlined" color="secondary" onClick={handleClear}>
           Limpar

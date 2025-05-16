@@ -1,10 +1,11 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import { useEffect, useState } from "react";
-import { UserProvider } from "../../../contexts/usuario.context";
+import { EmpresaProvider } from "../../../providers/empresa.provider";
+import { UserProvider } from "../../../providers/usuario.provider";
 import { isSuperAdmin } from "../../../Utils";
+import Loading from "../Loading";
 import { Form } from "./Form";
 import { List } from "./List";
-import { EmpresaProvider } from "../../../providers/empresa.provider";
 
 interface TabPanelProps {
   children: React.ReactNode;
@@ -53,7 +54,7 @@ export const EmpresasIndex = () => {
   ];
 
   if (loading) {
-    return <Box>Carregando...</Box>; // Ou algum componente de loading
+    return <Loading />; // Ou algum componente de loading
   }
 
   return (
@@ -84,7 +85,7 @@ export const EmpresasIndex = () => {
       </CustomTabPanel>
       {superAdm && (
         <CustomTabPanel value={abaAtual} index={1}>
-          <List setAbaAtual={setAbaAtual} />
+          <List />
         </CustomTabPanel>
       )}
     </Box>

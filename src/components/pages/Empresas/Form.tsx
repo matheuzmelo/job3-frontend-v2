@@ -1,11 +1,10 @@
-import { DeleteOutline, SaveAltRounded } from "@mui/icons-material";
+import { SaveAltRounded } from "@mui/icons-material";
 import {
   Box,
   Button,
   CircularProgress,
   Container,
-  IconButton,
-  MenuItem,
+  Divider,
   Paper,
   Table,
   TableBody,
@@ -18,25 +17,15 @@ import {
 } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import InputMask from "react-input-mask";
-import {
-  UserProvider,
-  useUserContext,
-} from "../../../contexts/usuario.context";
+import { useCreateEmpresa } from "../../../hooks/useCreateEmpresa";
 import { useEmpresasContext } from "../../../hooks/useEmpresaContext";
 import { isSuperAdmin } from "../../../Utils";
 import GenericModal from "../../organisms/Modal";
 import ToastMessage from "../../organisms/ToastMessage";
-import { UserForm } from "../Usuarios/Form";
 
 export const Form: React.FC = () => {
-  const {
-    currentEmpresa,
-    isLoading,
-    consultaCep,
-    addEmpresa,
-    error,
-  } = useEmpresasContext();
-  const { users, isLoading: userLoading, getAllUsers } = useUserContext();
+  const { currentEmpresa, isLoading, consultaCep, error } =
+    useEmpresasContext();
   const [formData, setFormData] = useState({
     cnpj: "",
     razao_social: "",
@@ -53,7 +42,43 @@ export const Form: React.FC = () => {
     inscricao_estadual: "",
     site: "",
   });
+  const [newUser, setNewUser] = useState({
+    nome: "",
+    usuario: "",
+    email: "",
+    senha: "",
+    nivel: 9,
+  });
+  const [loadingCEP, setLoadingCEP] = useState<boolean>(false)
+  const handleAddUser = () => {
+    const { nome, email, senha } = newUser;
 
+    if (!nome || !email || !senha) {
+      setToast({
+        open: true,
+        status: "error",
+        message: "Preencha nome, email e senha do usuário.",
+      });
+      return;
+    }
+
+    const newUserEntry = {
+      id: Math.random().toString(36).substring(2, 9),
+      nome,
+      usuario: email,
+      email,
+      senha,
+      nivel: 9,
+    };
+
+    setAssociatedUsers((prev) => [...prev, newUserEntry]);
+    setNewUser({ nome: "", usuario: "", email: "", senha: "", nivel: 9 });
+    setIsModalOpen(false);
+  };
+
+  const handleRemoveUser = (id: string) => {
+    setAssociatedUsers((prev) => prev.filter((user) => user.id !== id));
+  };
   const cnpjRef = useRef<HTMLInputElement>(null);
 
   const [toast, setToast] = useState({
@@ -63,34 +88,13 @@ export const Form: React.FC = () => {
   });
   const [isAdmin, setIsAdmin] = useState(false);
   const [associatedUsers, setAssociatedUsers] = useState<
-    { id: string; nome: string; email: string }[]
+    { id: string; nome: string; email: string,usuario: string, senha: string, nivel: number }[]
   >([]);
-  const [selectedUserId, setSelectedUserId] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
+  const {mutateAsync: createEmpresa, isPending} = useCreateEmpresa()
   const handleCloseModal = async () => {
     setIsModalOpen(false);
-    await getAllUsers(); // Recarrega a lista de usuários ao fechar o modal
-  };
-
-  const handleAddUser = () => {
-    const user = users.find((u) => u.id === Number(selectedUserId));
-    if (user) {
-      setAssociatedUsers((prev) => [
-        ...prev,
-        { id: String(user.id), nome: user.nome, email: user.email },
-      ]);
-      setSelectedUserId("");
-    }
-  };
-
-  const handleRemoveUser = (userId: string) => {
-    setAssociatedUsers((prev) => prev.filter((user) => user.id !== userId));
   };
 
   const handleCloseToast = () => {
@@ -144,8 +148,10 @@ export const Form: React.FC = () => {
     const { name, value } = e.target;
 
     if (name === "cep" && value.replace(/\D/g, "").length === 8) {
+      setLoadingCEP(true)
       const cep = value.replace(/\D/g, "");
       try {
+
         const data = await consultaCep(cep);
         if (data) {
           setFormData((prev) => ({
@@ -156,14 +162,16 @@ export const Form: React.FC = () => {
             logradouro: data.street || "",
           }));
         }
-        
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         setToast({
           open: true,
           status: "error",
           message: "Erro ao consultar CEP. Verifique o CEP e tente novamente.",
         });
+      } finally {
+        setLoadingCEP(false)
       }
     }
 
@@ -171,14 +179,16 @@ export const Form: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    if (associatedUsers.length === 0) {
+      setToast({
+        open: true,
+        status: "error",
+        message: "Selecione pelo menos um usuário para associar.",
+      });
+      return;
+    }
+
     try {
-      if (associatedUsers.length === 0) {
-        setToast({
-          open: true,
-          status: "error",
-          message: "Selecione pelo menos um usuário para associar.",
-        });
-      }
       const dataEmpresa = {
         cnpj: formData.cnpj,
         razao_social: formData.razao_social,
@@ -187,16 +197,22 @@ export const Form: React.FC = () => {
         telefone: formData.telefone,
         cep: formData.cep,
         bairro: formData.bairro,
-        endereco: `${formData.logradouro}, ${formData.numero}, ${formData.complemento}`,
+        endereco: `${formData.logradouro}, ${formData.numero}, ${formData.complemento || "sem complemento"}`,
         cidade: formData.cidade,
         uf: formData.uf,
         inscricao_estadual: formData.inscricao_estadual,
         site: formData.site,
-        associatedUsers: associatedUsers.map((user) => user.id),
+        usuarios: associatedUsers.map((user) => ({
+          nome: user.nome,
+          usuario: user.usuario,
+          email: user.email,
+          senha: user.senha,
+          nivel: user.nivel,
+        })),
       };
 
-      await addEmpresa(dataEmpresa);
-
+      await createEmpresa(dataEmpresa);
+      
       setToast({
         open: true,
         status: "success",
@@ -212,6 +228,7 @@ export const Form: React.FC = () => {
       });
     }
   };
+
 
   const handleClear = () => {
     setFormData({
@@ -231,15 +248,6 @@ export const Form: React.FC = () => {
       site: "",
     });
     setAssociatedUsers([]);
-  };
-
-  const isFormValid = () => {
-    return Object.values(formData).every((value) => {
-      if (typeof value === "string") {
-        return value.trim() !== "";
-      }
-      return true;
-    });
   };
 
   return (
@@ -327,7 +335,7 @@ export const Form: React.FC = () => {
             )}
           </InputMask>
         </Box>
-        <Box>
+        <Box position={'relative'} display={'flex'} alignItems={'center'}>
           <InputMask
             mask="99999-999"
             value={formData.cep}
@@ -346,6 +354,14 @@ export const Form: React.FC = () => {
               />
             )}
           </InputMask>
+          {loadingCEP && (
+            <CircularProgress sx={{
+              position: 'absolute',
+              right:10,
+            }}
+            size={24} 
+            color="inherit" />
+          )}
         </Box>
         <Box>
           <TextField
@@ -436,112 +452,82 @@ export const Form: React.FC = () => {
           />
         </Box>
       </Box>
-      {users && (
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Associar Usuários à Empresa
+      <Box margin={'2rem 0'}>
+        <Divider />
+      </Box>
+      <Box sx={{ mt: 4 }}>
+        <Box display={"flex"} justifyContent={"space-between"} margin={"1rem 0"} alignItems={"center"}>
+          <Typography variant="h6" gutterBottom>
+            Usuários Associados
           </Typography>
 
-          {/* Formulário para adicionar usuários */}
-          <Box
-            display="grid"
-            gridTemplateColumns={"1fr 200px 200px"}
-            gap={2}
-            alignItems="center"
+          <Button
+            variant="contained"
+            sx={{ mt: 2, padding: '.5rem 2rem', color: 'white' }}
+            onClick={() => setIsModalOpen(true)}
           >
-            <TextField
-              label="Usuário"
-              select
-              disabled={isAdmin || userLoading}
-              value={selectedUserId}
-              onChange={(e) => setSelectedUserId(e.target.value)}
-              fullWidth
-              onClick={async () => {
-                await getAllUsers();
-              }}
-            >
-              {users.map((user) => (
-                <MenuItem key={user.id} value={user.id}>
-                  {user.nome} - {user.email}
-                </MenuItem>
-              ))}
-            </TextField>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleAddUser}
-              disabled={!selectedUserId}
-              sx={{ height: "100%" }}
-            >
-              Adicionar
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={handleOpenModal} // Abre o modal
-              sx={{ height: "100%" }}
-              disabled={isAdmin}
-            >
-              Criar usuário
-            </Button>
-          </Box>
-
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle1" sx={{ mb: 1 }}>
-              Usuários Associados
-            </Typography>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Nome</TableCell>
-                    <TableCell>Email</TableCell>
-                    <TableCell align="center">Ações</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {associatedUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>{user.nome}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell align="center">
-                        <IconButton
-                          edge="end"
-                          color="error"
-                          onClick={() => handleRemoveUser(user.id)}
-                        >
-                          <DeleteOutline />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
+            Incluir
+          </Button>
         </Box>
-      )}
+
+        {associatedUsers.length === 0 ? (
+          <Typography variant="body2" color="text.secondary">
+            Nenhum usuário associado ainda.
+          </Typography>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Nome</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Nível</TableCell>
+                  <TableCell align="right">Ações</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {associatedUsers.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.nome}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.nivel}</TableCell>
+                    <TableCell align="right">
+                      <Button
+                        variant="text"
+                        color="error"
+                        onClick={() => handleRemoveUser(user.id)}
+                      >
+                        Remover
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Box>
       <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
         <Button
           variant="contained"
           color="primary"
           startIcon={
-            isLoading ? (
+            isPending ? (
               <CircularProgress size={20} color="inherit" />
             ) : (
               <SaveAltRounded />
             )
           }
           onClick={handleSubmit}
-          disabled={isLoading || !isFormValid() || associatedUsers.length === 0}
-          sx={{ opacity: isLoading ? 0.7 : 1 }}
+          disabled={isPending}
+          sx={{ opacity: isLoading ? 0.7 : 1, color: 'white' }}
         >
-          {isLoading ? "Salvando..." : "Salvar Empresa"}
+          {isPending ? "Salvando..." : "Salvar Empresa"}
         </Button>
         <Button variant="outlined" color="secondary" onClick={handleClear}>
           Limpar
         </Button>
       </Box>
-
       <ToastMessage
         status={toast.status}
         open={toast.open}
@@ -551,16 +537,63 @@ export const Form: React.FC = () => {
       <GenericModal
         open={isModalOpen}
         onClose={handleCloseModal}
-        title="Criar Usuário"
+        title="Incluir Usuário"
         actions={
-          <Button variant="contained" onClick={handleCloseModal}>
-            Fechar
-          </Button>
+          <>
+            <Button variant="outlined" onClick={handleCloseModal}>
+              Cancelar
+            </Button>
+            <Button variant="contained" onClick={handleAddUser}>
+              Adicionar
+            </Button>
+          </>
         }
       >
-        <UserProvider>
-          <UserForm />
-        </UserProvider>
+        <Box display="flex" flexDirection="column" gap={2} mt={2}>
+          <TextField
+            label="Nome"
+            name="nome"
+            value={newUser.nome}
+            onChange={(e) =>
+              setNewUser((prev) => ({ ...prev, nome: e.target.value }))
+            }
+            fullWidth
+          />
+          <TextField
+            label="Email"
+            name="email"
+            value={newUser.email}
+            onChange={(e) =>
+              setNewUser((prev) => ({
+                ...prev,
+                email: e.target.value,
+              }))
+            }
+            fullWidth
+          />
+          <TextField
+            label="Usuário"
+            name="usuario"
+            value={newUser.usuario}
+            onChange={(e) =>
+              setNewUser((prev) => ({
+                ...prev,
+                usuario: e.target.value,
+              }))
+            }
+            fullWidth
+          />
+          <TextField
+            label="Senha"
+            name="senha"
+            type="password"
+            value={newUser.senha}
+            onChange={(e) =>
+              setNewUser((prev) => ({ ...prev, senha: e.target.value }))
+            }
+            fullWidth
+          />
+        </Box>
       </GenericModal>
     </Container>
   );

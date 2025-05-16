@@ -13,6 +13,7 @@ interface EmpresaContextData {
   setCurrentEmpresa: (empresa: TEmpresa | null) => void;
   error: any;
   users: any | null;
+  isSavingLoading: boolean
 }
 
 export const EmpresasContext = createContext<EmpresaContextData | undefined>(

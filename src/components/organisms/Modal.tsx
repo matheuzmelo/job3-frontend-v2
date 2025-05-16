@@ -1,5 +1,5 @@
+import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 
 const GenericModal: React.FC<any> = ({
   open,

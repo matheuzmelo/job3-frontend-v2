@@ -1,8 +1,8 @@
 import { Box, Tab, Tabs } from '@mui/material';
 import React, { useState } from 'react';
-import { UserProvider } from '../../../contexts/usuario.context';
 import { UserForm } from './Form';
 import { List } from './List';
+import { UserProvider } from '../../../providers/usuario.provider';
 
 interface TabPanelProps {
     children: React.ReactNode;

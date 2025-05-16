@@ -16,7 +16,7 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<any>(null);
   const [users, setUsers] = React.useState<any | null>(null);
-
+  const [isSavingLoading, setIsSavingLoading] = React.useState<boolean>(false)
   const getUsers = async () => {
     try {
       const response = await UsuariosService.getAll();
@@ -48,19 +48,18 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const addEmpresa = async (empresa: TEmpresa) => {
     try {
-      setIsLoading(true);
+      setIsSavingLoading(true);
       const response: any = await EmpresasService.create(empresa);
 
       if (response.success) {
         setEmpresas((prevEmpresas) => [...prevEmpresas, response.data]);
-        setIsLoading(false);
         return response.data;
       }
-      setIsLoading(false);
     } catch (error) {
-      setIsLoading(false);
       setError(error);
       throw error;
+    } finally {
+      setIsSavingLoading(false)
     }
   };
 
@@ -85,6 +84,7 @@ export const EmpresaProvider: React.FC<{ children: React.ReactNode }> = ({
         setCurrentEmpresa,
         error,
         users,
+        isSavingLoading,
       }}
     >
       {children}
