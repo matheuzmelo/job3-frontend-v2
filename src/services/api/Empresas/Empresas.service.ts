@@ -1,5 +1,5 @@
 import Api from "..";
-import { isSuperAdmin } from "../../../Utils";
+import { decodeJWT } from "../../../Utils";
 
 const create = async (data: any) => {
   const token = localStorage.getItem("token");
@@ -60,73 +60,60 @@ const create = async (data: any) => {
   }
 };
 
-const getAll = async () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    throw new Error(
-      "Token de autenticação não encontrado. Faça login novamente."
-    );
-  }
-  const superAdm = isSuperAdmin(token);
-
-  if (superAdm) {
-    // const options = {
-    //   method: "GET",
-    //   url: "/empresas",
-    //   headers: {
-    //     authorization: `Bearer ${token}`,
-    //   },
-    // };
-
-    try {
-      // const { data } = await Api.request(options);
-      return {
-        data: [
-          {
-            id: 1,
-            cnpj: "07720423000125",
-            nome_fantasia: "Job3",
-            razao_social: "MLC - Informática e Manutenção de Software Ltda",
-            ativo: true,
-          },
-          {
-            id: 2,
-            cnpj: "92312312312305",
-            nome_fantasia: "Nome Fantasia Empresa Exemplo 2",
-            razao_social: "Nome Empresa Exemplo 2",
-            ativo: true,
-          },
-        ],
-      };
-    } catch (error) {
-      console.error(error);
-    }
-  }
-};
 
 const getEmpresas = async () => {
     try {
       const token = localStorage.getItem('token')
-      const options = {
-        method: 'GET',
-        url: '/empresas/all',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        data: {}
-      };
+      
+      if(!token){
+        throw new Error('token não recuperado')
+      }
+      const isSuperAdmin = decodeJWT(token)
 
-      const response = await Api.request(options)
+      if(isSuperAdmin.nivel === 99) {
+        const options = {
+          method: 'GET',
+          url: '/empresas/all',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          data: {}
+        };
 
-      return response.data
+        const response = await Api.request(options)
+
+        return response.data
+      }
+      
     } catch (error) {
       console.error(error)
     }
 };
 
+const getEmpresa = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    const options = {
+      method: 'GET',
+      url: '/empresas',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      data: {}
+    };
+
+    const response = await Api.request(options)
+
+    return response.data
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 export const EmpresasService = {
   create,
-  getAll,
+  getEmpresa,
   getEmpresas,
 };

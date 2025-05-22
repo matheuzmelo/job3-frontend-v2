@@ -7,7 +7,7 @@ const GenericModal: React.FC<any> = ({
   title,
   children,
   actions,
-  maxWidth = 'sm',
+  maxWidth = 'md',
   fullWidth = true,
 }) => {
   return (

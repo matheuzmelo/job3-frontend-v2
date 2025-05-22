@@ -65,7 +65,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const getEmpresas = async () => {
     try {
-      const empresas = await EmpresasService.getAll();
+      const empresas = await EmpresasService.getEmpresas();
       if(empresas){
         return empresas.data;
       }
