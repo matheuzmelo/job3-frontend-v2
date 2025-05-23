@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Api from "../services/api";
 import { EmpresasService } from "../services/api/Empresas/Empresas.service";
+import { decodeJWT } from "../Utils";
 
 export const useEmpresas = () => {
   return useQuery({
@@ -51,7 +52,15 @@ export const useCreateEmpresa = () => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["get-business"] });
+      const token = localStorage.getItem('token')
+      
+      if(!token){
+        throw new Error('token não recuperado')
+      }
+      
+      const isSuperAdmin = decodeJWT(token)
+
+      if(isSuperAdmin.nivel === 99) queryClient.invalidateQueries({ queryKey: ["get-business"] });
     },
   });
 };

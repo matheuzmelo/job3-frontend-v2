@@ -24,7 +24,7 @@ import {
   useGetCurrentEmpresa,
 } from "../../../hooks/useEmpresa";
 import { useEmpresasContext } from "../../../hooks/useEmpresaContext";
-import { isSuperAdmin } from "../../../Utils";
+import { decodeJWT, isSuperAdmin } from "../../../Utils";
 import GenericModal from "../../organisms/Modal";
 import ToastMessage from "../../organisms/ToastMessage";
 
@@ -116,7 +116,14 @@ export const Form: React.FC = () => {
   };
 
   useEffect(() => {
-    if (currentEmpresa) {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      throw new Error("token não recuperado");
+    }
+    const jwtData = decodeJWT(token);
+
+    if (currentEmpresa && jwtData.nivel !== 99) {
       setFormData({
         cnpj: currentEmpresa.cnpj || "",
         razao_social: currentEmpresa.razao_social || "",
@@ -274,7 +281,12 @@ export const Form: React.FC = () => {
       </Typography>
 
       {isLoading ? (
-        <Box display={'flex'} justifyContent={'center'} alignItems={'center'} height={'60vh'}>
+        <Box
+          display={"flex"}
+          justifyContent={"center"}
+          alignItems={"center"}
+          height={"60vh"}
+        >
           <CircularProgress />
         </Box>
       ) : (
@@ -478,9 +490,13 @@ export const Form: React.FC = () => {
               />
             </Box>
           </Box>
+          { !isAdmin && (
+
+          <>
           <Box margin={"2rem 0"}>
             <Divider />
           </Box>
+
           <Box sx={{ mt: 4 }}>
             <Box
               display={"flex"}
@@ -500,7 +516,6 @@ export const Form: React.FC = () => {
                 Incluir
               </Button>
             </Box>
-
             {associatedUsers.length === 0 ? (
               <Typography variant="body2" color="text.secondary">
                 Nenhum usuário associado ainda.
@@ -538,27 +553,37 @@ export const Form: React.FC = () => {
               </TableContainer>
             )}
           </Box>
-          <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={
-                isPending ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : (
-                  <SaveAltRounded />
-                )
-              }
-              onClick={handleSubmit}
-              disabled={isPending}
-              sx={{ opacity: isLoading ? 0.7 : 1, color: "white" }}
-            >
-              {isPending ? "Salvando..." : "Salvar Empresa"}
-            </Button>
-            <Button variant="outlined" color="secondary" onClick={handleClear}>
-              Limpar
-            </Button>
-          </Box>
+          </>
+
+          )}
+          {!isAdmin && (
+            <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={
+                  isPending ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <SaveAltRounded />
+                  )
+                }
+                onClick={handleSubmit}
+                disabled={isPending}
+                sx={{ opacity: isLoading ? 0.7 : 1, color: "white" }}
+              >
+                {isPending ? "Salvando..." : "Salvar Empresa"}
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={handleClear}
+              >
+                Limpar
+              </Button>
+            </Box>
+          )}
+
           <ToastMessage
             status={toast.status}
             open={toast.open}
