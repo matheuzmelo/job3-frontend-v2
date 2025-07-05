@@ -1,4 +1,4 @@
-import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
+import { KeyboardArrowLeftRounded } from "@mui/icons-material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Box, Drawer, IconButton, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -30,10 +30,6 @@ export const Menu: React.FC = () => {
     }
   }, [navigate]);
 
-  const toggleDrawer = () => {
-    setIsDrawerOpen((prev) => !prev);
-  };
-
   return (
     <Box>
       <IconButton
@@ -44,21 +40,17 @@ export const Menu: React.FC = () => {
             background: "transparent",
           },
         }}
-        onClick={toggleDrawer}
+        onClick={() => setIsDrawerOpen(!isDrawerOpen)}
         aria-label="Abrir menu"
       >
         <MenuIcon />
       </IconButton>
 
-      {/* Drawer (menu lateral) */}
-      <Drawer anchor="left" open={isDrawerOpen} onClose={toggleDrawer}>
+      <Drawer anchor="left" open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
         <Box
           role="presentation"
-          onClick={toggleDrawer}
-          onKeyDown={toggleDrawer}
-          sx={{ width: 250 }} // Define uma largura fixa para o Drawer
+          sx={{ width: 250 }}
         >
-          {/* Cabeçalho do Drawer */}
           <Box
             sx={{
               borderBottom: "1px solid #e9e9e9",
@@ -76,11 +68,11 @@ export const Menu: React.FC = () => {
                 Módulos
               </Typography>
               <IconButton
-                onClick={toggleDrawer}
                 sx={{ color: 'black' }}
                 aria-label="Fechar menu"
+                onClick={() => setIsDrawerOpen(false)}
               >
-                <KeyboardArrowRightRoundedIcon />
+                <KeyboardArrowLeftRounded />
               </IconButton>
             </Box>
             <Typography sx={{ textAlign: "left", marginTop: "10px" }}>
@@ -88,7 +80,6 @@ export const Menu: React.FC = () => {
             </Typography>
           </Box>
 
-          {/* Lista de menus com base nas permissões */}
           <MenuList permissions={permissions} />
         </Box>
       </Drawer>

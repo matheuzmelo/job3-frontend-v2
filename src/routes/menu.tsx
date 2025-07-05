@@ -1,4 +1,4 @@
-import { LocalAtmRounded } from "@mui/icons-material";
+import { LocalAtmRounded, Note } from "@mui/icons-material";
 import BusinessIcon from "@mui/icons-material/Business";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import GroupIcon from "@mui/icons-material/Group";
@@ -11,6 +11,7 @@ import Home from "../components/pages/Home";
 import { NotasFiscais } from "../components/pages/nfe";
 import Pessoas from "../components/pages/Pessoas";
 import Produtos from "../components/pages/Produtos";
+import Proposta from "../components/pages/Proposal/Index";
 import Usuario from "../components/pages/Usuarios";
 import { MenuLayout } from "../types/TMenu.type";
 
@@ -22,26 +23,26 @@ export const menuLayout: MenuLayout = [
     icon: <HomeRoundedIcon />,
     permission: undefined,
   },
-  // {
-  //     name: "Proposta",
-  //     route: "/proposta",
-  //     page: <Proposta />,
-  //     icon: <NoteAltRoundedIcon />,
-  //     permission: 'PROPOSTAS',
-  // },
-  // {
-  //     name: "Clientes",
-  //     route: "/clientes",
-  //     page: <Clientes />,
-  //     icon: <GroupRoundedIcon />,
-  //     permission: 'CLIENTES',
-  // },
   {
     name: "Documentos",
     route: "/documentos",
     page: <Documentos />,
     icon: <ConfirmationNumberIcon />,
     permission: undefined,
+    subMenu: [
+      {
+        name: "Proposta",
+        route: "/proposta",
+        page: <Proposta />,
+        icon: <Note />,
+      },
+      {
+        name: "Notas Fiscais",
+        route: "/notas-fiscais",
+        page: <NotasFiscais />,
+        icon: <LocalAtmRounded />,
+      },
+    ],
   },
   {
     name: "Produtos",
@@ -50,13 +51,7 @@ export const menuLayout: MenuLayout = [
     icon: <InventoryIcon />,
     permission: undefined,
   },
-  {
-    name: "Notas Fiscais",
-    route: "/notas-fiscais",
-    page: <NotasFiscais />,
-    icon: <LocalAtmRounded />,
-    permission: undefined,
-  },
+
   {
     name: "Pessoas",
     route: "/pessoas",
