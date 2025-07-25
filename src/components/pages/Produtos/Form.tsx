@@ -1,225 +1,319 @@
 import {
     Box,
     Button,
-    CircularProgress,
     Container,
-    Grid,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
+    Tab,
+    Tabs,
     TextField,
-    Typography
-} from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { useProdutoContext } from '../../../contexts/produtos.context';
-import { ProdutosService } from '../../../services/api/Produtos/produtos.service';
-import ToastMessage from '../../organisms/ToastMessage';
-import { SaveAltRounded } from '@mui/icons-material';
+    Typography,
+} from "@mui/material";
+import { useState } from "react";
+import { ProdutosService } from "../../../services/api/Produtos/produtos.service";
 
-export const Form: React.FC = () => {
-    const { produtoAtual, setProdutoAtual }: any = useProdutoContext();
-    const [openToast, setOpenToast] = useState(false);
-    const [toastStatus, setToastStatus] = useState<"success" | "alert" | "warn">(
-        "success"
-    );
-    const [message, setMessage] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [formData, setFormData] = useState({
-        codigo: '',
-        descricao: '',
-        unidade: '',
-        valor_unidade: '',
-        valor_atacado: '',
-        valor_revenda: '',
-        valor_tabela4: '',
-    });
+export const Form = () => {
+  const [activeTab, setActiveTab] = useState(0);
+  const [formData, setFormData] = useState({
+    // Aba Geral
+    nome: "",
+    descricao: "",
+    categoria: "",
+    preco: "",
+    unidadeMedida: "",
+    valorAtacado: "",
+    valorRevenda: "",
+    valorTabela4: "",
+    // Aba Dados Fiscais
+    ncm: "",
+    cest: "",
+    origem: 0,
+    codigoBarras: "",
+    // Aba Rastreabilidade
+    lote: "",
+    validade: "",
+    codigoRastreamento: "",
+    localizacao: "",
+  });
 
-    useEffect(() => {
-        if (produtoAtual) {
-            setFormData(produtoAtual);
-        }
-    }, [produtoAtual]);
+  const handleTabChange = (_, newValue) => {
+    setActiveTab(newValue);
+  };
 
-    const handleOpenToast = (
-        status: "success" | "alert" | "warn",
-        msg: string
-    ) => {
-        setToastStatus(status);
-        setMessage(msg);
-        setOpenToast(true);
-    };
-    // Função para lidar com mudanças nos campos do formulário
-    const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
-    ) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name as string]: value }));
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-    // Função para salvar os dados do formulário
-    const handleSubmit = async () => {
-        setIsLoading(true); // Ativa o loading
+  const handleSubmit = async () => {
+    try {
+      const productData = {
+        codigo: formData.codigoBarras,
+        descricao: formData.descricao,
+        unidade: formData.unidadeMedida,
+        valor_unidade: Number(formData.preco),
+        valor_atacado: Number(formData.valorAtacado),
+        valor_revenda: Number(formData.valorRevenda),
+        valor_tabela4: Number(formData.valorTabela4),
+      };
+      const createData = await ProdutosService.create(productData);
 
-        try {
-            const productData = {
-                codigo: formData.codigo,
-                descricao: formData.descricao,
-                unidade: formData.unidade,
-                valor_unidade: Number(formData.valor_unidade),
-                valor_atacado: Number(formData.valor_atacado),
-                valor_revenda: Number(formData.valor_revenda),
-                valor_tabela4: Number(formData.valor_tabela4),
-            }
-            const createData = await ProdutosService.create(productData);
+      if (createData) {
+        alert("Suuuucesso");
+      }
+    } catch (error) {
+      console.error("Erro na requisição:", error);
+    }
+  };
 
-            if (createData) {
-                handleOpenToast("success", "Produto salvo com sucesso!");
-                handleClear();
-            } else {
-                handleOpenToast("warn", "Erro ao salvar o produto.");
-            }
-        } catch (error) {
-            console.error("Erro na requisição:", error);
-            handleOpenToast("warn", "Erro ao salvar o produto.");
-        } finally {
-            setIsLoading(false); // Desativa o loading
-        }
-    };
+  return (
+    <Container sx={{ my: 2 }}>
+      <Box>
+        <Typography variant="h5">Cadastro de Produto</Typography>
 
-    // Função para limpar os campos do formulário
-    const handleClear = () => {
-        setFormData({
-            codigo: '',
-            descricao: '',
-            unidade: '',
-            valor_unidade: '',
-            valor_atacado: '',
-            valor_revenda: '',
-            valor_tabela4: '',
-        });
-        setProdutoAtual(null);
-    };
+        <Box sx={{ borderColor: "divider" }}>
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            variant="standard"
+            textColor="primary"
+            indicatorColor="primary"
+          >
+            <Tab label="Geral" sx={{ fontWeight: "bold" }} />
+            <Tab label="Dados Fiscais" sx={{ fontWeight: "bold" }} />
+            <Tab label="Rastreabilidade" sx={{ fontWeight: "bold" }} />
+          </Tabs>
+        </Box>
 
-    return (
-        <Container maxWidth="xl">
-            <Typography variant="h5" sx={{ mb: 2 }}>
-                Cadastro de Produto
-            </Typography>
-            <Grid container spacing={2}>
-                {/* Código */}
-                <Grid item xs={12} sm={6} md={4}>
-                    <TextField
-                        label="Código"
-                        name="codigo"
-                        value={formData.codigo}
-                        onChange={handleChange}
-                        fullWidth
-                    />
-                </Grid>
-
-                {/* Descrição */}
-                <Grid item xs={12} sm={6} md={8}>
-                    <TextField
-                        label="Descrição"
-                        name="descricao"
-                        value={formData.descricao}
-                        onChange={handleChange}
-                        fullWidth
-                    />
-                </Grid>
-
-                {/* Unidade */}
-                <Grid item xs={12} sm={6} md={4}>
-                    <TextField
-                        label="Unidade"
-                        name="unidade"
-                        value={formData.unidade}
-                        onChange={handleChange}
-                        fullWidth
-                    />
-                </Grid>
-
-                {/* Valores */}
-                <Grid item xs={12} sm={6} md={4}>
-                    <TextField
-                        label="Valor Unidade"
-                        name="valor_unidade"
-                        value={formData.valor_unidade}
-                        onChange={handleChange}
-                        type="number"
-                        fullWidth
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                    <TextField
-                        label="Valor Atacado"
-                        name="valor_atacado"
-                        value={formData.valor_atacado}
-                        onChange={handleChange}
-                        type="number"
-                        fullWidth
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                    <TextField
-                        label="Valor Revenda"
-                        name="valor_revenda"
-                        value={formData.valor_revenda}
-                        onChange={handleChange}
-                        type="number"
-                        fullWidth
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                    <TextField
-                        label="Valor Tabela 4"
-                        name="valor_tabela4"
-                        value={formData.valor_tabela4}
-                        onChange={handleChange}
-                        type="number"
-                        fullWidth
-                    />
-                </Grid>
-            </Grid>
-
-            {/* Botões de Ação */}
-            <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={
-                        isLoading ? (
-                            <CircularProgress size={20} color="inherit" />
-                        ) : (
-                            <SaveAltRounded />
-                        )
-                    }
-                    onClick={handleSubmit}
-                    disabled={
-                        isLoading ||
-                        !formData.codigo ||
-                        !formData.descricao ||
-                        !formData.unidade ||
-                        !formData.valor_unidade
-                    }
-                    sx={{
-                        opacity: isLoading ? 0.7 : 1,
-                        cursor: isLoading ? "progress" : "pointer",
-                    }}
-                >
-                    {isLoading ? "Salvando..." : "Salvar Produto"}
-                </Button>
-                <Button
-                    variant="outlined"
-                    color="secondary"
-                    onClick={handleClear}
-                >
-                    Limpar
-                </Button>
-            </Box>
-            <ToastMessage
-                status={toastStatus}
-                message={message}
-                open={openToast}
-                onClose={() => setOpenToast(false)}
+        {/* Aba Geral */}
+        <TabPanel value={activeTab} index={0}>
+          <Box>
+            <TextField
+              name="nome"
+              label="Nome do Produto"
+              value={formData.nome}
+              onChange={handleChange}
+              fullWidth
+              required
             />
-        </Container>
-    );
+          </Box>
+          <Box>
+            <TextField
+              name="descricao"
+              label="Descrição"
+              value={formData.descricao}
+              onChange={handleChange}
+              fullWidth
+              multiline
+              rows={3}
+              margin="normal"
+            />
+          </Box>
+          <Box display={'grid'} gap={2} gridTemplateColumns={'1fr 1fr'}>
+            <Box>
+              <TextField
+                name="categoria"
+                label="Categoria"
+                value={formData.categoria}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+              />
+            </Box>
+            <Box>
+              <TextField
+                name="preco"
+                label="Preço (R$)"
+                value={formData.preco}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+                type="number"
+              />
+            </Box>
+            <Box>
+              <TextField
+                name="tabela"
+                label="Valor Tabela (R$)"
+                value={formData.valorTabela4}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+                type="number"
+              />
+            </Box>
+            <Box>
+              <TextField
+                name="atacado"
+                label="Valor Atacado (R$)"
+                value={formData.valorAtacado}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+                type="number"
+              />
+            </Box>
+            <Box>
+              <TextField
+                name="revenda"
+                label="Valor Revenda (R$)"
+                value={formData.valorRevenda}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+                type="number"
+              />
+            </Box>
+            <Box>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Unidade de Medida</InputLabel>
+                <Select
+                  name="unidadeMedida"
+                  value={formData.unidadeMedida}
+                  label="Unidade de Medida"
+                  onChange={handleChange}
+                >
+                  <MenuItem value="un">Unidade</MenuItem>
+                  <MenuItem value="kg">Quilograma</MenuItem>
+                  <MenuItem value="g">Grama</MenuItem>
+                  <MenuItem value="l">Litro</MenuItem>
+                  <MenuItem value="ml">Mililitro</MenuItem>
+                  <MenuItem value="m">Metro</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </Box>
+        </TabPanel>
+
+        {/* Aba Dados Fiscais */}
+        <TabPanel value={activeTab} index={1}>
+          <Box>
+            <TextField
+              name="ncm"
+              label="NCM"
+              value={formData.ncm}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+              helperText="Código da Nomenclatura Comum do Mercosul"
+            />
+          </Box>
+          <Box>
+            <TextField
+              name="cest"
+              label="CEST"
+              value={formData.cest}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+              helperText="Código Especificador da Substituição Tributária"
+            />
+          </Box>
+          <Box>
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Origem</InputLabel>
+              <Select
+                name="origem"
+                value={formData.origem}
+                label="Origem"
+                onChange={handleChange}
+              >
+                <MenuItem value={0}>Nacional</MenuItem>
+                <MenuItem value={1}>Importado</MenuItem>
+                <MenuItem value={2}>
+                  Nacional com mais de 40% de conteúdo importado
+                </MenuItem>
+                <MenuItem value={3}>Importado por empresa nacional</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+          <Box>
+            <TextField
+              name="codigoBarras"
+              label="Código de Barras"
+              value={formData.codigoBarras}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+            />
+          </Box>
+        </TabPanel>
+
+        {/* Aba Rastreabilidade */}
+        <TabPanel value={activeTab} index={2}>
+          <Box>
+            <TextField
+              name="lote"
+              label="Lote"
+              value={formData.lote}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+            />
+          </Box>
+          <Box>
+            <TextField
+              name="validade"
+              label="Validade"
+              type="date"
+              value={formData.validade}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+              InputLabelProps={{ shrink: true }}
+            />
+          </Box>
+          <Box>
+            <TextField
+              name="codigoRastreamento"
+              label="Código de Rastreamento"
+              value={formData.codigoRastreamento}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+            />
+          </Box>
+          <Box>
+            <TextField
+              name="localizacao"
+              label="Localização no Armazém"
+              value={formData.localizacao}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+            />
+          </Box>
+        </TabPanel>
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+          <Button
+            id="submit-button"
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            sx={{ px: 4, py: 1.5, fontWeight: "bold" }}
+          >
+            Salvar Produto
+          </Button>
+        </Box>
+      </Box>
+    </Container>
+  );
+};
+
+// Componente auxiliar para TabPanel
+const TabPanel = ({ children, value, index, ...props }) => {
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`tabpanel-${index}`}
+      aria-labelledby={`tab-${index}`}
+      {...props}
+    >
+      {value === index && <Box sx={{ p: 2 }}>{children}</Box>}
+    </div>
+  );
 };
