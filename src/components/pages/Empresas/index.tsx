@@ -58,7 +58,7 @@ export const EmpresasIndex = () => {
   }
 
   return (
-    <Box sx={{ width: "100%", minHeight: "100vh" }}>
+    <Box sx={{ width: "100%", minHeight: "100dvh" }}>
       <Box
         sx={{
           borderBottom: 1,

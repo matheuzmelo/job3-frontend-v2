@@ -43,7 +43,7 @@ export const NotasFiscaisIndex = () => {
   ];
 
   return (
-    <Box sx={{ width: "100%", minHeight: "100vh" }}>
+    <Box sx={{ width: "100%", minHeight: "100dvh" }}>
       <Box
         sx={{
           borderBottom: 1,
