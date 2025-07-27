@@ -27,6 +27,7 @@ export const List: React.FC = () => {
 
     const fetchProdutos = async () => {
         const token = localStorage.getItem("token");
+
         if (!token) {
             alert('Sessão expirada. Efetue o Login novamente');
             navigate(`/`);
@@ -49,8 +50,9 @@ export const List: React.FC = () => {
     }, []);
 
     const handleEdit = (produto: any) => {
+        console.log(produto)
         setProdutoAtual(produto);
-        setAbaAtual(0); // Define a aba atual para 0 (Cadastro)
+        setAbaAtual(0);
     };
 
     const filteredAndSortedProdutos = produtos
@@ -105,7 +107,8 @@ export const List: React.FC = () => {
                                             <Button
                                                 variant="contained"
                                                 color="primary"
-                                                onClick={() => handleEdit(produto)}
+                                                onClick={() => handleEdit(produto.id)}
+                                                sx={{color: 'white'}}
                                             >
                                                 Editar
                                             </Button>

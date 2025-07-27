@@ -1,5 +1,5 @@
+import { Alert, AlertColor, Snackbar } from '@mui/material';
 import React from 'react';
-import { Snackbar, Alert, AlertColor } from '@mui/material';
 import { TToastMessageProps } from '../../types/TToastMessage.type';
 
 const ToastMessage: React.FC<TToastMessageProps> = ({ status, message, open, onClose }) => {
