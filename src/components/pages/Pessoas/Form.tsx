@@ -74,7 +74,7 @@ export const Form: React.FC = () => {
             address: data.street || "",
           }));
         }
-      } catch (err) {
+      } catch {
         setMessage("Erro ao consultar CEP. Verifique o CEP e tente novamente.")
         setToastStatus("warn")
         setOpenToast(true);
@@ -193,7 +193,6 @@ export const Form: React.FC = () => {
               value={formData.cpfCnpj}
               onChange={handleChange}
               maskChar=""
-              inputRef={inputRef}
             >
               {(inputProps: any) => (
                 <TextField

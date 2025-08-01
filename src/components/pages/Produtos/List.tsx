@@ -1,7 +1,6 @@
 import {
     Box,
     Button,
-    CircularProgress,
     Container,
     Paper,
     Table,
@@ -17,6 +16,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProdutoContext } from '../../../contexts/produtos.context';
 import { ProdutosService } from '../../../services/api/Produtos/produtos.service';
+import { ListLoading } from '../../organisms/ListLoading';
 
 export const List: React.FC = () => {
     const { setProdutoAtual, setAbaAtual } = useProdutoContext();
@@ -27,6 +27,7 @@ export const List: React.FC = () => {
 
     const fetchProdutos = async () => {
         const token = localStorage.getItem("token");
+
         if (!token) {
             alert('Sessão expirada. Efetue o Login novamente');
             navigate(`/`);
@@ -49,8 +50,9 @@ export const List: React.FC = () => {
     }, []);
 
     const handleEdit = (produto: any) => {
+        console.log(produto)
         setProdutoAtual(produto);
-        setAbaAtual(0); // Define a aba atual para 0 (Cadastro)
+        setAbaAtual(0);
     };
 
     const filteredAndSortedProdutos = produtos
@@ -66,7 +68,6 @@ export const List: React.FC = () => {
     return (
         <Container maxWidth="xl" sx={{ mt: 4 }}>
             <Typography variant="h5">Lista de Produtos</Typography>
-
             <TextField
                 label="Buscar por descrição"
                 variant="outlined"
@@ -83,14 +84,7 @@ export const List: React.FC = () => {
             )}
 
             {isLoading ? (
-                <Box sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: '50vh'
-                }}>
-                    <CircularProgress />
-                </Box>
+                <ListLoading />
             ) : (
                 filteredAndSortedProdutos.length > 0 && (
                     <TableContainer component={Paper} sx={{ mt: 2 }}>
@@ -113,7 +107,8 @@ export const List: React.FC = () => {
                                             <Button
                                                 variant="contained"
                                                 color="primary"
-                                                onClick={() => handleEdit(produto)}
+                                                onClick={() => handleEdit(produto.id)}
+                                                sx={{color: 'white'}}
                                             >
                                                 Editar
                                             </Button>

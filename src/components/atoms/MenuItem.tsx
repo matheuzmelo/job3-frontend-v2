@@ -1,12 +1,12 @@
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import {
-    Collapse,
-    Link,
-    List,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText
+  Collapse,
+  Link,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText
 } from "@mui/material";
 import { useState } from 'react';
 
@@ -14,7 +14,7 @@ export const MenuItem = ({
   allowedPermissions,
   ...menuItem
 }) => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   const hasAccess = !menuItem.permission || allowedPermissions.includes(menuItem.permission);
 

@@ -55,7 +55,7 @@ function ProdutosTabs() {
 
     return (
         <>
-            <Box sx={{ width: '100%', minHeight: '100dvh' }}>
+            <Box sx={{ width: '100%', height: 'calc(100dvh - 9rem)' }}>
                 <Box
                     sx={{
                         borderBottom: 1,

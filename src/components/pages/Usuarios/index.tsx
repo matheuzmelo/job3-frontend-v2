@@ -1,8 +1,8 @@
 import { Box, Tab, Tabs } from '@mui/material';
 import React, { useState } from 'react';
+import { UserProvider } from '../../../providers/usuario.provider';
 import { UserForm } from './Form';
 import { List } from './List';
-import { UserProvider } from '../../../providers/usuario.provider';
 
 interface TabPanelProps {
     children: React.ReactNode;
@@ -38,7 +38,7 @@ const UserIndex: React.FC = () => {
     ];
 
     return (
-        <Box sx={{ width: '100%', minHeight: '100vh' }}>
+        <Box sx={{ width: '100%', minHeight: '100dvh' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'center' }}>
                 <Tabs value={abaAtual} onChange={handleChange} aria-label="tabs">
                     {ContentTabs.map(tab => (
