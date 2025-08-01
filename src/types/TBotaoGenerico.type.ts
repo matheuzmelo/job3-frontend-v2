@@ -1,5 +1,5 @@
 export type TBotaoGenerico = {
-  icon: React.JSX.Element;
+  icon: React.ReactNode;
   handle?: () => void;
   label?: string;
   variant?: "black" | "white";
