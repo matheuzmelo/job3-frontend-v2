@@ -8,11 +8,10 @@ import {
   Select,
   Tab,
   Tabs,
-  TextField,
-  Typography
+  TextField
 } from "@mui/material";
 import { useState } from "react";
-import { ProdutosService } from "../../../services/api/Produtos/produtos.service";
+import { currencyMask } from "../../../Utils";
 import ToastMessage from "../../organisms/ToastMessage";
 
 export const Form = () => {
@@ -30,12 +29,31 @@ export const Form = () => {
     valorAtacado: "",
     valorRevenda: "",
     valorTabela4: "",
+    valorUltimaCompra: "",
+    custo: "",
+    pesoBruto: "",
+    pesoLiquido: "",
+    estoqueMinimo: "",
+    continuacaoDescricao: "",
+    codigo: '',
 
     // Aba Dados Fiscais
     ncm: "",
+    situacaoTributariaIcmsCst: "",
+    csosn: "",
+    cstIpi: "",
+    enquadramentoIpi: "",
+    cstPis: "",
+    cstCofins: "",
     cest: "",
-    origem: 0,
-    codigo: "",
+    cfopInterno: "",
+    cfopExterno: "",
+    icms: "",
+    icmsReduzido: "",
+    icmsDiferido: "",
+    mva: "",
+    fcp: "",
+    codigoBeneficiario: "",
 
     // Aba Rastreabilidade
     lote: "",
@@ -48,15 +66,21 @@ export const Form = () => {
     setActiveTab(newValue);
   };
 
-  const isFormValid = Object.values(formData).every(value => value !== '' && value !== null && value !== undefined);
-
+  // Removida a validação obrigatória conforme demanda
+  const isFormValid = true;
 
   const handleChange = (e) => {
-
     const { name, value } = e.target;
-    console.log(name, value)
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+  
+  const handleCurrencyChange = (e) => {
+    const { name, value } = e.target;
+    const formattedValue = currencyMask(value);
+
+    setFormData((prev) => ({ ...prev, [name]: formattedValue }));
+  };
+
 
   const handleCloseToast = () => {
     setShowToast(false)
@@ -68,23 +92,40 @@ export const Form = () => {
         codigo: formData.codigo,
         descricao: formData.descricao,
         unidade: formData.unidadeMedida,
-        valor_unidade: Number(formData.preco),
-        valor_atacado: Number(formData.valorAtacado),
-        valor_revenda: Number(formData.valorRevenda),
-        valor_tabela4: Number(formData.valorTabela4),
+        valor_unidade: Number(formData.preco.replace(/[^\d]/g, "")) / 100,
+        valor_atacado: Number(formData.valorAtacado.replace(/[^\d]/g, "")) / 100,
+        valor_revenda: Number(formData.valorRevenda.replace(/[^\d]/g, "")) / 100,
+        valor_tabela4: Number(formData.valorTabela4.replace(/[^\d]/g, "")) / 100,
+        valor_ultima_compra: Number(formData.valorUltimaCompra.replace(/[^\d]/g, "")) / 100,
+        custo: Number(formData.custo.replace(/[^\d]/g, "")) / 100,
+        peso_bruto: Number(formData.pesoBruto),
+        peso_liquido: Number(formData.pesoLiquido),
+        estoque_minimo: Number(formData.estoqueMinimo),
+        continuacao_descricao: formData.continuacaoDescricao,
+        tributacao: {
+          ncm: Number(formData.ncm),
+          situacao_tributaria_icms_cst: Number(formData.situacaoTributariaIcmsCst),
+          csosn: Number(formData.csosn),
+          cst_ipi: Number(formData.cstIpi),
+          enquadramento_ipi: Number(formData.enquadramentoIpi),
+          cst_pis: Number(formData.cstPis),
+          cst_cofins: Number(formData.cstCofins),
+          cest: Number(formData.cest),
+          cfop_interno: Number(formData.cfopInterno),
+          cfop_externo: Number(formData.cfopExterno),
+          icms: Number(formData.icms),
+          icms_reduzidao: Number(formData.icmsReduzido),
+          icms_diferido: Number(formData.icmsDiferido),
+          mva: Number(formData.mva),
+          fcp: Number(formData.fcp),
+          codigo_beneficiario: formData.codigoBeneficiario,
+        }
       };
 
-      if (Array.prototype.every.call(productData, (x) => !x ? false : true)) {
-        setTextToast('Algum dado do form não está preenchido.')
-        setStatusToast('warning')
-      }
-
-      const createData = await ProdutosService.create(productData);
-
-      if (createData) {
+      // const createData = await ProdutosService.create(productData);
+        console.log(productData)
         setTextToast('Cadastro realizado com sucesso.')
         setStatusToast('success')
-      }
 
     } catch (error) {
       console.error("Erro na requisição:", error);
@@ -96,10 +137,8 @@ export const Form = () => {
   };
 
   return (
-    <Container sx={{ my: 2 }}>
+    <Container>
       <Box>
-        <Typography variant="h5">Cadastro de Produto</Typography>
-
         <Box sx={{ borderColor: "divider" }}>
           <Tabs
             value={activeTab}
@@ -110,214 +149,439 @@ export const Form = () => {
           >
             <Tab label="Geral" sx={{ fontWeight: "bold" }} />
             <Tab label="Dados Fiscais" sx={{ fontWeight: "bold" }} />
-            <Tab label="Rastreabilidade" sx={{ fontWeight: "bold" }} />
+            {/* <Tab label="Rastreabilidade" sx={{ fontWeight: "bold" }} /> */}
           </Tabs>
         </Box>
 
         {/* Aba Geral */}
         <TabPanel value={activeTab} index={0}>
-          <Box>
-            <TextField
-              name="nome"
-              label="Nome do Produto"
-              value={formData.nome}
-              onChange={handleChange}
-              fullWidth
-              required
-            />
-          </Box>
-          <Box>
-            <TextField
-              name="descricao"
-              label="Descrição"
-              value={formData.descricao}
-              onChange={handleChange}
-              fullWidth
-              multiline
-              margin="normal"
-              rows={3}
-            />
-          </Box>
-
-          <Box display={'grid'} gap={2} gridTemplateColumns={'1fr 1fr'}>
-            <Box>
-              <TextField
-                name="categoria"
-                label="Categoria"
-                value={formData.categoria}
-                onChange={handleChange}
-                fullWidth
-
-              />
-            </Box>
-            <Box>
-              <FormControl fullWidth >
-                <InputLabel>Unidade de Medida</InputLabel>
-                <Select
-                  name="unidadeMedida"
-                  value={formData.unidadeMedida}
-                  label="Unidade de Medida"
+          <Box display={'grid'} rowGap={'.5rem'}>
+            <Box display={'flex'} gap={'.5rem'}>
+              <Box width={'100%'}>
+                <TextField
+                  name="codigo"
+                  label="Código"
+                  value={formData.codigo}
                   onChange={handleChange}
-                >
-                  <MenuItem value="un">Unidade</MenuItem>
-                  <MenuItem value="kg">Quilograma</MenuItem>
-                  <MenuItem value="g">Grama</MenuItem>
-                  <MenuItem value="l">Litro</MenuItem>
-                  <MenuItem value="ml">Mililitro</MenuItem>
-                  <MenuItem value="m">Metro</MenuItem>
-                </Select>
-              </FormControl>
+                  fullWidth
+                />
+              </Box>
+              <Box width={'100%'}>
+                <FormControl fullWidth >
+                  <InputLabel>Unidade</InputLabel>
+                  <Select
+                    name="unidadeMedida"
+                    value={formData.unidadeMedida}
+                    label="Unidade"
+                    onChange={handleChange}
+                  >
+                    <MenuItem value="un">Unidade</MenuItem>
+                    <MenuItem value="kg">Quilograma</MenuItem>
+                    <MenuItem value="g">Grama</MenuItem>
+                    <MenuItem value="l">Litro</MenuItem>
+                    <MenuItem value="ml">Mililitro</MenuItem>
+                    <MenuItem value="m">Metro</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
             </Box>
-            
-
-          </Box>
-          <Box display={'flex'} gap={4} margin={'1rem 0'}>
-<Box>
+            <Box display={'flex'} gap={'.5rem'}>
+              <Box width={'100%'}>
+                <TextField
+                  name="preco"
+                  label="Preço (R$)"
+                  value={formData.preco}
+                  onChange={handleCurrencyChange}
+                  fullWidth
+                />
+              </Box>
+              <Box width={'100%'}>
+                <TextField
+                  name="valorTabela4"
+                  label="Valor Tabela (R$)"
+                  value={formData.valorTabela4}
+                  onChange={handleCurrencyChange}
+                  fullWidth
+                />
+              </Box>
+              <Box width={'100%'}>
+                <TextField
+                  name="valorAtacado"
+                  label="Valor Atacado (R$)"
+                  value={formData.valorAtacado}
+                  onChange={handleCurrencyChange}
+                  fullWidth
+                />
+              </Box>
+              <Box width={'100%'}>
+                <TextField
+                  name="valorRevenda"
+                  label="Valor Revenda (R$)"
+                  value={formData.valorRevenda}
+                  onChange={handleCurrencyChange}
+                  fullWidth
+                />
+              </Box>
+            </Box>
+            <Box display={'flex'} gap={'.5rem'}>
+              <Box width={'100%'}>
+                <TextField
+                  name="valorUltimaCompra"
+                  label="Valor Última Compra (R$)"
+                  value={formData.valorUltimaCompra}
+                  onChange={handleCurrencyChange}
+                  fullWidth
+                />
+              </Box>
+              <Box width={'100%'}>
+                <TextField
+                  name="custo"
+                  label="Custo (R$)"
+                  value={formData.custo}
+                  onChange={handleCurrencyChange}
+                  fullWidth
+                />
+              </Box>
+              <Box width={'100%'}>
+                <TextField
+                  name="pesoBruto"
+                  label="Peso Bruto (kg)"
+                  value={formData.pesoBruto}
+                  onChange={handleChange}
+                  fullWidth
+                  type="number"
+                />
+              </Box>
+              <Box width={'100%'}>
+                <TextField
+                  name="pesoLiquido"
+                  label="Peso Líquido (kg)"
+                  value={formData.pesoLiquido}
+                  onChange={handleChange}
+                  fullWidth
+                  type="number"
+                />
+              </Box>
+            </Box>
+            <Box display={'flex'} gap={'1rem'}>
+              <Box width={'100%'}>
+                <TextField
+                  name="estoqueMinimo"
+                  label="Estoque Mínimo"
+                  value={formData.estoqueMinimo}
+                  onChange={handleChange}
+                  fullWidth
+                  type="number"
+                />
+              </Box>
+            </Box>
+            <Box>
               <TextField
-                name="preco"
-                label="Preço (R$)"
-                value={formData.preco}
+                name="descricao"
+                label="Descrição"
+                value={formData.descricao}
                 onChange={handleChange}
                 fullWidth
-                type="text"
+                multiline
+                rows={2}
               />
             </Box>
             <Box>
               <TextField
-                name="valorTabela4"
-                label="Valor Tabela (R$)"
-                value={formData.valorTabela4}
+                name="continuacaoDescricao"
+                label="Continuação Descrição"
+                value={formData.continuacaoDescricao}
                 onChange={handleChange}
                 fullWidth
-                type="text"
+                multiline
+                rows={2}
               />
             </Box>
-            <Box>
-              <TextField
-                name="valorAtacado"
-                label="Valor Atacado (R$)"
-                value={formData.valorAtacado}
-                onChange={handleChange}
-                fullWidth
-                type="text"
-              />
-            </Box>
-            <Box>
-              <TextField
-                name="valorRevenda"
-                label="Valor Revenda (R$)"
-                value={formData.valorRevenda}
-                onChange={handleChange}
-                fullWidth
-                type="text"
-              />
-            </Box>
-          </Box>
+          </Box> 
         </TabPanel>
 
         {/* Aba Dados Fiscais */}
         <TabPanel value={activeTab} index={1}>
-          <Box display={"grid"} gap={2}>
-            <Box>
-              <TextField
-                name="ncm"
-                label="NCM"
-                value={formData.ncm}
-                onChange={handleChange}
-                fullWidth
-                helperText="Código da Nomenclatura Comum do Mercosul"
-              />
-            </Box>
-            <Box>
-              <TextField
-                name="cest"
-                label="CEST"
-                value={formData.cest}
-                onChange={handleChange}
-                fullWidth
-                helperText="Código Especificador da Substituição Tributária"
-              />
-            </Box>
-            <Box>
-              <FormControl fullWidth >
-                <InputLabel>Origem</InputLabel>
-                <Select
-                  name="origem"
-                  value={formData.origem}
-                  label="Origem"
+          <Box display={'grid'} rowGap={'1rem'}>
+            <Box display={'flex'} gap={'1rem'}>
+              <Box width={'100%'}>
+                <TextField
+                  name="ncm"
+                  label="NCM"
+                  value={formData.ncm}
                   onChange={handleChange}
-                >
-                  <MenuItem value={0}>Nacional</MenuItem>
-                  <MenuItem value={1}>Importado</MenuItem>
-                  <MenuItem value={2}>
-                    Nacional com mais de 40% de conteúdo importado
-                  </MenuItem>
-                  <MenuItem value={3}>Importado por empresa nacional</MenuItem>
-                </Select>
-              </FormControl>
+                  fullWidth
+                  type="number"
+                />
+              </Box>
+              <Box width={'100%'}>
+                <FormControl fullWidth>
+                  <InputLabel>Situação Tributária ICMS - CST</InputLabel>
+                  <Select
+                    name="situacaoTributariaIcmsCst"
+                    value={formData.situacaoTributariaIcmsCst}
+                    label="Situação Tributária ICMS - CST"
+                    onChange={handleChange}
+                  >
+                    {[0, 10, 20, 30, 40, 41, 50, 51, 60, 70, 90].map((value) => (
+                      <MenuItem key={value} value={value}>{value}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+              <Box width={'100%'}>
+                <FormControl fullWidth>
+                  <InputLabel>CSOSN</InputLabel>
+                  <Select
+                    name="csosn"
+                    value={formData.csosn}
+                    label="CSOSN"
+                    onChange={handleChange}
+                  >
+                    {[101, 102, 103, 201, 202, 203, 300, 400, 500, 900].map((value) => (
+                      <MenuItem key={value} value={value}>{value}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
             </Box>
-            <Box>
-              <TextField
-                name="codigo"
-                label="Código"
-                value={formData.codigo}
-                onChange={handleChange}
-                fullWidth
-              />
+            
+            <Box display={'flex'} gap={'1rem'}>
+              <Box width={'100%'}>
+                <FormControl fullWidth>
+                  <InputLabel>CST IPI</InputLabel>
+                  <Select
+                    name="cstIpi"
+                    value={formData.cstIpi}
+                    label="CST IPI"
+                    onChange={handleChange}
+                  >
+                    {[0, 1, 2, 3, 4, 5, 49, 50, 51, 52, 53, 54, 55, 99].map((value) => (
+                      <MenuItem key={value} value={value}>{value}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+              <Box width={'100%'}>
+                <FormControl fullWidth>
+                  <InputLabel>Enquadramento IPI</InputLabel>
+                  <Select
+                    name="enquadramentoIpi"
+                    value={formData.enquadramentoIpi}
+                    label="Enquadramento IPI"
+                    onChange={handleChange}
+                  >
+                    <MenuItem value={0}>0 - Entrada com recuperação de crédito</MenuItem>
+                    <MenuItem value={1}>1 - Entrada tributada com alíquota zero</MenuItem>
+                    <MenuItem value={2}>2 - Entrada isenta</MenuItem>
+                    <MenuItem value={3}>3 - Entrada não-tributada</MenuItem>
+                    <MenuItem value={4}>4 - Entrada imune</MenuItem>
+                    <MenuItem value={5}>5 - Entrada com suspensão</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+              <Box width={'100%'}>
+                <TextField
+                  name="cest"
+                  label="CEST"
+                  value={formData.cest}
+                  onChange={handleChange}
+                  fullWidth
+                  type="number"
+                />
+              </Box>
+            </Box>
+            
+            <Box display={'flex'} gap={'1rem'}>
+              <Box width={'100%'}>
+                <FormControl fullWidth>
+                  <InputLabel>CST PIS</InputLabel>
+                  <Select
+                    name="cstPis"
+                    value={formData.cstPis}
+                    label="CST PIS"
+                    onChange={handleChange}
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 49, 50, 51, 52, 53, 54, 55, 56, 60, 61, 62, 63, 64, 65, 66, 67, 70, 71, 72, 73, 74, 75, 98, 99].map((value) => (
+                      <MenuItem key={value} value={value}>{value}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+              <Box width={'100%'}>
+                <FormControl fullWidth>
+                  <InputLabel>CST COFINS</InputLabel>
+                  <Select
+                    name="cstCofins"
+                    value={formData.cstCofins}
+                    label="CST COFINS"
+                    onChange={handleChange}
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 49, 50, 51, 52, 53, 54, 55, 56, 60, 61, 62, 63, 64, 65, 66, 67, 70, 71, 72, 73, 74, 75, 98, 99].map((value) => (
+                      <MenuItem key={value} value={value}>{value}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+            </Box>
+            
+            <Box display={'flex'} gap={'1rem'}>
+              <Box width={'100%'}>
+                <FormControl fullWidth>
+                  <InputLabel>CFOP Interna</InputLabel>
+                  <Select
+                    name="cfopInterno"
+                    value={formData.cfopInterno}
+                    label="CFOP Interna"
+                    onChange={handleChange}
+                  >
+                    {[5101, 5102, 5103, 5104, 5105, 5109, 5401, 5402, 5403, 5405, 5409, 5656].map((value) => (
+                      <MenuItem key={value} value={value}>{value}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+              <Box width={'100%'}>
+                <FormControl fullWidth>
+                  <InputLabel>CFOP Externa</InputLabel>
+                  <Select
+                    name="cfopExterno"
+                    value={formData.cfopExterno}
+                    label="CFOP Externa"
+                    onChange={handleChange}
+                  >
+                    {[6101, 6102, 6103, 6104, 6105, 6109, 6401, 6402, 6403, 6404, 6409].map((value) => (
+                      <MenuItem key={value} value={value}>{value}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+            </Box>
+            
+            <Box display={'flex'} gap={'1rem'}>
+              <Box width={'100%'}>
+                <TextField
+                  name="icms"
+                  label="ICMS (%)"
+                  value={formData.icms}
+                  onChange={handleChange}
+                  fullWidth
+                  type="number"
+                />
+              </Box>
+              <Box width={'100%'}>
+                <TextField
+                  name="icmsReduzido"
+                  label="ICMS Reduzido (%)"
+                  value={formData.icmsReduzido}
+                  onChange={handleChange}
+                  fullWidth
+                  type="number"
+                />
+              </Box>
+              <Box width={'100%'}>
+                <TextField
+                  name="icmsDiferido"
+                  label="ICMS Diferido (%)"
+                  value={formData.icmsDiferido}
+                  onChange={handleChange}
+                  fullWidth
+                  type="number"
+                />
+              </Box>
+            </Box>
+            
+            <Box display={'flex'} gap={'1rem'}>
+              <Box width={'100%'}>
+                <TextField
+                  name="mva"
+                  label="MVA (%)"
+                  value={formData.mva}
+                  onChange={handleChange}
+                  fullWidth
+                  type="number"
+                />
+              </Box>
+              <Box width={'100%'}>
+                <TextField
+                  name="fcp"
+                  label="FCP (%)"
+                  value={formData.fcp}
+                  onChange={handleChange}
+                  fullWidth
+                  type="number"
+                />
+              </Box>
+              <Box width={'100%'}>
+                <TextField
+                  name="codigoBeneficiario"
+                  label="Código Beneficiário"
+                  value={formData.codigoBeneficiario}
+                  onChange={handleChange}
+                  fullWidth
+                />
+              </Box>
             </Box>
           </Box>
         </TabPanel>
 
+        {/* Aba Rastreabilidade */}
         <TabPanel value={activeTab} index={2}>
-          <Box display={"grid"} gap={2}>
-            <Box>
-              <TextField
-                name="lote"
-                label="Lote"
-                value={formData.lote}
-                onChange={handleChange}
-                fullWidth
-
-              />
+          <Box display={'grid'} rowGap={'1rem'}>
+            <Box display={'flex'} gap={'1rem'}>
+              <Box width={'100%'}>
+                <TextField
+                  name="lote"
+                  label="Lote"
+                  value={formData.lote}
+                  onChange={handleChange}
+                  fullWidth
+                />
+              </Box>
+              <Box width={'100%'}>
+                <TextField
+                  name="validade"
+                  label="Validade"
+                  type="date"
+                  value={formData.validade}
+                  onChange={handleChange}
+                  fullWidth
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </Box>
             </Box>
-            <Box>
-              <TextField
-                name="validade"
-                label="Validade"
-                type="date"
-                value={formData.validade}
-                onChange={handleChange}
-                fullWidth
-              />
-            </Box>
-            <Box>
-              <TextField
-                name="codigoRastreamento"
-                label="Código de Rastreamento"
-                value={formData.codigoRastreamento}
-                onChange={handleChange}
-                fullWidth
-              />
-            </Box>
-            <Box>
-              <TextField
-                name="localizacao"
-                label="Localização no Armazém"
-                value={formData.localizacao}
-                onChange={handleChange}
-                fullWidth
-              />
+            <Box display={'flex'} gap={'1rem'}>
+              <Box width={'100%'}>
+                <TextField
+                  name="codigoRastreamento"
+                  label="Código de Rastreamento"
+                  value={formData.codigoRastreamento}
+                  onChange={handleChange}
+                  fullWidth
+                />
+              </Box>
+              <Box width={'100%'}>
+                <TextField
+                  name="localizacao"
+                  label="Localização"
+                  value={formData.localizacao}
+                  onChange={handleChange}
+                  fullWidth
+                />
+              </Box>
             </Box>
           </Box>
         </TabPanel>
 
-        <Box marginTop={2} sx={{ display: "flex", justifyContent: "flex-end" }}>
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <Button
             id="submit-button"
             variant="contained"
             onClick={handleSubmit}
-            sx={{ px: 4, py: 1.5, fontWeight: "bold", color: 'white' }}
             disabled={!isFormValid}
+            sx={{color: 'white'}}
           >
             Salvar Produto
           </Button>

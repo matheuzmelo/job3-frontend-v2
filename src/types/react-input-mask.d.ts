@@ -5,7 +5,6 @@ declare module 'react-input-mask' {
     mask: string;
     maskChar?: string;
     alwaysShowMask?: boolean;
-    // Adicione outras props necessárias aqui
   }
 
   const InputMask: React.ForwardRefExoticComponent<

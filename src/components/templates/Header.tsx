@@ -26,8 +26,7 @@ export const Header = () => {
 
     setUser(data.email);
 
-    // TODO: Solicitar para o Diogo mandar estes dados
-    setEnvironment("DEVELOP");
+    setEnvironment("HOMOLOG");
     setBusiness("JOB3");
   };
 
@@ -41,7 +40,7 @@ export const Header = () => {
   };
 
   return (
-    <Box component="header" sx={{ flexGrow: 1 }}>
+    <Box component="header">
       <AppBar position="static">
         <Toolbar
           sx={{
@@ -55,7 +54,7 @@ export const Header = () => {
             edge="start"
             aria-label="menu"
             sx={{
-              mr: 2,
+              mr: 1,
               color: "#fff",
               width: "fit-content",
               padding: 0,
@@ -85,9 +84,9 @@ export const Header = () => {
               display: "flex",
               justifyContent: "flex-end",
               alignItems: "center",
-              gap: 2,
+              gap: 1,
               color: "#fff",
-              ml: 2,
+              ml: 1,
             }}
           >
             <Typography
