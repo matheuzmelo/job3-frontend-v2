@@ -11,6 +11,13 @@ import {
   TextField
 } from "@mui/material";
 import { useState } from "react";
+
+import csosn from "../../../mock/csosn.json";
+import cstCofins from "../../../mock/cst-cofins.json";
+import cstIcms from "../../../mock/cst-icms.json";
+import cstIpi from "../../../mock/cst-ipi.json";
+import cstPis from "../../../mock/cst-pis.json";
+
 import { currencyMask } from "../../../Utils";
 import ToastMessage from "../../organisms/ToastMessage";
 
@@ -323,8 +330,8 @@ export const Form = () => {
                     label="Situação Tributária ICMS - CST"
                     onChange={handleChange}
                   >
-                    {[0, 10, 20, 30, 40, 41, 50, 51, 60, 70, 90].map((value) => (
-                      <MenuItem key={value} value={value}>{value}</MenuItem>
+                    {cstIcms.map((value) => (
+                      <MenuItem key={value.codigo} value={value.codigo}>{value.descricao}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -338,8 +345,8 @@ export const Form = () => {
                     label="CSOSN"
                     onChange={handleChange}
                   >
-                    {[101, 102, 103, 201, 202, 203, 300, 400, 500, 900].map((value) => (
-                      <MenuItem key={value} value={value}>{value}</MenuItem>
+                    {csosn.map((value) => (
+                      <MenuItem key={value.codigo} value={value.codigo}>{value.descricao}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -356,8 +363,8 @@ export const Form = () => {
                     label="CST IPI"
                     onChange={handleChange}
                   >
-                    {[0, 1, 2, 3, 4, 5, 49, 50, 51, 52, 53, 54, 55, 99].map((value) => (
-                      <MenuItem key={value} value={value}>{value}</MenuItem>
+                    {cstIpi.map((value) => (
+                      <MenuItem key={value.codigo} value={value.codigo}>{value.descricao}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -402,8 +409,8 @@ export const Form = () => {
                     label="CST PIS"
                     onChange={handleChange}
                   >
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 49, 50, 51, 52, 53, 54, 55, 56, 60, 61, 62, 63, 64, 65, 66, 67, 70, 71, 72, 73, 74, 75, 98, 99].map((value) => (
-                      <MenuItem key={value} value={value}>{value}</MenuItem>
+                    {cstPis.map((value) => (
+                      <MenuItem key={value.codigo} value={value.codigo}>{value.descricao}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -417,8 +424,8 @@ export const Form = () => {
                     label="CST COFINS"
                     onChange={handleChange}
                   >
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 49, 50, 51, 52, 53, 54, 55, 56, 60, 61, 62, 63, 64, 65, 66, 67, 70, 71, 72, 73, 74, 75, 98, 99].map((value) => (
-                      <MenuItem key={value} value={value}>{value}</MenuItem>
+                    {cstCofins.map((value) => (
+                      <MenuItem key={value.codigo} value={value.codigo}>{value.descricao}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>

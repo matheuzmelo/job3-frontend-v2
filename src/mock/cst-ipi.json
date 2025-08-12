@@ -1,0 +1,16 @@
+[
+  { "codigo": "0", "descricao": "Entrada com Recuperação de Crédito" },
+  { "codigo": "1", "descricao": "Entrada Tributável com Alíquota Zero" },
+  { "codigo": "2", "descricao": "Entrada Isenta" },
+  { "codigo": "3", "descricao": "Entrada Não-Tributada" },
+  { "codigo": "4", "descricao": "Entrada Imune" },
+  { "codigo": "5", "descricao": "Entrada com Suspensão" },
+  { "codigo": "49", "descricao": "Outras Entradas" },
+  { "codigo": "50", "descricao": "Saída Tributada" },
+  { "codigo": "51", "descricao": "Saída Tributável com Alíquota Zero" },
+  { "codigo": "52", "descricao": "Saída Isenta" },
+  { "codigo": "53", "descricao": "Saída Não-Tributada" },
+  { "codigo": "54", "descricao": "Saída Imune" },
+  { "codigo": "55", "descricao": "Saída com Suspensão" },
+  { "codigo": "99", "descricao": "Outras Saídas" }
+]

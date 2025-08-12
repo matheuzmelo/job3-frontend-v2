@@ -1,0 +1,34 @@
+[
+  {
+    "codigo": 0,
+    "descricao": "Nacional, exceto as indicadas nos códigos 3 a 5"
+  },
+  {
+    "codigo": 1,
+    "descricao": "Estrangeira - Importação direta, exceto a indicada no código 6"
+  },
+  {
+    "codigo": 2,
+    "descricao": "Estrangeira - Adquirida no mercado interno, exceto a indicada no código 7"
+  },
+  {
+    "codigo": 3,
+    "descricao": "Nacional, mercadoria ou bem com Conteúdo de Importação superior a 40%"
+  },
+  {
+    "codigo": 4,
+    "descricao": "Nacional, cuja produção tenha sido feita em conformidade com os processos produtivos básicos de que tratam o Decreto-Lei nº 288/67 e as Leis nºs 8.248/91, 8.387/91, 10.176/01 e 11.484/07"
+  },
+  {
+    "codigo": 5,
+    "descricao": "Nacional, mercadoria ou bem com Conteúdo de Importação inferior ou igual a 40%"
+  },
+  {
+    "codigo": 6,
+    "descricao": "Estrangeira - Importação direta, sem similar nacional, constante em lista de Resolução CAMEX"
+  },
+  {
+    "codigo": 7,
+    "descricao": "Estrangeira - Adquirida no mercado interno, sem similar nacional, constante em lista de Resolução CAMEX"
+  }
+]
