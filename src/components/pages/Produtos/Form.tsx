@@ -369,8 +369,8 @@ export const Form = () => {
                     {cstIcms.map((value) => (
                       <MenuItem title={value.descricao} key={value.codigo} value={value.codigo}>
                         {value.descricao.length > 60
-                          ? value.descricao.substring(0, 60) + "..."
-                          : value.descricao}
+                          ? `${value.codigo} - ${value.descricao.substring(0, 60)}` + "..."
+                          : `${value.codigo} - ${value.descricao}`}
                       </MenuItem>))}
                   </Select>
                 </FormControl>
@@ -387,8 +387,8 @@ export const Form = () => {
                     {csosn.map((value) => (
                       <MenuItem title={value.descricao} key={value.codigo} value={value.codigo}>
                         {value.descricao.length > 60
-                          ? value.descricao.substring(0, 60) + "..."
-                          : value.descricao}
+                          ? `${value.codigo} - ${value.descricao.substring(0, 60)}` + "..."
+                          : `${value.codigo} - ${value.descricao}`}
                       </MenuItem>
 
                     ))}
@@ -410,8 +410,8 @@ export const Form = () => {
                     {cstIpi.map((value) => (
                       <MenuItem title={value.descricao} key={value.codigo} value={value.codigo}>
                         {value.descricao.length > 60
-                          ? value.descricao.substring(0, 60) + "..."
-                          : value.descricao}
+                          ? `${value.codigo} - ${value.descricao.substring(0, 60)}` + "..."
+                          : `${value.codigo} - ${value.descricao}`}
                       </MenuItem>
                     ))}
                   </Select>
@@ -469,8 +469,8 @@ export const Form = () => {
                     {cstPis.map((value) => (
                       <MenuItem title={value.descricao} key={value.codigo} value={value.codigo}>
                         {value.descricao.length > 60
-                          ? value.descricao.substring(0, 60) + "..."
-                          : value.descricao}
+                          ? `${value.codigo} - ${value.descricao.substring(0, 60)}` + "..."
+                          : `${value.codigo} - ${value.descricao}`}
                       </MenuItem>
                     ))}
                   </Select>
@@ -488,8 +488,8 @@ export const Form = () => {
                     {cstCofins.map((value) => (
                       <MenuItem title={value.descricao} key={value.codigo} value={value.codigo}>
                         {value.descricao.length > 60
-                          ? value.descricao.substring(0, 60) + "..."
-                          : value.descricao}
+                          ? `${value.codigo} - ${value.descricao.substring(0, 60)}` + "..."
+                          : `${value.codigo} - ${value.descricao}`}
                       </MenuItem>
                     ))}
                   </Select>
