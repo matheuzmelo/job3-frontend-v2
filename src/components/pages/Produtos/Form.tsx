@@ -80,7 +80,7 @@ export const Form = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
+
   const handleCurrencyChange = (e) => {
     const { name, value } = e.target;
     const formattedValue = currencyMask(value);
@@ -130,9 +130,9 @@ export const Form = () => {
       };
 
       // const createData = await ProdutosService.create(productData);
-        console.log(productData)
-        setTextToast('Cadastro realizado com sucesso.')
-        setStatusToast('success')
+      console.log(productData)
+      setTextToast('Cadastro realizado com sucesso.')
+      setStatusToast('success')
 
     } catch (error) {
       console.error("Erro na requisição:", error);
@@ -257,6 +257,15 @@ export const Form = () => {
                   onChange={handleChange}
                   fullWidth
                   type="number"
+                  sx={{
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield', // Firefox
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none', // Chrome, Safari, Edge, Opera
+                      margin: 0,
+                    }
+                  }}
                 />
               </Box>
               <Box width={'100%'}>
@@ -267,6 +276,15 @@ export const Form = () => {
                   onChange={handleChange}
                   fullWidth
                   type="number"
+                  sx={{
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield', // Firefox
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none', // Chrome, Safari, Edge, Opera
+                      margin: 0,
+                    }
+                  }}
                 />
               </Box>
             </Box>
@@ -279,6 +297,15 @@ export const Form = () => {
                   onChange={handleChange}
                   fullWidth
                   type="number"
+                  sx={{
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield', // Firefox
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none', // Chrome, Safari, Edge, Opera
+                      margin: 0,
+                    }
+                  }}
                 />
               </Box>
             </Box>
@@ -304,7 +331,7 @@ export const Form = () => {
                 rows={2}
               />
             </Box>
-          </Box> 
+          </Box>
         </TabPanel>
 
         {/* Aba Dados Fiscais */}
@@ -319,6 +346,15 @@ export const Form = () => {
                   onChange={handleChange}
                   fullWidth
                   type="number"
+                  sx={{
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield', // Firefox
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none', // Chrome, Safari, Edge, Opera
+                      margin: 0,
+                    }
+                  }}
                 />
               </Box>
               <Box width={'100%'}>
@@ -331,8 +367,11 @@ export const Form = () => {
                     onChange={handleChange}
                   >
                     {cstIcms.map((value) => (
-                      <MenuItem key={value.codigo} value={value.codigo}>{value.descricao}</MenuItem>
-                    ))}
+                      <MenuItem title={value.descricao} key={value.codigo} value={value.codigo}>
+                        {value.descricao.length > 60
+                          ? `${value.codigo} - ${value.descricao.substring(0, 60)}` + "..."
+                          : `${value.codigo} - ${value.descricao}`}
+                      </MenuItem>))}
                   </Select>
                 </FormControl>
               </Box>
@@ -346,13 +385,18 @@ export const Form = () => {
                     onChange={handleChange}
                   >
                     {csosn.map((value) => (
-                      <MenuItem key={value.codigo} value={value.codigo}>{value.descricao}</MenuItem>
+                      <MenuItem title={value.descricao} key={value.codigo} value={value.codigo}>
+                        {value.descricao.length > 60
+                          ? `${value.codigo} - ${value.descricao.substring(0, 60)}` + "..."
+                          : `${value.codigo} - ${value.descricao}`}
+                      </MenuItem>
+
                     ))}
                   </Select>
                 </FormControl>
               </Box>
             </Box>
-            
+
             <Box display={'flex'} gap={'1rem'}>
               <Box width={'100%'}>
                 <FormControl fullWidth>
@@ -364,7 +408,11 @@ export const Form = () => {
                     onChange={handleChange}
                   >
                     {cstIpi.map((value) => (
-                      <MenuItem key={value.codigo} value={value.codigo}>{value.descricao}</MenuItem>
+                      <MenuItem title={value.descricao} key={value.codigo} value={value.codigo}>
+                        {value.descricao.length > 60
+                          ? `${value.codigo} - ${value.descricao.substring(0, 60)}` + "..."
+                          : `${value.codigo} - ${value.descricao}`}
+                      </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -395,10 +443,19 @@ export const Form = () => {
                   onChange={handleChange}
                   fullWidth
                   type="number"
+                  sx={{
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield', // Firefox
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none', // Chrome, Safari, Edge, Opera
+                      margin: 0,
+                    }
+                  }}
                 />
               </Box>
             </Box>
-            
+
             <Box display={'flex'} gap={'1rem'}>
               <Box width={'100%'}>
                 <FormControl fullWidth>
@@ -410,7 +467,11 @@ export const Form = () => {
                     onChange={handleChange}
                   >
                     {cstPis.map((value) => (
-                      <MenuItem key={value.codigo} value={value.codigo}>{value.descricao}</MenuItem>
+                      <MenuItem title={value.descricao} key={value.codigo} value={value.codigo}>
+                        {value.descricao.length > 60
+                          ? `${value.codigo} - ${value.descricao.substring(0, 60)}` + "..."
+                          : `${value.codigo} - ${value.descricao}`}
+                      </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -425,13 +486,17 @@ export const Form = () => {
                     onChange={handleChange}
                   >
                     {cstCofins.map((value) => (
-                      <MenuItem key={value.codigo} value={value.codigo}>{value.descricao}</MenuItem>
+                      <MenuItem title={value.descricao} key={value.codigo} value={value.codigo}>
+                        {value.descricao.length > 60
+                          ? `${value.codigo} - ${value.descricao.substring(0, 60)}` + "..."
+                          : `${value.codigo} - ${value.descricao}`}
+                      </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               </Box>
             </Box>
-            
+
             <Box display={'flex'} gap={'1rem'}>
               <Box width={'100%'}>
                 <FormControl fullWidth>
@@ -464,7 +529,7 @@ export const Form = () => {
                 </FormControl>
               </Box>
             </Box>
-            
+
             <Box display={'flex'} gap={'1rem'}>
               <Box width={'100%'}>
                 <TextField
@@ -474,6 +539,16 @@ export const Form = () => {
                   onChange={handleChange}
                   fullWidth
                   type="number"
+                  sx={{
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield', // Firefox
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none', // Chrome, Safari, Edge, Opera
+                      margin: 0,
+                    }
+                  }}
+
                 />
               </Box>
               <Box width={'100%'}>
@@ -484,6 +559,15 @@ export const Form = () => {
                   onChange={handleChange}
                   fullWidth
                   type="number"
+                  sx={{
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield', // Firefox
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none', // Chrome, Safari, Edge, Opera
+                      margin: 0,
+                    }
+                  }}
                 />
               </Box>
               <Box width={'100%'}>
@@ -494,10 +578,19 @@ export const Form = () => {
                   onChange={handleChange}
                   fullWidth
                   type="number"
+                  sx={{
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield', // Firefox
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none', // Chrome, Safari, Edge, Opera
+                      margin: 0,
+                    }
+                  }}
                 />
               </Box>
             </Box>
-            
+
             <Box display={'flex'} gap={'1rem'}>
               <Box width={'100%'}>
                 <TextField
@@ -507,6 +600,15 @@ export const Form = () => {
                   onChange={handleChange}
                   fullWidth
                   type="number"
+                  sx={{
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield', // Firefox
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none', // Chrome, Safari, Edge, Opera
+                      margin: 0,
+                    }
+                  }}
                 />
               </Box>
               <Box width={'100%'}>
@@ -517,6 +619,15 @@ export const Form = () => {
                   onChange={handleChange}
                   fullWidth
                   type="number"
+                  sx={{
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield', // Firefox
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none', // Chrome, Safari, Edge, Opera
+                      margin: 0,
+                    }
+                  }}
                 />
               </Box>
               <Box width={'100%'}>
@@ -588,7 +699,7 @@ export const Form = () => {
             variant="contained"
             onClick={handleSubmit}
             disabled={!isFormValid}
-            sx={{color: 'white'}}
+            sx={{ color: 'white' }}
           >
             Salvar Produto
           </Button>
