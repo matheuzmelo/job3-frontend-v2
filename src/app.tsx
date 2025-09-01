@@ -6,17 +6,31 @@ import Loading from "./components/pages/Loading";
 import Login from "./components/pages/Login";
 import { menuLayout } from "./routes/menu";
 import { theme } from "./theme/theme";
-import { MenuLayout } from "./types/TMenu.type";
+import { MenuLayout, TMenuItem, } from "./types/TMenu.type";
 
 export const App = () => {
-  const createRoutes = (menu: MenuLayout) => {
-    return menu.map((item) => (
-      <Route
-        path={item.route}
-        element={<Suspense fallback={<Loading />}>{item.page}</Suspense>}
-        key={item.route}
-      />
-    ));
+  const createRoutes = (menu: MenuLayout): JSX.Element[] => {
+    return menu.flatMap((item: TMenuItem) => {
+      const routes: JSX.Element[] = [];
+
+      // Se tiver route definido → cria rota
+      if (item.route) {
+        routes.push(
+          <Route
+            key={item.route}
+            path={item.route}
+            element={<Suspense fallback={<Loading />}>{item.page}</Suspense>}
+          />
+        );
+      }
+
+      // Se tiver subMenu → cria rotas recursivas
+      if (item.subMenu) {
+        routes.push(...createRoutes(item.subMenu));
+      }
+
+      return routes;
+    });
   };
 
   return (
@@ -29,8 +43,10 @@ export const App = () => {
         }}
       >
         <Routes>
+          {/* Rota de login fora do layout */}
           <Route path="/login" element={<Login />} />
 
+          {/* Todas as outras dentro do layout */}
           <Route
             path="/*"
             element={

@@ -2,9 +2,11 @@ import { LocalAtmRounded, Note } from "@mui/icons-material";
 import BusinessIcon from "@mui/icons-material/Business";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import GroupIcon from "@mui/icons-material/Group";
+import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import PersonIcon from "@mui/icons-material/Person";
+import TableChartIcon from '@mui/icons-material/TableChart';
 import { Documentos } from "../components/pages/Documentos";
 import { Empresas } from "../components/pages/Empresas";
 import Home from "../components/pages/Home";
@@ -12,6 +14,7 @@ import { NotasFiscais } from "../components/pages/nfe";
 import Pessoas from "../components/pages/Pessoas";
 import Produtos from "../components/pages/Produtos";
 import Proposta from "../components/pages/Proposal/Index";
+import { Classes } from "../components/pages/Tabelas/classes";
 import Usuario from "../components/pages/Usuarios";
 import { MenuLayout } from "../types/TMenu.type";
 
@@ -43,6 +46,21 @@ export const menuLayout: MenuLayout = [
         icon: <LocalAtmRounded />,
       },
     ],
+  },
+  {
+    name: "Tabelas",
+    permission: undefined,
+    route: "/tabelas/classes",
+    page:<Classes />,
+    icon: <TableChartIcon />,
+    subMenu: [
+      {
+        name: "Classes",
+        route: "/tabelas/classes",
+        page: <Classes />,
+        icon: <HistoryEduIcon />
+      },
+    ]
   },
   {
     name: "Produtos",
