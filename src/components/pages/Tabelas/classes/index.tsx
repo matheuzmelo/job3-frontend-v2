@@ -53,7 +53,7 @@ export const Classes = () => {
   return (
     <>
 
-      <Box p={3} component={Paper} elevation={3}>
+      <Box p={3} component={Paper} elevation={3} height={'calc(100dvh - 9rem)'}>
         <Box sx={{
           borderBottom: 1,
           borderColor: 'divider',

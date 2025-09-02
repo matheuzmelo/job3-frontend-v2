@@ -182,21 +182,20 @@ export const Form = () => {
           </Box>
 
           <Box sx={{ flex: '1 1 calc(33.33% - 1rem)', minWidth: '300px' }}>
-            <InputMask
-              mask={cpfCnpjMask}
+            <TextField
+              label="CPF/CNPJ *"
+              name="cpfCnpj"
+              fullWidth
               value={formData.cpfCnpj}
               onChange={handleChange}
-              maskChar=""
-            >
-              {(inputProps) => (
-                <TextField
-                  {...inputProps}
-                  label="CNPJ/CPF *"
-                  name="cpfCnpj"
-                  fullWidth
-                />
-              )}
-            </InputMask>
+              InputProps={{
+                inputComponent: InputMask as any,
+              }}
+              inputProps={{
+                mask: cpfCnpjMask,
+                maskChar: "",
+              }}
+            />
           </Box>
           <Box sx={{ flex: '1 1 calc(33.33% - 1rem)', minWidth: '300px' }}>
             <TextField

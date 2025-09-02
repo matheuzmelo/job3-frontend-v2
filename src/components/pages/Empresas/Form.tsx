@@ -220,9 +220,8 @@ export const Form: React.FC = () => {
         telefone: formData.telefone,
         cep: formData.cep,
         bairro: formData.bairro,
-        endereco: `${formData.logradouro}, ${formData.numero}, ${
-          formData.complemento || "sem complemento"
-        }`,
+        endereco: `${formData.logradouro}, ${formData.numero}, ${formData.complemento || "sem complemento"
+          }`,
         cidade: formData.cidade,
         uf: formData.uf,
         inscricao_estadual: formData.inscricao_estadual,
@@ -298,25 +297,23 @@ export const Form: React.FC = () => {
           >
             {/* Campo CNPJ com Máscara */}
             <Box>
-              <InputMask
-                mask="99.999.999/9999-99"
+              <TextField
+                label="CNPJ"
+                name="cnpj"
+                fullWidth
+                required
                 value={formData.cnpj}
                 onChange={handleChange}
                 disabled={isAdmin}
-              >
-                {(inputProps: any) => (
-                  <TextField
-                    {...inputProps}
-                    label="CNPJ"
-                    name="cnpj"
-                    fullWidth
-                    required
-                    disabled={isAdmin}
-                    onChange={handleChange}
-                    inputRef={cnpjRef} // Usando ref diretamente no TextField
-                  />
-                )}
-              </InputMask>
+                inputRef={cnpjRef}
+                InputProps={{
+                  inputComponent: InputMask as any,
+                }}
+                inputProps={{
+                  mask: "99.999.999/9999-99",
+                  maskChar: "",
+                }}
+              />
             </Box>
             <Box>
               <TextField
@@ -352,44 +349,40 @@ export const Form: React.FC = () => {
               />
             </Box>
             <Box>
-              <InputMask
-                mask="(99) 99999-9999"
+              <TextField
+                label="Telefone"
+                name="telefone"
+                fullWidth
+                required
                 value={formData.telefone}
                 onChange={handleChange}
                 disabled={isAdmin}
-              >
-                {(inputProps: any) => (
-                  <TextField
-                    {...inputProps}
-                    label="Telefone"
-                    name="telefone"
-                    fullWidth
-                    required
-                    disabled={isAdmin}
-                    onChange={handleChange}
-                  />
-                )}
-              </InputMask>
+                InputProps={{
+                  inputComponent: InputMask as any,
+                }}
+                inputProps={{
+                  mask: "(99) 99999-9999",
+                  maskChar: "",
+                }}
+              />
             </Box>
             <Box position={"relative"} display={"flex"} alignItems={"center"}>
-              <InputMask
-                mask="99999-999"
+              <TextField
+                label="CEP"
+                name="cep"
+                fullWidth
+                required
                 value={formData.cep}
                 onChange={handleChange}
                 disabled={isAdmin}
-              >
-                {(inputProps: any) => (
-                  <TextField
-                    {...inputProps}
-                    label="CEP"
-                    name="cep"
-                    fullWidth
-                    required
-                    onChange={handleChange}
-                    disabled={isAdmin}
-                  />
-                )}
-              </InputMask>
+                InputProps={{
+                  inputComponent: InputMask as any,
+                }}
+                inputProps={{
+                  mask: "99999-999",
+                  maskChar: "",
+                }}
+              />
               {loadingCEP && (
                 <CircularProgress
                   sx={{
@@ -490,70 +483,70 @@ export const Form: React.FC = () => {
               />
             </Box>
           </Box>
-          { !isAdmin && (
+          {!isAdmin && (
 
-          <>
-          <Box margin={"2rem 0"}>
-            <Divider />
-          </Box>
+            <>
+              <Box margin={"2rem 0"}>
+                <Divider />
+              </Box>
 
-          <Box sx={{ mt: 4 }}>
-            <Box
-              display={"flex"}
-              justifyContent={"space-between"}
-              margin={"1rem 0"}
-              alignItems={"center"}
-            >
-              <Typography variant="h6" gutterBottom>
-                Usuários Associados
-              </Typography>
+              <Box sx={{ mt: 4 }}>
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  margin={"1rem 0"}
+                  alignItems={"center"}
+                >
+                  <Typography variant="h6" gutterBottom>
+                    Usuários Associados
+                  </Typography>
 
-              <Button
-                variant="contained"
-                sx={{ mt: 2, padding: ".5rem 2rem", color: "white" }}
-                onClick={() => setIsModalOpen(true)}
-              >
-                Incluir
-              </Button>
-            </Box>
-            {associatedUsers.length === 0 ? (
-              <Typography variant="body2" color="text.secondary">
-                Nenhum usuário associado ainda.
-              </Typography>
-            ) : (
-              <TableContainer component={Paper}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Nome</TableCell>
-                      <TableCell>Email</TableCell>
-                      <TableCell>Nível</TableCell>
-                      <TableCell align="right">Ações</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {associatedUsers.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>{user.nome}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.nivel}</TableCell>
-                        <TableCell align="right">
-                          <Button
-                            variant="text"
-                            color="error"
-                            onClick={() => handleRemoveUser(user.id)}
-                          >
-                            Remover
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            )}
-          </Box>
-          </>
+                  <Button
+                    variant="contained"
+                    sx={{ mt: 2, padding: ".5rem 2rem", color: "white" }}
+                    onClick={() => setIsModalOpen(true)}
+                  >
+                    Incluir
+                  </Button>
+                </Box>
+                {associatedUsers.length === 0 ? (
+                  <Typography variant="body2" color="text.secondary">
+                    Nenhum usuário associado ainda.
+                  </Typography>
+                ) : (
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Nome</TableCell>
+                          <TableCell>Email</TableCell>
+                          <TableCell>Nível</TableCell>
+                          <TableCell align="right">Ações</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {associatedUsers.map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell>{user.nome}</TableCell>
+                            <TableCell>{user.email}</TableCell>
+                            <TableCell>{user.nivel}</TableCell>
+                            <TableCell align="right">
+                              <Button
+                                variant="text"
+                                color="error"
+                                onClick={() => handleRemoveUser(user.id)}
+                              >
+                                Remover
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
+              </Box>
+            </>
 
           )}
           {!isAdmin && (

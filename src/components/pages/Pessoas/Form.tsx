@@ -188,22 +188,21 @@ export const Form: React.FC = () => {
             />
           </Box>
           <Box sx={{ flex: '1 1 calc(33.33% - 1rem)', minWidth: '300px' }}>
-            <InputMask
-              mask={cpfCnpjMask}
+            <TextField
+              label="CPF/CNPJ *"
+              name="cpfCnpj"
+              fullWidth
               value={formData.cpfCnpj}
               onChange={handleChange}
-              maskChar=""
-            >
-              {(inputProps: any) => (
-                <TextField
-                  {...inputProps}
-                  label="CPF/CNPJ *"
-                  name="cpfCnpj"
-                  fullWidth
-                  inputRef={inputRef}
-                />
-              )}
-            </InputMask>
+              inputRef={inputRef}
+              InputProps={{
+                inputComponent: InputMask as any,
+              }}
+              inputProps={{
+                mask: cpfCnpjMask,
+                maskChar: "",
+              }}
+            />
           </Box>
           <Box sx={{ flex: '1 1 calc(33.33% - 1rem)', minWidth: '300px' }}>
             <TextField
@@ -224,38 +223,37 @@ export const Form: React.FC = () => {
             />
           </Box>
           <Box sx={{ flex: '1 1 calc(33.33% - 1rem)', minWidth: '300px' }}>
-            <InputMask
-              mask="(99) 99999-9999"
+            <TextField
+              label="Telefone"
+              name="phone"
+              fullWidth
               value={formData.phone}
               onChange={handleChange}
-              maskChar=""
-            >
-              {(inputProps) => (
-                <TextField
-                  {...inputProps}
-                  label="Telefone"
-                  name="phone"
-                  fullWidth
-                />
-              )}
-            </InputMask>
+              InputProps={{
+                inputComponent: InputMask as any,
+              }}
+              inputProps={{
+                mask: "(99) 99999-9999",
+                maskChar: "",
+              }}
+            />
+
           </Box>
           <Box sx={{ flex: '1 1 calc(33.33% - 1rem)', minWidth: '300px' }}>
-            <InputMask
-              mask="99999-999"
+            <TextField
+              label="CEP *"
+              name="zip"
+              fullWidth
               value={formData.zip}
               onChange={handleChange}
-              maskChar=""
-            >
-              {(inputProps) => (
-                <TextField
-                  {...inputProps}
-                  label="CEP *"
-                  name="zip"
-                  fullWidth
-                />
-              )}
-            </InputMask>
+              InputProps={{
+                inputComponent: InputMask as any,
+              }}
+              inputProps={{
+                mask: "99999-999",
+                maskChar: "",
+              }}
+            />
           </Box>
           <Box sx={{ flex: '1 1 calc(33.33% - 1rem)', minWidth: '300px' }}>
             <TextField
