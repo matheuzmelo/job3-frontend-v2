@@ -30,6 +30,7 @@ export const Form = () => {
   const [showToast, setShowToast] = useState<boolean>(false)
   const [textToast, setTextToast] = useState<string>('')
   const [statusToast, setStatusToast] = useState<string>('')
+  const [saveLoading, setSaveLoading] = useState<boolean>(false)
   const navigate = useNavigate()
   const [unidades, setUnidades] = useState([]);
   const [classes, setClasses] = useState([])
@@ -103,6 +104,7 @@ export const Form = () => {
 
   const handleSubmit = async () => {
     try {
+      setSaveLoading(true)
       const productData = {
         codigo: formData.codigo,
         descricao: formData.descricao,
@@ -152,6 +154,7 @@ export const Form = () => {
       setStatusToast('error')
     } finally {
       setShowToast(true)
+      setSaveLoading(false)
     }
   };
 
@@ -761,10 +764,10 @@ export const Form = () => {
                 id="submit-button"
                 variant="contained"
                 onClick={handleSubmit}
-                disabled={!isFormValid}
+                disabled={!isFormValid || saveLoading}
                 sx={{ color: 'white' }}
               >
-                Salvar Produto
+                {saveLoading ? 'Salvando Produto...' : 'Salvar Produto'}
               </Button>
             </Box>
           </Box>
