@@ -10,7 +10,7 @@ import {
   Tabs,
   TextField
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import csosn from "../../../mock/csosn.json";
 import cstCofins from "../../../mock/cst-cofins.json";
@@ -18,6 +18,9 @@ import cstIcms from "../../../mock/cst-icms.json";
 import cstIpi from "../../../mock/cst-ipi.json";
 import cstPis from "../../../mock/cst-pis.json";
 
+import { useNavigate } from "react-router-dom";
+import { ParametrosService } from "../../../services/api/Parmentros/paramentros.service";
+import { ProdutosService } from "../../../services/api/Produtos/produtos.service";
 import { currencyMask } from "../../../Utils";
 import ToastMessage from "../../organisms/ToastMessage";
 
@@ -26,6 +29,9 @@ export const Form = () => {
   const [showToast, setShowToast] = useState<boolean>(false)
   const [textToast, setTextToast] = useState<string>('')
   const [statusToast, setStatusToast] = useState<string>('')
+  const navigate = useNavigate()
+  const [unidades, setUnidades] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     // Aba Geral
     nome: "",
@@ -88,7 +94,6 @@ export const Form = () => {
     setFormData((prev) => ({ ...prev, [name]: formattedValue }));
   };
 
-
   const handleCloseToast = () => {
     setShowToast(false)
   }
@@ -129,11 +134,15 @@ export const Form = () => {
         }
       };
 
-      // const createData = await ProdutosService.create(productData);
-      console.log(productData)
+      const createData = await ProdutosService.create(productData);
+
+      if (!createData.success) {
+        setTextToast('Erro ao criar produto.')
+        setStatusToast('error')
+      }
+
       setTextToast('Cadastro realizado com sucesso.')
       setStatusToast('success')
-
     } catch (error) {
       console.error("Erro na requisição:", error);
       setTextToast('Erro ao criar produto.')
@@ -142,6 +151,40 @@ export const Form = () => {
       setShowToast(true)
     }
   };
+
+
+  const fetchParams = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      console.log(token)
+      if (!token) {
+        setTextToast("Sessão expirada. Efetue o login novamente.");
+        navigate(`/`);
+        return;
+      }
+
+      setLoading(true);
+      const response = await ParametrosService.getDataByPage("produtos");
+      console.log(response)
+      if (response.success) {
+        setUnidades(response.data.unidadesMedida || []);
+        localStorage.setItem("classes", JSON.stringify(response.data.classes));
+      } else {
+        setTextToast("Erro ao buscar classes.");
+        setStatusToast('error')
+        setShowToast(true)
+      }
+    } catch (err) {
+      console.error(err);
+      setTextToast("Erro ao carregar classes.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchParams()
+  }, [])
 
   return (
     <Container>
@@ -173,24 +216,22 @@ export const Form = () => {
                   fullWidth
                 />
               </Box>
-              <Box width={'100%'}>
-                <FormControl fullWidth >
-                  <InputLabel>Unidade</InputLabel>
-                  <Select
-                    name="unidadeMedida"
-                    value={formData.unidadeMedida}
-                    label="Unidade"
-                    onChange={handleChange}
-                  >
-                    <MenuItem value="un">Unidade</MenuItem>
-                    <MenuItem value="kg">Quilograma</MenuItem>
-                    <MenuItem value="g">Grama</MenuItem>
-                    <MenuItem value="l">Litro</MenuItem>
-                    <MenuItem value="ml">Mililitro</MenuItem>
-                    <MenuItem value="m">Metro</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+              {unidades.length > 0 && (
+                <Box width={'100%'}>
+                  <FormControl fullWidth >
+                    <InputLabel>Unidade</InputLabel>
+                    <Select
+                      name="unidadeMedida"
+                      value={formData.unidadeMedida}
+                      label="Unidade"
+                      onChange={handleChange}
+                    >
+                      {unidades.map((unidade: any) => <MenuItem key={unidade.id} value={unidade.id}>{unidade.titulo}</MenuItem>)}
+                    </Select>
+                  </FormControl>
+                </Box>
+              )}
+
             </Box>
             <Box display={'flex'} gap={'.5rem'}>
               <Box width={'100%'}>
