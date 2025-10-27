@@ -109,6 +109,7 @@ export const Form = () => {
         codigo: formData.codigo,
         descricao: formData.descricao,
         unidade: formData.unidadeMedida,
+        classe_id: Number( formData.classe ),
         valor_unidade: Number(formData.preco.replace(/[^\d]/g, "")) / 100,
         valor_atacado: Number(formData.valorAtacado.replace(/[^\d]/g, "")) / 100,
         valor_revenda: Number(formData.valorRevenda.replace(/[^\d]/g, "")) / 100,
@@ -237,7 +238,7 @@ export const Form = () => {
                           label="Unidade"
                           onChange={handleChange}
                         >
-                          {unidades.map((unidade: any) => <MenuItem key={unidade.id} value={unidade.id}>{unidade.titulo}</MenuItem>)}
+                          {unidades.map((unidade: any) => <MenuItem key={unidade.id} value={unidade.chave}>{unidade.titulo}</MenuItem>)}
                         </Select>
                       </FormControl>
                     </Box>

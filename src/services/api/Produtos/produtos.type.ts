@@ -34,6 +34,7 @@ export interface ProdutoBody {
 export interface ProdutoData {
   codigo: string;
   descricao: string;
+  classe_id: number;
   unidade: string | number;
   valor_unidade: number;
   valor_atacado: number;
